@@ -304,113 +304,145 @@ var CSS_BACKGROUNDS = [
       solid("#121216")
     ]
   },
-  // ---------- motion ----------
-  {
-    key: "aurora-drift",
-    name: "Aurora Drift",
-    kind: "motion",
-    palette: "fixed",
-    motion: { frames: "drift", seconds: 60, alternate: true },
-    day: [
-      blob("ellipse 60% 45%", "22% 30%", "#a8f7d6", 70),
-      blob("ellipse 55% 50%", "78% 35%", "#d2c2ff", 70),
-      blob("ellipse 70% 40%", "50% 85%", "#b2e8ff", 70),
-      solid("#f2fbff")
-    ],
-    night: [
-      blob("ellipse 60% 40%", "22% 30%", "rgb(25 230 140 / 0.55)", 70),
-      blob("ellipse 55% 45%", "78% 35%", "rgb(122 60 255 / 0.5)", 70),
-      blob("ellipse 70% 35%", "50% 85%", "rgb(0 194 255 / 0.35)", 70),
-      solid("#04060f")
-    ]
-  },
+  // ---------- motion (media art: two layers move apart and blend; 16~30s cycles) ----------
   {
     key: "tide",
     name: "Tide",
     kind: "motion",
     palette: "theme",
-    motion: { frames: "tide", seconds: 45, alternate: true },
-    day: ["linear-gradient(115deg, hsl({H} 70% 86%) 0%, hsl({H+30} 80% 76%) 30%, hsl({H-20} 85% 70%) 50%, hsl({H+30} 80% 76%) 70%, hsl({H} 70% 86%) 100%)"],
-    night: ["linear-gradient(115deg, hsl({H} 60% 8%) 0%, hsl({H+30} 65% 20%) 30%, hsl({H-20} 70% 32%) 50%, hsl({H+30} 65% 20%) 70%, hsl({H} 60% 8%) 100%)"]
+    motion: { frames: "tide", seconds: 18, alternate: true },
+    day: ["linear-gradient(115deg, hsl({H} 75% 80%) 0%, hsl({H+30} 85% 70%) 25%, hsl({H-20} 90% 66%) 50%, hsl({H+30} 85% 70%) 75%, hsl({H} 75% 80%) 100%)"],
+    night: ["linear-gradient(115deg, hsl({H} 65% 14%) 0%, hsl({H+30} 70% 26%) 25%, hsl({H-20} 75% 36%) 50%, hsl({H+30} 70% 26%) 75%, hsl({H} 65% 14%) 100%)"]
   },
   {
     key: "swell",
     name: "Ocean Swell",
     kind: "motion",
     palette: "fixed",
-    motion: { frames: "swell", seconds: 50, alternate: true },
-    day: [
-      blob("ellipse 80% 30%", "50% 20%", "rgb(255 255 255 / 0.5)", 70),
-      "linear-gradient(170deg, #b4f3ff 0%, #6fdcef 45%, #3bbcd9 80%, #2ea3c7 100%)"
-    ],
-    night: [
-      blob("ellipse 40% 25%", "30% 70%", "rgb(25 227 214 / 0.35)", 70),
-      blob("ellipse 35% 25%", "72% 45%", "rgb(58 123 255 / 0.3)", 70),
-      "linear-gradient(170deg, #031426 0%, #062a45 50%, #0a3d5c 100%)"
-    ]
-  },
-  {
-    key: "nebula",
-    name: "Nebula",
-    kind: "motion",
-    palette: "fixed",
-    motion: { frames: "nebula", seconds: 80, alternate: true },
-    day: [
-      blob("ellipse 45% 80%", "35% 40%", "#ffb6e6", 65),
-      blob("ellipse 45% 80%", "65% 60%", "#a9c9ff", 65),
-      solid("#f6f1ff")
-    ],
-    night: [
-      blob("ellipse 40% 71%", "35% 40%", "rgb(123 47 247 / 0.5)", 65),
-      blob("ellipse 40% 71%", "65% 60%", "rgb(31 209 249 / 0.3)", 65),
-      blob("ellipse 25% 44%", "55% 30%", "rgb(241 7 163 / 0.25)", 65),
-      solid("#07020f")
-    ]
-  },
-  {
-    key: "lava",
-    name: "Lava Lamp",
-    kind: "motion",
-    palette: "fixed",
-    motion: { frames: "lava", seconds: 70, alternate: true },
-    day: [
-      blob("ellipse 30% 53%", "30% 35%", "#ff9a8b", 70),
-      blob("ellipse 28% 50%", "70% 60%", "#ffcf8b", 70),
-      blob("ellipse 22% 39%", "45% 80%", "#ff8fab", 70),
-      solid("#fff1ec")
-    ],
-    night: [
-      blob("ellipse 30% 53%", "30% 35%", "rgb(255 61 0 / 0.42)", 70),
-      blob("ellipse 28% 50%", "70% 60%", "rgb(255 145 0 / 0.3)", 70),
-      blob("ellipse 22% 39%", "45% 80%", "rgb(179 0 27 / 0.4)", 70),
-      solid("#1a0402")
-    ]
-  },
-  {
-    key: "breathe",
-    name: "Breathe",
-    kind: "motion",
-    palette: "theme",
-    motion: { frames: "breathe", seconds: 40, alternate: true },
-    day: [
-      blob("ellipse 50% 45%", "50% 50%", "hsl({H} 90% 72%)", 70),
-      blob("ellipse 70% 60%", "50% 50%", "hsl({H+40} 80% 82%)", 70),
-      solid("hsl({H} 50% 94%)")
-    ],
-    night: [
-      blob("ellipse 50% 45%", "50% 50%", "hsl({H} 80% 32%)", 70),
-      blob("ellipse 70% 60%", "50% 50%", "hsl({H+40} 70% 18%)", 70),
-      solid("hsl({H} 45% 6%)")
-    ]
+    motion: { frames: "swell", seconds: 16, alternate: true },
+    day: ["linear-gradient(170deg, #9debff 0%, #5ad2ec 35%, #2fb6dc 65%, #3f9fe0 100%)"],
+    night: ["linear-gradient(170deg, #0f4766 0%, #11678a 35%, #0f84a0 65%, #2463ad 100%)"]
   },
   {
     key: "iris",
     name: "Iris",
     kind: "motion",
     palette: "theme",
-    motion: { frames: "iris", seconds: 120 },
-    day: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 85% 74%), hsl({H+60} 85% 78%), hsl({H+150} 80% 76%), hsl({H+240} 75% 78%), hsl({H} 85% 74%))"],
-    night: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 30%), hsl({H+60} 75% 24%), hsl({H+150} 70% 22%), hsl({H+240} 65% 24%), hsl({H} 75% 30%))"]
+    motion: { frames: "iris", seconds: 40 },
+    day: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 85% 72%), hsl({H+60} 85% 74%), hsl({H+150} 80% 72%), hsl({H+240} 75% 74%), hsl({H} 85% 72%))"],
+    night: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 32%), hsl({H+60} 75% 28%), hsl({H+150} 70% 26%), hsl({H+240} 65% 28%), hsl({H} 75% 32%))"]
+  },
+  {
+    key: "liquid",
+    name: "Liquid",
+    kind: "motion",
+    palette: "theme",
+    motion: {
+      frames: "orbitA",
+      seconds: 24,
+      over: {
+        frames: "orbitB",
+        seconds: 30,
+        blend: { day: "multiply", night: "screen" },
+        day: [
+          blob("ellipse 45% 55%", "70% 30%", "hsl({H+30} 95% 72%)", 70),
+          blob("ellipse 40% 50%", "25% 75%", "hsl({H-70} 95% 74%)", 70),
+          blob("ellipse 35% 45%", "55% 55%", "hsl({H+200} 90% 78%)", 70),
+          solid("hsl({H} 40% 100% / 0)")
+        ],
+        night: [
+          blob("ellipse 45% 55%", "70% 30%", "hsl({H+30} 80% 24%)", 70),
+          blob("ellipse 40% 50%", "25% 75%", "hsl({H-70} 80% 22%)", 70),
+          blob("ellipse 35% 45%", "55% 55%", "hsl({H+200} 75% 21%)", 70),
+          solid("hsl({H} 40% 0% / 0)")
+        ]
+      }
+    },
+    day: [
+      blob("ellipse 55% 60%", "25% 25%", "hsl({H} 90% 68%)", 70),
+      blob("ellipse 50% 55%", "80% 70%", "hsl({H+60} 90% 70%)", 70),
+      blob("ellipse 45% 50%", "70% 15%", "hsl({H+140} 85% 74%)", 70),
+      solid("hsl({H+20} 70% 82%)")
+    ],
+    night: [
+      blob("ellipse 55% 60%", "25% 25%", "hsl({H} 85% 27%)", 70),
+      blob("ellipse 50% 55%", "80% 70%", "hsl({H+60} 85% 24%)", 70),
+      blob("ellipse 45% 50%", "70% 15%", "hsl({H+140} 80% 22%)", 70),
+      solid("hsl({H+20} 55% 11%)")
+    ]
+  },
+  {
+    key: "aurora-flow",
+    name: "Aurora Flow",
+    kind: "motion",
+    palette: "fixed",
+    motion: {
+      frames: "curtainA",
+      seconds: 20,
+      alternate: true,
+      over: {
+        frames: "curtainB",
+        seconds: 26,
+        alternate: true,
+        blend: { day: "multiply", night: "screen" },
+        day: ["linear-gradient(80deg, transparent 5%, #a6f5d2 18%, transparent 32%, #c7b2ff 48%, transparent 62%, #9fe0ff 78%, transparent 92%)"],
+        night: ["linear-gradient(80deg, transparent 5%, rgb(20 210 130 / 0.75) 18%, transparent 32%, rgb(120 70 255 / 0.7) 48%, transparent 62%, rgb(0 170 255 / 0.65) 78%, transparent 92%)"]
+      }
+    },
+    day: [
+      "linear-gradient(100deg, #b8f7dd 0%, #9ae6ff 30%, #d4c2ff 60%, #a9f0d0 100%)"
+    ],
+    night: [
+      "linear-gradient(100deg, #0b3a2c 0%, #0d2a55 30%, #2a1a5e 60%, #0d3d36 100%)"
+    ]
+  },
+  {
+    key: "plasma",
+    name: "Plasma",
+    kind: "motion",
+    palette: "theme",
+    motion: {
+      frames: "orbitA",
+      seconds: 28,
+      over: {
+        frames: "plasmaB",
+        seconds: 22,
+        blend: { day: "multiply", night: "screen" },
+        day: ["conic-gradient(from 90deg at 60% 45%, hsl({H+120} 90% 78%), hsl({H+200} 90% 80%), hsl({H+300} 90% 78%), hsl({H+120} 90% 78%))"],
+        night: ["conic-gradient(from 90deg at 60% 45%, hsl({H+120} 80% 24%), hsl({H+200} 80% 22%), hsl({H+300} 80% 24%), hsl({H+120} 80% 24%))"]
+      }
+    },
+    day: ["conic-gradient(from 0deg at 35% 55%, hsl({H} 90% 70%), hsl({H+90} 90% 72%), hsl({H+180} 85% 70%), hsl({H+270} 90% 72%), hsl({H} 90% 70%))"],
+    night: ["conic-gradient(from 0deg at 35% 55%, hsl({H} 80% 28%), hsl({H+90} 80% 26%), hsl({H+180} 75% 24%), hsl({H+270} 80% 26%), hsl({H} 80% 28%))"]
+  },
+  {
+    key: "lava",
+    name: "Lava",
+    kind: "motion",
+    palette: "fixed",
+    motion: {
+      frames: "riseA",
+      seconds: 18,
+      alternate: true,
+      over: {
+        frames: "riseB",
+        seconds: 23,
+        alternate: true,
+        blend: { day: "multiply", night: "screen" },
+        day: [
+          blob("ellipse 30% 45%", "30% 60%", "#ffb38a", 70),
+          blob("ellipse 28% 40%", "72% 35%", "#ff8fb0", 70),
+          solid("rgb(255 255 255 / 0)")
+        ],
+        night: [
+          blob("ellipse 30% 45%", "30% 60%", "rgb(255 90 20 / 0.7)", 70),
+          blob("ellipse 28% 40%", "72% 35%", "rgb(230 20 90 / 0.6)", 70),
+          solid("rgb(0 0 0 / 0)")
+        ]
+      }
+    },
+    day: ["linear-gradient(160deg, #ffc58a 0%, #ff9b8a 40%, #ff86a8 75%, #ffb36b 100%)"],
+    night: ["linear-gradient(160deg, #3a0d06 0%, #5a1208 40%, #4a0820 75%, #5a2a06 100%)"]
   }
 ];
 
@@ -600,7 +632,14 @@ var GalleryModal = class extends import_obsidian2.Modal {
           const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
           const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
           layer.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key})`);
-          if (b.motion) layer.style.setProperty("animation", `fantasy-easel-${b.motion.frames} ${b.motion.seconds}s ${b.motion.alternate ? "ease-in-out" : "linear"} infinite${b.motion.alternate ? " alternate" : ""}`);
+          const anim = (m) => `fantasy-easel-${m.frames} ${m.seconds}s ${m.alternate ? "ease-in-out" : "linear"} infinite${m.alternate ? " alternate" : ""}`;
+          if (b.motion) layer.style.setProperty("animation", anim(b.motion));
+          if (b.motion?.over) {
+            const over = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
+            over.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key}-b)`);
+            over.style.setProperty("mix-blend-mode", `var(--fantasy-easel-blend-${b.key})`);
+            over.style.setProperty("animation", anim(b.motion.over));
+          }
           const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
           card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
           card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });

@@ -34,9 +34,13 @@ for (const b of CSS_BACKGROUNDS) {
   check(styles.includes(`body.fantasy-easel.fantasy-easel-bg-${b.key} {`), `styles.css (generated) has no fantasy-easel-bg-${b.key}; run npm run build`);
   check(styles.includes(`--fantasy-easel-grad-${b.key}:`), `styles.css has no gradient for ${b.key}`);
   if (b.motion) check(styles.includes(`@keyframes fantasy-easel-${b.motion.frames}`), `styles.css has no keyframes for ${b.key}`);
+  if (b.motion && b.motion.over) {
+    check(styles.includes(`@keyframes fantasy-easel-${b.motion.over.frames}`), `styles.css has no keyframes for ${b.key} upper layer`);
+    check(styles.includes(`--fantasy-easel-grad-${b.key}-b:`), `styles.css has no upper layer for ${b.key}`);
+  }
   check(b.day.length > 0 && b.night.length > 0, `${b.key}: day and night pictures`);
   // known invalid CSS: a circle radius must be a length (circle 30% makes the whole value invalid)
-  for (const l of [...b.day, ...b.night]) check(!/circle [\d.]+%/.test(l), `${b.key}: "circle N%" is invalid CSS, use "ellipse X% Y%"`);
+  for (const l of [...b.day, ...b.night, ...(b.motion && b.motion.over ? [...b.motion.over.day, ...b.motion.over.night] : [])]) check(!/circle [\d.]+%/.test(l), `${b.key}: "circle N%" is invalid CSS, use "ellipse X% Y%"`);
 }
 check(new Set(BACKGROUNDS.map((b) => b.id)).size === BACKGROUNDS.length, "background ids are unique");
 const settings = theme.slice(theme.indexOf("/* @settings"), theme.indexOf("*/", theme.indexOf("/* @settings")));
@@ -108,6 +112,13 @@ for (const b of CSS_BACKGROUNDS) {
       const bases = base.length ? base : [side === "day" ? [255, 255, 255] : [0, 0, 0]];
       const cands = [...bases];
       for (const l of layers.slice(0, -1)) for (const x of parseColors(l, hue)) for (const bs of bases) cands.push(mix(x.rgb, x.a, bs));
+      // upper motion layer: blended (multiply / screen) over every lower candidate
+      const over = b.motion && b.motion.over;
+      if (over) {
+        const blendFn = { multiply: (p, q) => (p * q) / 255, screen: (p, q) => 255 - ((255 - p) * (255 - q)) / 255, normal: (_p, q) => q }[over.blend[side]];
+        const lower = [...cands];
+        for (const l of over[side]) for (const x of parseColors(l, hue)) for (const bs of lower) cands.push(mix(bs.map((v, i) => blendFn(v, x.rgb[i])), x.a, bs));
+      }
       for (const bg of cands) {
         const eff = side === "night" ? mix(themeRgb(c.cls), 0.6, bg.map((v) => v * 0.8)) : mix([251, 251, 253], 0.67, bg.map((v) => Math.min(255, v * 1.05)));
         const r = ratio(TEXT[side], eff);

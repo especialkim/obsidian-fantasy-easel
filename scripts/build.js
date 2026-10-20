@@ -20,12 +20,20 @@ function loadTs(file) {
 function backgroundCss() {
   const { CSS_BACKGROUNDS, KEYFRAMES, resolveHue } = loadTs("src/backgrounds.ts");
   const list = (layers) => layers.map((l) => `\n\t\t${resolveHue(l)}`).join(",");
-  const vars = (side) => CSS_BACKGROUNDS.map((b) => `\t--fantasy-easel-grad-${b.key}:${list(b[side])};`).join("\n");
-  const pick = CSS_BACKGROUNDS.map((b) => {
-    const motion = b.motion ? ` --fantasy-easel-motion: fantasy-easel-${b.motion.frames} ${b.motion.seconds}s ${b.motion.alternate ? "ease-in-out" : "linear"} infinite${b.motion.alternate ? " alternate" : ""};` : "";
-    return `body.fantasy-easel.fantasy-easel-bg-${b.key} { --background-url: var(--fantasy-easel-grad-${b.key});${motion} }`;
+  const vars = (side) => CSS_BACKGROUNDS.map((b) => {
+    const lines = [`\t--fantasy-easel-grad-${b.key}:${list(b[side])};`];
+    const over = b.motion && b.motion.over;
+    if (over) lines.push(`\t--fantasy-easel-grad-${b.key}-b:${list(over[side])};`, `\t--fantasy-easel-blend-${b.key}: ${over.blend[side]};`);
+    return lines.join("\n");
   }).join("\n");
-  const used = [...new Set(CSS_BACKGROUNDS.filter((b) => b.motion).map((b) => b.motion.frames))];
+  const anim = (m) => `fantasy-easel-${m.frames} ${m.seconds}s ${m.alternate ? "ease-in-out" : "linear"} infinite${m.alternate ? " alternate" : ""}`;
+  const pick = CSS_BACKGROUNDS.map((b) => {
+    let extra = "";
+    if (b.motion) extra += ` --fantasy-easel-motion: ${anim(b.motion)};`;
+    if (b.motion && b.motion.over) extra += ` --fantasy-easel-motion-b: ${anim(b.motion.over)}; --fantasy-easel-layer-b: var(--fantasy-easel-grad-${b.key}-b); --fantasy-easel-blend-b: var(--fantasy-easel-blend-${b.key});`;
+    return `body.fantasy-easel.fantasy-easel-bg-${b.key} { --background-url: var(--fantasy-easel-grad-${b.key});${extra} }`;
+  }).join("\n");
+  const used = [...new Set(CSS_BACKGROUNDS.filter((b) => b.motion).flatMap((b) => [b.motion.frames, ...(b.motion.over ? [b.motion.over.frames] : [])]))];
   const frames = used.map((k) => `@keyframes fantasy-easel-${k} { ${KEYFRAMES[k]} }`).join("\n");
   return [
     BEGIN,
