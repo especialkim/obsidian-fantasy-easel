@@ -1,0 +1,182 @@
+/* Fantasy Easel
+   1. CSS backgrounds. Each gradient is defined once as `--fantasy-easel-grad-<id>` on body
+      (colors follow the theme color through theme.css `--fantasy-hue`; lightness tokens per mode).
+      Choosing one sets the theme's `--background-url`; theme.css draws it on `.app-container`.
+      Motion backgrounds draw the same gradient on a separate `.app-container::before` layer and
+      move it with `transform` only (no repaint of the gradient per frame).
+      Background presets are picture data, not UI chrome (plugin UI rule 1-1 does not apply).
+      Nothing here changes the look unless a `fantasy-easel-bg-*` class is on body.
+   2. Plugin UI (status bar, settings): theme variables only, scoped under `.fantasy-easel-*`. */
+
+/* ---------- 1. Background tokens ---------- */
+body.theme-dark {
+	--fantasy-easel-s: 55%;
+	--fantasy-easel-deep: 7%;
+	--fantasy-easel-mid: 18%;
+	--fantasy-easel-hi: 34%;
+	--fantasy-easel-glow: 0.55;
+}
+
+body.theme-light {
+	--fantasy-easel-s: 60%;
+	--fantasy-easel-deep: 93%;
+	--fantasy-easel-mid: 84%;
+	--fantasy-easel-hi: 72%;
+	--fantasy-easel-glow: 0.6;
+}
+
+/* ---------- 1-1. Gradients (one source for backgrounds and previews) ---------- */
+body {
+	--fantasy-easel-grad-dusk: linear-gradient(160deg,
+			hsl(var(--fantasy-hue, 230) var(--fantasy-easel-s) var(--fantasy-easel-mid)) 0%,
+			hsl(calc(var(--fantasy-hue, 230) + 40) calc(var(--fantasy-easel-s) - 10%) calc((var(--fantasy-easel-mid) + var(--fantasy-easel-deep)) / 2)) 55%,
+			hsl(calc(var(--fantasy-hue, 230) - 30) calc(var(--fantasy-easel-s) - 20%) var(--fantasy-easel-deep)) 100%);
+	--fantasy-easel-grad-aurora:
+		radial-gradient(ellipse at 18% 22%, hsl(calc(var(--fantasy-hue, 230) + 60) 75% var(--fantasy-easel-hi) / var(--fantasy-easel-glow)), transparent 55%),
+		radial-gradient(ellipse at 82% 28%, hsl(var(--fantasy-hue, 230) 75% var(--fantasy-easel-hi) / var(--fantasy-easel-glow)), transparent 55%),
+		radial-gradient(ellipse at 50% 92%, hsl(calc(var(--fantasy-hue, 230) - 60) 70% var(--fantasy-easel-hi) / var(--fantasy-easel-glow)), transparent 60%),
+		linear-gradient(hsl(var(--fantasy-hue, 230) 30% var(--fantasy-easel-deep)), hsl(var(--fantasy-hue, 230) 30% var(--fantasy-easel-deep)));
+	--fantasy-easel-grad-horizon: linear-gradient(180deg,
+			hsl(calc(var(--fantasy-hue, 230) + 180) 40% var(--fantasy-easel-deep)) 0%,
+			hsl(calc(var(--fantasy-hue, 230) + 200) 45% var(--fantasy-easel-mid)) 45%,
+			hsl(calc(var(--fantasy-hue, 230) + 20) 65% var(--fantasy-easel-hi)) 68%,
+			hsl(calc(var(--fantasy-hue, 230) + 40) 70% calc(var(--fantasy-easel-hi) + 8%)) 74%,
+			hsl(var(--fantasy-hue, 230) 35% var(--fantasy-easel-mid)) 76%,
+			hsl(var(--fantasy-hue, 230) 30% var(--fantasy-easel-deep)) 100%);
+	--fantasy-easel-grad-prism:
+		radial-gradient(at 0% 0%, hsl(var(--fantasy-hue, 230) 70% var(--fantasy-easel-hi)) 0, transparent 50%),
+		radial-gradient(at 100% 0%, hsl(calc(var(--fantasy-hue, 230) + 120) 70% var(--fantasy-easel-hi)) 0, transparent 50%),
+		radial-gradient(at 100% 100%, hsl(calc(var(--fantasy-hue, 230) + 240) 70% var(--fantasy-easel-hi)) 0, transparent 50%),
+		radial-gradient(at 0% 100%, hsl(calc(var(--fantasy-hue, 230) + 60) 70% var(--fantasy-easel-mid)) 0, transparent 50%),
+		linear-gradient(hsl(var(--fantasy-hue, 230) 25% var(--fantasy-easel-mid)), hsl(var(--fantasy-hue, 230) 25% var(--fantasy-easel-mid)));
+	--fantasy-easel-grad-grain:
+		repeating-radial-gradient(circle at 30% 40%, hsl(var(--fantasy-hue, 230) 20% var(--fantasy-easel-mid) / 0.35) 0 1px, transparent 1px 3px),
+		repeating-linear-gradient(115deg, hsl(var(--fantasy-hue, 230) 20% var(--fantasy-easel-hi) / 0.08) 0 2px, transparent 2px 6px),
+		linear-gradient(170deg, hsl(var(--fantasy-hue, 230) 25% var(--fantasy-easel-mid)), hsl(var(--fantasy-hue, 230) 20% var(--fantasy-easel-deep)));
+	--fantasy-easel-grad-aurora-drift:
+		radial-gradient(ellipse 60% 45% at 22% 30%, hsl(calc(var(--fantasy-hue, 230) + 70) 80% var(--fantasy-easel-hi) / var(--fantasy-easel-glow)), transparent 70%),
+		radial-gradient(ellipse 55% 50% at 78% 35%, hsl(var(--fantasy-hue, 230) 80% var(--fantasy-easel-hi) / var(--fantasy-easel-glow)), transparent 70%),
+		radial-gradient(ellipse 70% 40% at 50% 85%, hsl(calc(var(--fantasy-hue, 230) - 70) 75% var(--fantasy-easel-hi) / var(--fantasy-easel-glow)), transparent 70%),
+		linear-gradient(hsl(var(--fantasy-hue, 230) 30% var(--fantasy-easel-deep)), hsl(var(--fantasy-hue, 230) 30% var(--fantasy-easel-deep)));
+	--fantasy-easel-grad-tide:
+		linear-gradient(115deg,
+			hsl(var(--fantasy-hue, 230) var(--fantasy-easel-s) var(--fantasy-easel-deep)) 0%,
+			hsl(calc(var(--fantasy-hue, 230) + 30) var(--fantasy-easel-s) var(--fantasy-easel-mid)) 30%,
+			hsl(calc(var(--fantasy-hue, 230) - 20) var(--fantasy-easel-s) var(--fantasy-easel-hi)) 50%,
+			hsl(calc(var(--fantasy-hue, 230) + 30) var(--fantasy-easel-s) var(--fantasy-easel-mid)) 70%,
+			hsl(var(--fantasy-hue, 230) var(--fantasy-easel-s) var(--fantasy-easel-deep)) 100%);
+	--fantasy-easel-grad-nebula:
+		radial-gradient(circle at 35% 40%, hsl(calc(var(--fantasy-hue, 230) + 40) 70% var(--fantasy-easel-hi) / 0.5), transparent 40%),
+		radial-gradient(circle at 65% 60%, hsl(calc(var(--fantasy-hue, 230) - 40) 70% var(--fantasy-easel-hi) / 0.45), transparent 45%),
+		radial-gradient(circle at 50% 50%, hsl(var(--fantasy-hue, 230) 50% var(--fantasy-easel-mid)), hsl(var(--fantasy-hue, 230) 35% var(--fantasy-easel-deep)) 75%);
+}
+
+/* ---------- 1-2. Choosing a background ---------- */
+/* (0,2,1): beats the theme's body.fantasy-theme-background-* (0,1,1) even before the observer runs */
+body.fantasy-easel.fantasy-easel-bg-dusk { --background-url: var(--fantasy-easel-grad-dusk); }
+body.fantasy-easel.fantasy-easel-bg-aurora { --background-url: var(--fantasy-easel-grad-aurora); }
+body.fantasy-easel.fantasy-easel-bg-horizon { --background-url: var(--fantasy-easel-grad-horizon); }
+body.fantasy-easel.fantasy-easel-bg-prism { --background-url: var(--fantasy-easel-grad-prism); }
+body.fantasy-easel.fantasy-easel-bg-grain { --background-url: var(--fantasy-easel-grad-grain); }
+body.fantasy-easel.fantasy-easel-bg-aurora-drift { --background-url: var(--fantasy-easel-grad-aurora-drift); }
+body.fantasy-easel.fantasy-easel-bg-tide { --background-url: var(--fantasy-easel-grad-tide); }
+body.fantasy-easel.fantasy-easel-bg-nebula { --background-url: var(--fantasy-easel-grad-nebula); }
+
+/* ---------- 1-3. Motion layer ---------- */
+/* (0,3,1): beats theme `.is-translucent:not(.is-fullscreen) .app-container` (0,3,0) */
+body.fantasy-easel.fantasy-easel-motion .app-container {
+	background-image: none;
+}
+
+body.fantasy-easel.fantasy-easel-motion .app-container::before {
+	content: "";
+	position: fixed;
+	inset: -10%;
+	z-index: -1;
+	pointer-events: none;
+	background-image: var(--background-url);
+	background-size: cover;
+	will-change: transform;
+	animation: var(--fantasy-easel-motion, none);
+}
+
+body.fantasy-easel.fantasy-easel-bg-aurora-drift { --fantasy-easel-motion: fantasy-easel-aurora-drift 60s ease-in-out infinite alternate; }
+body.fantasy-easel.fantasy-easel-bg-tide { --fantasy-easel-motion: fantasy-easel-tide 45s ease-in-out infinite alternate; }
+body.fantasy-easel.fantasy-easel-bg-nebula { --fantasy-easel-motion: fantasy-easel-nebula 80s ease-in-out infinite alternate; }
+
+@keyframes fantasy-easel-aurora-drift {
+	0% { transform: translate3d(-4%, -2%, 0) rotate(0deg); }
+	50% { transform: translate3d(3%, 2%, 0) rotate(2deg); }
+	100% { transform: translate3d(-2%, 4%, 0) rotate(-1deg); }
+}
+
+@keyframes fantasy-easel-tide {
+	0% { transform: translate3d(-8%, 0, 0); }
+	100% { transform: translate3d(8%, 0, 0); }
+}
+
+@keyframes fantasy-easel-nebula {
+	0% { transform: scale(1) rotate(0deg); }
+	100% { transform: scale(1.08) rotate(4deg); }
+}
+
+/* Paused: window not focused, motion off, or OS reduced motion (unless motion on) */
+body.fantasy-easel.fantasy-easel-motion:not(.is-focused) .app-container::before,
+body.fantasy-easel.fantasy-easel-motion.fantasy-easel-still .app-container::before {
+	animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	body.fantasy-easel.fantasy-easel-motion:not(.fantasy-easel-force-motion) .app-container::before {
+		animation-play-state: paused;
+	}
+}
+
+/* ---------- 2. Plugin UI ---------- */
+.fantasy-easel-sb {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--size-2-2);
+}
+
+.fantasy-easel-sb svg {
+	width: var(--icon-xs);
+	height: var(--icon-xs);
+}
+
+.fantasy-easel-sb.is-on {
+	color: var(--interactive-accent);
+}
+
+.fantasy-easel-sb.is-idle {
+	opacity: 0.45;
+}
+
+.fantasy-easel-sb-prev,
+.fantasy-easel-sb-next {
+	padding-inline: var(--size-2-1);
+}
+
+/* Fixed width so the arrows do not move when the name changes */
+.fantasy-easel-sb-bgname {
+	display: inline-block;
+	width: 7.5em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.fantasy-easel-sb-kind {
+	display: inline-flex;
+	color: var(--text-muted);
+}
+
+/* The theme color class on this span gives it that color's --fantasy-hue */
+.fantasy-easel-swatch {
+	display: inline-block;
+	width: 0.8em;
+	height: 0.8em;
+	border-radius: 50%;
+	background: hsl(var(--fantasy-hue, 230) 60% 50%);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-normal) 35%, transparent);
+}
