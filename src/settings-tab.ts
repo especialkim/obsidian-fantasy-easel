@@ -12,14 +12,30 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     super(app, plugin);
   }
 
+  private queued = false;
+
   display() {
+    // Subscribe once per open; store changes (here, status bar, commands) redraw via render().
+    if (!this.unsubscribe) this.unsubscribe = this.plugin.store.subscribe(() => this.queueRender());
+    this.render();
+  }
+
+  /** One redraw after the current event (several changes in one click redraw once). */
+  private queueRender() {
+    if (this.queued) return;
+    this.queued = true;
+    queueMicrotask(() => {
+      this.queued = false;
+      if (this.unsubscribe) this.render();
+    });
+  }
+
+  private render() {
     const { containerEl } = this;
     const store = this.plugin.store;
     const { look, motion, statusBar } = store.settings;
     containerEl.empty();
     containerEl.addClass("fantasy-easel-settings");
-    this.unsubscribe?.();
-    this.unsubscribe = store.subscribe(() => this.display());
 
     containerEl.createEl("p", {
       cls: "setting-item-description",

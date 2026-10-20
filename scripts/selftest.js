@@ -57,5 +57,23 @@ for (const m of bgPart.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}@]+)\{([^
   check(gated || risky.length === 0, `styles.css rule "${sel.slice(0, 60)}" affects the look without a background class`);
 }
 
+// 5. Store: a listener that unsubscribes and re-subscribes while being notified must not loop
+//    (settings tab froze Obsidian this way, 2026-10-20).
+{
+  const esbuild = require("esbuild");
+  const out = esbuild.buildSync({ entryPoints: [path.join(root, "src/store.ts")], bundle: true, platform: "node", format: "cjs", write: false }).outputFiles[0].text;
+  global.window = { setTimeout: () => 0, clearTimeout: () => {} };
+  const mod = { exports: {} };
+  new Function("module", "exports", "require", out)(mod, mod.exports, require);
+  const store = new mod.exports.Store({ look: {}, motion: "auto", statusBar: true }, async () => {});
+  let calls = 0;
+  let off = null;
+  const listen = () => { calls++; if (calls > 50) throw new Error("loop"); off && off(); off = store.subscribe(listen); };
+  off = store.subscribe(listen);
+  let ok = true;
+  try { store.set({ motion: "on" }); } catch { ok = false; }
+  check(ok && calls === 1, `store notify with re-subscribing listener: ${calls} calls`);
+}
+
 console.log(fail ? `${fail} failed` : `ok: ${colorCls.length} colors, ${themeBg.length} theme backgrounds, ${cssBg.length} CSS backgrounds`);
 process.exit(fail ? 1 : 0);

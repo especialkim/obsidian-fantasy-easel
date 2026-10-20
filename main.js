@@ -272,15 +272,27 @@ var FantasyEaselSettingTab = class extends import_obsidian3.PluginSettingTab {
     super(app, plugin);
     this.plugin = plugin;
     this.unsubscribe = null;
+    this.queued = false;
   }
   display() {
+    if (!this.unsubscribe) this.unsubscribe = this.plugin.store.subscribe(() => this.queueRender());
+    this.render();
+  }
+  /** One redraw after the current event (several changes in one click redraw once). */
+  queueRender() {
+    if (this.queued) return;
+    this.queued = true;
+    queueMicrotask(() => {
+      this.queued = false;
+      if (this.unsubscribe) this.render();
+    });
+  }
+  render() {
     const { containerEl } = this;
     const store = this.plugin.store;
     const { look, motion, statusBar } = store.settings;
     containerEl.empty();
     containerEl.addClass("fantasy-easel-settings");
-    this.unsubscribe?.();
-    this.unsubscribe = store.subscribe(() => this.display());
     containerEl.createEl("p", {
       cls: "setting-item-description",
       text: `While Fantasy Easel is on, it owns the Fantasy look. Changes made in Style Settings' Fantasy section are put back right away. Use "Import from Style Settings" below to take those values.`
@@ -400,7 +412,7 @@ var Store = class {
   }
   set(patch) {
     this.settings = { ...this.settings, ...patch };
-    this.listeners.forEach((f) => f());
+    [...this.listeners].forEach((f) => f());
     if (this.saveTimer !== null) window.clearTimeout(this.saveTimer);
     this.saveTimer = window.setTimeout(() => this.flush(), 300);
   }

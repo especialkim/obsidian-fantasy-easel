@@ -16,7 +16,9 @@ export class Store {
 
   set(patch: Partial<FantasyEaselSettings>) {
     this.settings = { ...this.settings, ...patch };
-    this.listeners.forEach((f) => f());
+    // Copy first: a listener may unsubscribe / subscribe while we notify. Set.forEach visits
+    // entries added during the loop, so a listener that re-subscribes would loop forever.
+    [...this.listeners].forEach((f) => f());
     if (this.saveTimer !== null) window.clearTimeout(this.saveTimer);
     this.saveTimer = window.setTimeout(() => this.flush(), 300);
   }
