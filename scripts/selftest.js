@@ -33,9 +33,8 @@ for (const b of BACKGROUNDS.filter((b) => b.kind === "theme")) check(theme.inclu
 for (const b of CSS_BACKGROUNDS) {
   check(styles.includes(`body.fantasy-easel.fantasy-easel-bg-${b.key} {`), `styles.css (generated) has no fantasy-easel-bg-${b.key}; run npm run build`);
   check(styles.includes(`--fantasy-easel-grad-${b.key}:`), `styles.css has no gradient for ${b.key}`);
-  if (b.motion) check(styles.includes(`@keyframes fantasy-easel-${b.motion.frames}`), `styles.css has no keyframes for ${b.key}`);
+  if (b.motion) for (const p of [...b.motion.parts, ...(b.motion.over ? b.motion.over.parts : [])]) check(styles.includes(`@keyframes fantasy-easel-${p.frames} `), `styles.css has no keyframes ${p.frames} for ${b.key}`);
   if (b.motion && b.motion.over) {
-    check(styles.includes(`@keyframes fantasy-easel-${b.motion.over.frames}`), `styles.css has no keyframes for ${b.key} upper layer`);
     check(styles.includes(`--fantasy-easel-grad-${b.key}-b:`), `styles.css has no upper layer for ${b.key}`);
   }
   check(b.day.length > 0 && b.night.length > 0, `${b.key}: day and night pictures`);

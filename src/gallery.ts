@@ -1,5 +1,5 @@
 import { Modal, setIcon, type App } from "obsidian";
-import { CSS_BACKGROUNDS, type CssBackground } from "./backgrounds";
+import { CSS_BACKGROUNDS, motionCss, type CssBackground } from "./backgrounds";
 import type { Store } from "./store";
 
 const GROUPS: { title: string; desc: string; pick: (b: CssBackground) => boolean }[] = [
@@ -49,14 +49,13 @@ export class GalleryModal extends Modal {
           const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
           const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
           layer.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key})`);
-          const anim = (m: { frames: string; seconds: number; alternate?: boolean }) => `fantasy-easel-${m.frames} ${m.seconds}s ${m.alternate ? "ease-in-out" : "linear"} infinite${m.alternate ? " alternate" : ""}`;
-          if (b.motion) layer.style.setProperty("animation", anim(b.motion));
+          if (b.motion) layer.style.setProperty("animation", motionCss(b.motion));
           if (b.motion?.over) {
             // upper layer: blend var comes from the tile's day / night class
             const over = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
             over.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key}-b)`);
             over.style.setProperty("mix-blend-mode", `var(--fantasy-easel-blend-${b.key})`);
-            over.style.setProperty("animation", anim(b.motion.over));
+            over.style.setProperty("animation", motionCss(b.motion.over));
           }
           const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
           card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });

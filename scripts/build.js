@@ -18,7 +18,7 @@ function loadTs(file) {
 }
 
 function backgroundCss() {
-  const { CSS_BACKGROUNDS, KEYFRAMES, resolveHue } = loadTs("src/backgrounds.ts");
+  const { CSS_BACKGROUNDS, KEYFRAMES, resolveHue, motionCss } = loadTs("src/backgrounds.ts");
   const list = (layers) => layers.map((l) => `\n\t\t${resolveHue(l)}`).join(",");
   const vars = (side) => CSS_BACKGROUNDS.map((b) => {
     const lines = [`\t--fantasy-easel-grad-${b.key}:${list(b[side])};`];
@@ -26,14 +26,13 @@ function backgroundCss() {
     if (over) lines.push(`\t--fantasy-easel-grad-${b.key}-b:${list(over[side])};`, `\t--fantasy-easel-blend-${b.key}: ${over.blend[side]};`);
     return lines.join("\n");
   }).join("\n");
-  const anim = (m) => `fantasy-easel-${m.frames} ${m.seconds}s ${m.alternate ? "ease-in-out" : "linear"} infinite${m.alternate ? " alternate" : ""}`;
   const pick = CSS_BACKGROUNDS.map((b) => {
     let extra = "";
-    if (b.motion) extra += ` --fantasy-easel-motion: ${anim(b.motion)};`;
-    if (b.motion && b.motion.over) extra += ` --fantasy-easel-motion-b: ${anim(b.motion.over)}; --fantasy-easel-layer-b: var(--fantasy-easel-grad-${b.key}-b); --fantasy-easel-blend-b: var(--fantasy-easel-blend-${b.key});`;
+    if (b.motion) extra += ` --fantasy-easel-motion: ${motionCss(b.motion)};`;
+    if (b.motion && b.motion.over) extra += ` --fantasy-easel-motion-b: ${motionCss(b.motion.over)}; --fantasy-easel-layer-b: var(--fantasy-easel-grad-${b.key}-b); --fantasy-easel-blend-b: var(--fantasy-easel-blend-${b.key});`;
     return `body.fantasy-easel.fantasy-easel-bg-${b.key} { --background-url: var(--fantasy-easel-grad-${b.key});${extra} }`;
   }).join("\n");
-  const used = [...new Set(CSS_BACKGROUNDS.filter((b) => b.motion).flatMap((b) => [b.motion.frames, ...(b.motion.over ? [b.motion.over.frames] : [])]))];
+  const used = [...new Set(CSS_BACKGROUNDS.filter((b) => b.motion).flatMap((b) => [...b.motion.parts, ...(b.motion.over ? b.motion.over.parts : [])].map((p) => p.frames)))];
   const frames = used.map((k) => `@keyframes fantasy-easel-${k} { ${KEYFRAMES[k]} }`).join("\n");
   return [
     BEGIN,

@@ -30,6 +30,9 @@ export default class FantasyEaselPlugin extends Plugin {
     this.store = new Store(settings, (s) => this.saveData(s));
     if (!saved) await this.saveData(settings);
 
+    // Random start point for motion backgrounds (negative delay = already that far into the cycle)
+    document.body.style.setProperty("--fantasy-easel-delay", `-${Math.round(Math.random() * 600)}s`);
+    this.register(() => document.body.style.removeProperty("--fantasy-easel-delay"));
     this.applier = new Applier(document.body, () => this.store.settings);
     this.applier.attach();
     this.statusBar = new StatusBar(this.app, this, this.store);

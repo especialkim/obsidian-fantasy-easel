@@ -31,6 +31,7 @@ var import_obsidian = require("obsidian");
 // src/backgrounds.ts
 var solid = (c) => `linear-gradient(${c}, ${c})`;
 var blob = (shape, at, c, fade = 60) => `radial-gradient(${shape} at ${at}, ${c}, transparent ${fade}%)`;
+var motionCss = (layer) => layer.parts.map((p) => `fantasy-easel-${p.frames} ${p.seconds}s ${p.loop ? "linear" : "ease-in-out"} infinite${p.loop ? "" : " alternate"}`).join(", ");
 var CSS_BACKGROUNDS = [
   // ---------- theme color ----------
   {
@@ -68,24 +69,6 @@ var CSS_BACKGROUNDS = [
     ]
   },
   {
-    key: "glow",
-    name: "Light Leak",
-    kind: "static",
-    palette: "theme",
-    day: [
-      blob("ellipse 55% 50%", "0% 0%", "hsl({H+30} 100% 70% / 0.9)", 70),
-      blob("ellipse 60% 55%", "100% 100%", "hsl({H-40} 100% 72% / 0.85)", 70),
-      blob("ellipse 30% 53%", "80% 15%", "hsl({H+90} 100% 80% / 0.7)", 70),
-      solid("hsl({H} 40% 95%)")
-    ],
-    night: [
-      blob("ellipse 55% 50%", "0% 0%", "hsl({H+30} 90% 42% / 0.85)", 70),
-      blob("ellipse 60% 55%", "100% 100%", "hsl({H-40} 90% 38% / 0.8)", 70),
-      blob("ellipse 30% 53%", "80% 15%", "hsl({H+90} 90% 45% / 0.55)", 70),
-      solid("hsl({H} 50% 6%)")
-    ]
-  },
-  {
     key: "veil",
     name: "Veil",
     kind: "static",
@@ -105,7 +88,7 @@ var CSS_BACKGROUNDS = [
     kind: "static",
     palette: "theme",
     day: ["linear-gradient(160deg, hsl({H} 85% 78%) 0%, hsl({H+40} 85% 76%) 40%, hsl({H+90} 80% 80%) 75%, hsl({H+130} 70% 86%) 100%)"],
-    night: ["linear-gradient(160deg, hsl({H} 70% 26%) 0%, hsl({H+40} 65% 18%) 40%, hsl({H+90} 60% 12%) 75%, hsl({H+130} 50% 7%) 100%)"]
+    night: ["linear-gradient(160deg, hsl({H} 75% 34%) 0%, hsl({H+40} 72% 28%) 40%, hsl({H+90} 70% 26%) 75%, hsl({H+130} 65% 22%) 100%)"]
   },
   // ---------- fixed palettes ----------
   {
@@ -118,24 +101,9 @@ var CSS_BACKGROUNDS = [
       "linear-gradient(180deg, #7fb3ff 0%, #b9a7ff 40%, #ffb3c7 70%, #ffd29a 100%)"
     ],
     night: [
-      blob("ellipse 18% 32%", "80% 18%", "rgb(170 190 255 / 0.35)", 70),
-      blob("ellipse 80% 35%", "50% 100%", "rgb(120 60 170 / 0.45)", 70),
-      "linear-gradient(180deg, #050816 0%, #0d1b4a 45%, #24195a 75%, #3a2160 100%)"
-    ]
-  },
-  {
-    key: "ocean",
-    name: "Ocean",
-    kind: "static",
-    palette: "fixed",
-    day: [
-      blob("ellipse 70% 35%", "50% 0%", "rgb(255 255 255 / 0.55)", 70),
-      "linear-gradient(170deg, #b4f3ff 0%, #6fdcef 40%, #3bbcd9 75%, #2ea3c7 100%)"
-    ],
-    night: [
-      blob("ellipse 35% 30%", "28% 72%", "rgb(25 227 214 / 0.35)", 70),
-      blob("ellipse 30% 30%", "75% 40%", "rgb(58 123 255 / 0.3)", 70),
-      "linear-gradient(170deg, #031426 0%, #062a45 50%, #0a3d5c 100%)"
+      blob("ellipse 16% 28%", "80% 18%", "rgb(190 205 255 / 0.45)", 70),
+      blob("ellipse 80% 40%", "50% 100%", "rgb(200 80 160 / 0.5)", 70),
+      "linear-gradient(180deg, #1b2a72 0%, #2c2a8c 40%, #55308e 70%, #7a3478 100%)"
     ]
   },
   {
@@ -144,10 +112,11 @@ var CSS_BACKGROUNDS = [
     kind: "static",
     palette: "fixed",
     day: [
-      blob("ellipse 60% 45%", "25% 30%", "#a8f7d6"),
-      blob("ellipse 55% 50%", "75% 28%", "#d2c2ff"),
-      blob("ellipse 70% 40%", "50% 85%", "#b2e8ff"),
-      solid("#f2fbff")
+      blob("ellipse 55% 50%", "15% 20%", "#5fe8b0", 70),
+      blob("ellipse 55% 55%", "85% 25%", "#a38aff", 70),
+      blob("ellipse 60% 50%", "50% 95%", "#66c8ff", 70),
+      blob("ellipse 40% 45%", "10% 90%", "#86ee96", 70),
+      solid("#b5dde6")
     ],
     night: [
       blob("ellipse 60% 40%", "30% 35%", "rgb(25 230 140 / 0.55)", 65),
@@ -157,135 +126,14 @@ var CSS_BACKGROUNDS = [
     ]
   },
   {
-    key: "citrus",
-    name: "Citrus / Ember",
-    kind: "static",
-    palette: "fixed",
-    day: [
-      blob("ellipse 60% 55%", "20% 25%", "#fff27a"),
-      blob("ellipse 55% 55%", "80% 30%", "#c4f56b"),
-      blob("ellipse 65% 55%", "60% 90%", "#ffc061"),
-      solid("#fffbe6")
-    ],
-    night: [
-      blob("ellipse 60% 55%", "20% 25%", "rgb(255 106 26 / 0.4)"),
-      blob("ellipse 55% 55%", "80% 30%", "rgb(255 176 0 / 0.3)"),
-      blob("ellipse 65% 55%", "60% 90%", "rgb(212 20 90 / 0.35)"),
-      solid("#120805")
-    ]
-  },
-  {
-    key: "rose",
-    name: "Ros\xE9 / Wine",
-    kind: "static",
-    palette: "fixed",
-    day: [
-      blob("ellipse 60% 55%", "20% 20%", "#ffc3d0"),
-      blob("ellipse 55% 55%", "85% 35%", "#ffd6b8"),
-      blob("ellipse 65% 55%", "45% 90%", "#e8c1ff"),
-      solid("#fff5f7")
-    ],
-    night: [
-      blob("ellipse 60% 55%", "20% 20%", "rgb(176 48 106 / 0.5)"),
-      blob("ellipse 55% 55%", "85% 35%", "rgb(109 42 143 / 0.45)"),
-      blob("ellipse 65% 55%", "45% 90%", "rgb(255 122 138 / 0.22)"),
-      solid("#14060d")
-    ]
-  },
-  {
-    key: "forest",
-    name: "Forest",
-    kind: "static",
-    palette: "fixed",
-    day: [
-      "linear-gradient(115deg, transparent 20%, rgb(255 247 194 / 0.7) 30%, transparent 42%, rgb(255 247 194 / 0.5) 55%, transparent 65%)",
-      blob("ellipse 60% 55%", "20% 75%", "#a6dd90"),
-      blob("ellipse 55% 55%", "85% 30%", "#7fd3a8"),
-      solid("#eef7e8")
-    ],
-    night: [
-      blob("ellipse 6% 11%", "30% 60%", "rgb(216 255 106 / 0.35)", 80),
-      blob("ellipse 5% 9%", "70% 35%", "rgb(216 255 106 / 0.3)", 80),
-      blob("ellipse 60% 55%", "20% 75%", "rgb(31 107 58 / 0.55)"),
-      blob("ellipse 55% 55%", "85% 30%", "rgb(15 77 74 / 0.5)"),
-      solid("#040d07")
-    ]
-  },
-  {
-    key: "cosmos",
-    name: "Cotton / Cosmos",
-    kind: "static",
-    palette: "fixed",
-    day: [
-      blob("ellipse 60% 55%", "20% 30%", "#ffb6e6"),
-      blob("ellipse 55% 55%", "80% 25%", "#a9c9ff"),
-      blob("ellipse 65% 55%", "55% 90%", "#c7b3ff"),
-      solid("#f8f4ff")
-    ],
-    night: [
-      blob("ellipse 55% 50%", "25% 30%", "rgb(123 47 247 / 0.5)"),
-      blob("ellipse 45% 45%", "78% 30%", "rgb(241 7 163 / 0.32)"),
-      blob("ellipse 60% 45%", "55% 85%", "rgb(31 209 249 / 0.28)"),
-      solid("#07020f")
-    ]
-  },
-  {
     key: "prism",
     name: "Prism / Neon",
     kind: "static",
     palette: "fixed",
-    day: ["conic-gradient(from 0deg at 50% 50%, #ffd1f0, #c9f0ff, #d9ffcf, #fff2c2, #e2d1ff, #ffd1f0)"],
+    day: ["conic-gradient(from 0deg at 50% 50%, #ff7fcf, #6fd0ff, #8ff07a, #ffd65c, #b48cff, #ff7fcf)"],
     night: [
       blob("ellipse 45% 80%", "50% 50%", "rgb(4 2 12 / 0.75)", 75),
       "conic-gradient(from 0deg at 50% 50%, #8a1166, #116a8a, #3a138a, #8a5a11, #8a1166)"
-    ]
-  },
-  {
-    key: "magma",
-    name: "Coral / Magma",
-    kind: "static",
-    palette: "fixed",
-    day: [
-      blob("ellipse 60% 55%", "20% 30%", "#ff9a8b"),
-      blob("ellipse 55% 55%", "80% 25%", "#ffcf8b"),
-      blob("ellipse 65% 55%", "55% 90%", "#ff8fab"),
-      solid("#fff1ec")
-    ],
-    night: [
-      blob("ellipse 55% 45%", "25% 80%", "rgb(255 61 0 / 0.45)"),
-      blob("ellipse 50% 45%", "75% 70%", "rgb(255 145 0 / 0.3)"),
-      blob("ellipse 60% 45%", "50% 20%", "rgb(179 0 27 / 0.4)"),
-      solid("#1a0402")
-    ]
-  },
-  {
-    key: "arctic",
-    name: "Arctic",
-    kind: "static",
-    palette: "fixed",
-    day: [
-      blob("ellipse 60% 50%", "25% 25%", "#ffffff"),
-      blob("ellipse 60% 55%", "80% 70%", "#bfe3ff"),
-      blob("ellipse 50% 45%", "20% 85%", "#cfd8ff"),
-      solid("#e8f6ff")
-    ],
-    night: [
-      blob("ellipse 70% 30%", "50% 25%", "rgb(43 255 176 / 0.22)", 70),
-      blob("ellipse 60% 55%", "80% 80%", "rgb(20 80 150 / 0.5)"),
-      solid("#020b18")
-    ]
-  },
-  {
-    key: "dune",
-    name: "Dune",
-    kind: "static",
-    palette: "fixed",
-    day: [
-      "linear-gradient(175deg, #a7d4ff 0%, #ffe6c2 45%, #ffd19a 70%, #f2a66b 100%)"
-    ],
-    night: [
-      blob("ellipse 14% 25%", "75% 22%", "rgb(255 236 200 / 0.25)", 70),
-      "linear-gradient(175deg, #0b0a24 0%, #1e1846 45%, #33234f 70%, #3d2a1e 100%)"
     ]
   },
   {
@@ -299,9 +147,93 @@ var CSS_BACKGROUNDS = [
       solid("#f3ead9")
     ],
     night: [
-      blob("ellipse 80% 70%", "50% 45%", "rgb(60 60 72 / 0.5)", 75),
-      "repeating-linear-gradient(115deg, rgb(255 255 255 / 0.025) 0 2px, transparent 2px 6px)",
-      solid("#121216")
+      blob("ellipse 45% 55%", "20% 30%", "rgb(95 110 200 / 0.6)", 70),
+      blob("ellipse 40% 50%", "80% 70%", "rgb(150 90 170 / 0.5)", 70),
+      "repeating-linear-gradient(115deg, rgb(255 255 255 / 0.03) 0 2px, transparent 2px 6px)",
+      "linear-gradient(160deg, #46507a 0%, #3c4466 50%, #4a3c66 100%)"
+    ]
+  },
+  // ---------- new (2026-10-21): edge-to-edge, contrast target 5.0~6.0 ----------
+  {
+    key: "stained",
+    name: "Stained Glass",
+    kind: "static",
+    palette: "theme",
+    day: [
+      blob("ellipse 70% 70%", "38% 46%", "hsl({H} 60% 96% / 0.35)", 70),
+      "repeating-conic-gradient(from 15deg at 38% 46%, hsl({H} 85% 70%) 0deg 22deg, hsl({H+70} 85% 76%) 22deg 47deg, hsl({H+160} 80% 72%) 47deg 75deg, hsl({H+240} 85% 76%) 75deg 100deg)"
+    ],
+    night: [
+      blob("ellipse 70% 70%", "38% 46%", "hsl({H} 60% 8% / 0.35)", 70),
+      "repeating-conic-gradient(from 15deg at 38% 46%, hsl({H} 80% 30%) 0deg 22deg, hsl({H+70} 80% 25%) 22deg 47deg, hsl({H+160} 75% 27%) 47deg 75deg, hsl({H+240} 80% 25%) 75deg 100deg)"
+    ]
+  },
+  {
+    key: "ripple",
+    name: "Ripple",
+    kind: "static",
+    palette: "theme",
+    day: [
+      "repeating-radial-gradient(circle at 18% 80%, hsl({H+120} 85% 74% / 0.55) 0 4%, transparent 4% 9%)",
+      "repeating-radial-gradient(circle at 75% 25%, hsl({H} 85% 70%) 0 6%, hsl({H+50} 85% 78%) 6% 12%)"
+    ],
+    night: [
+      "repeating-radial-gradient(circle at 18% 80%, hsl({H+120} 80% 30% / 0.55) 0 4%, transparent 4% 9%)",
+      "repeating-radial-gradient(circle at 75% 25%, hsl({H} 80% 30%) 0 6%, hsl({H+50} 75% 22%) 6% 12%)"
+    ]
+  },
+  {
+    key: "holo",
+    name: "Holo",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 45% 55%", "0% 0%", "#ff6fc0", 75),
+      blob("ellipse 45% 55%", "50% 0%", "#6fd8ff", 75),
+      blob("ellipse 45% 55%", "100% 0%", "#a0f06a", 75),
+      blob("ellipse 45% 55%", "0% 100%", "#a080ff", 75),
+      blob("ellipse 45% 55%", "50% 100%", "#ffb46a", 75),
+      blob("ellipse 45% 55%", "100% 100%", "#6fe8c8", 75),
+      solid("#c8bdf0")
+    ],
+    night: [
+      blob("ellipse 45% 55%", "0% 0%", "#a0306e", 75),
+      blob("ellipse 45% 55%", "50% 0%", "#1d6f92", 75),
+      blob("ellipse 45% 55%", "100% 0%", "#4a7a1f", 75),
+      blob("ellipse 45% 55%", "0% 100%", "#4b2a9a", 75),
+      blob("ellipse 45% 55%", "50% 100%", "#9a5a1d", 75),
+      blob("ellipse 45% 55%", "100% 100%", "#1d7f6a", 75),
+      solid("#241a40")
+    ]
+  },
+  {
+    key: "sunburst",
+    name: "Sunburst",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 60% 45%", "50% 100%", "rgb(255 241 201 / 0.6)", 70),
+      "repeating-conic-gradient(from 0deg at 50% 115%, #ff9a4a 0deg 7deg, #ff7060 7deg 14deg, #ffad85 14deg 21deg)"
+    ],
+    night: [
+      blob("ellipse 60% 45%", "50% 100%", "rgb(255 140 90 / 0.4)", 70),
+      "repeating-conic-gradient(from 0deg at 50% 115%, #5e2a80 0deg 7deg, #4a2272 7deg 14deg, #74307a 14deg 21deg)"
+    ]
+  },
+  {
+    key: "marble",
+    name: "Marble",
+    kind: "static",
+    palette: "theme",
+    day: [
+      "linear-gradient(35deg, transparent 18%, hsl({H+40} 75% 66% / 0.7) 24%, transparent 30%, transparent 58%, hsl({H-30} 70% 70% / 0.6) 64%, transparent 70%)",
+      "linear-gradient(-20deg, transparent 30%, hsl({H+150} 70% 72% / 0.55) 38%, transparent 46%, transparent 76%, hsl({H} 80% 68% / 0.6) 82%, transparent 88%)",
+      "linear-gradient(160deg, hsl({H} 55% 84%), hsl({H+30} 50% 80%))"
+    ],
+    night: [
+      "linear-gradient(35deg, transparent 18%, hsl({H+40} 70% 36% / 0.75) 24%, transparent 30%, transparent 58%, hsl({H-30} 65% 34% / 0.7) 64%, transparent 70%)",
+      "linear-gradient(-20deg, transparent 30%, hsl({H+150} 65% 32% / 0.6) 38%, transparent 46%, transparent 76%, hsl({H} 75% 36% / 0.65) 82%, transparent 88%)",
+      "linear-gradient(160deg, hsl({H} 45% 17%), hsl({H+30} 40% 14%))"
     ]
   },
   // ---------- motion (media art: two layers move apart and blend; 16~30s cycles) ----------
@@ -310,7 +242,7 @@ var CSS_BACKGROUNDS = [
     name: "Tide",
     kind: "motion",
     palette: "theme",
-    motion: { frames: "tide", seconds: 18, alternate: true },
+    motion: { parts: [{ frames: "tideX", seconds: 17 }, { frames: "pulseB", seconds: 23 }, { frames: "hue", seconds: 29 }] },
     day: ["linear-gradient(115deg, hsl({H} 75% 80%) 0%, hsl({H+30} 85% 70%) 25%, hsl({H-20} 90% 66%) 50%, hsl({H+30} 85% 70%) 75%, hsl({H} 75% 80%) 100%)"],
     night: ["linear-gradient(115deg, hsl({H} 65% 14%) 0%, hsl({H+30} 70% 26%) 25%, hsl({H-20} 75% 36%) 50%, hsl({H+30} 70% 26%) 75%, hsl({H} 65% 14%) 100%)"]
   },
@@ -319,7 +251,7 @@ var CSS_BACKGROUNDS = [
     name: "Ocean Swell",
     kind: "motion",
     palette: "fixed",
-    motion: { frames: "swell", seconds: 16, alternate: true },
+    motion: { parts: [{ frames: "swellY", seconds: 15 }, { frames: "wanderC", seconds: 31 }, { frames: "pulse", seconds: 19 }] },
     day: ["linear-gradient(170deg, #9debff 0%, #5ad2ec 35%, #2fb6dc 65%, #3f9fe0 100%)"],
     night: ["linear-gradient(170deg, #0f4766 0%, #11678a 35%, #0f84a0 65%, #2463ad 100%)"]
   },
@@ -328,7 +260,7 @@ var CSS_BACKGROUNDS = [
     name: "Iris",
     kind: "motion",
     palette: "theme",
-    motion: { frames: "iris", seconds: 40 },
+    motion: { parts: [{ frames: "hueFull", seconds: 37, loop: true }, { frames: "wanderA", seconds: 41 }, { frames: "sway", seconds: 29 }] },
     day: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 85% 72%), hsl({H+60} 85% 74%), hsl({H+150} 80% 72%), hsl({H+240} 75% 74%), hsl({H} 85% 72%))"],
     night: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 32%), hsl({H+60} 75% 28%), hsl({H+150} 70% 26%), hsl({H+240} 65% 28%), hsl({H} 75% 32%))"]
   },
@@ -338,11 +270,9 @@ var CSS_BACKGROUNDS = [
     kind: "motion",
     palette: "theme",
     motion: {
-      frames: "orbitA",
-      seconds: 24,
+      parts: [{ frames: "wanderA", seconds: 23 }, { frames: "sway", seconds: 31 }, { frames: "pulseB", seconds: 19 }],
       over: {
-        frames: "orbitB",
-        seconds: 30,
+        parts: [{ frames: "wanderB", seconds: 29 }, { frames: "swayB", seconds: 37 }, { frames: "pulse", seconds: 17 }, { frames: "hue", seconds: 41 }],
         blend: { day: "multiply", night: "screen" },
         day: [
           blob("ellipse 45% 55%", "70% 30%", "hsl({H+30} 95% 72%)", 70),
@@ -377,13 +307,9 @@ var CSS_BACKGROUNDS = [
     kind: "motion",
     palette: "fixed",
     motion: {
-      frames: "curtainA",
-      seconds: 20,
-      alternate: true,
+      parts: [{ frames: "tideX", seconds: 19 }, { frames: "swayB", seconds: 29 }, { frames: "pulseB", seconds: 23 }],
       over: {
-        frames: "curtainB",
-        seconds: 26,
-        alternate: true,
+        parts: [{ frames: "wanderB", seconds: 26 }, { frames: "hue", seconds: 31 }, { frames: "pulse", seconds: 17 }],
         blend: { day: "multiply", night: "screen" },
         day: ["linear-gradient(80deg, transparent 5%, #a6f5d2 18%, transparent 32%, #c7b2ff 48%, transparent 62%, #9fe0ff 78%, transparent 92%)"],
         night: ["linear-gradient(80deg, transparent 5%, rgb(20 210 130 / 0.75) 18%, transparent 32%, rgb(120 70 255 / 0.7) 48%, transparent 62%, rgb(0 170 255 / 0.65) 78%, transparent 92%)"]
@@ -402,11 +328,9 @@ var CSS_BACKGROUNDS = [
     kind: "motion",
     palette: "theme",
     motion: {
-      frames: "orbitA",
-      seconds: 28,
+      parts: [{ frames: "wanderC", seconds: 29 }, { frames: "sway", seconds: 23 }, { frames: "pulse", seconds: 19 }],
       over: {
-        frames: "plasmaB",
-        seconds: 22,
+        parts: [{ frames: "wanderA", seconds: 22 }, { frames: "hueFull", seconds: 47, loop: true }, { frames: "swayB", seconds: 31 }, { frames: "pulseB", seconds: 17 }],
         blend: { day: "multiply", night: "screen" },
         day: ["conic-gradient(from 90deg at 60% 45%, hsl({H+120} 90% 78%), hsl({H+200} 90% 80%), hsl({H+300} 90% 78%), hsl({H+120} 90% 78%))"],
         night: ["conic-gradient(from 90deg at 60% 45%, hsl({H+120} 80% 24%), hsl({H+200} 80% 22%), hsl({H+300} 80% 24%), hsl({H+120} 80% 24%))"]
@@ -421,13 +345,9 @@ var CSS_BACKGROUNDS = [
     kind: "motion",
     palette: "fixed",
     motion: {
-      frames: "riseA",
-      seconds: 18,
-      alternate: true,
+      parts: [{ frames: "swellY", seconds: 18 }, { frames: "pulseB", seconds: 13 }, { frames: "sway", seconds: 27 }],
       over: {
-        frames: "riseB",
-        seconds: 23,
-        alternate: true,
+        parts: [{ frames: "wanderB", seconds: 23 }, { frames: "pulse", seconds: 16 }, { frames: "hue", seconds: 33 }],
         blend: { day: "multiply", night: "screen" },
         day: [
           blob("ellipse 30% 45%", "30% 60%", "#ffb38a", 70),
@@ -632,13 +552,12 @@ var GalleryModal = class extends import_obsidian2.Modal {
           const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
           const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
           layer.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key})`);
-          const anim = (m) => `fantasy-easel-${m.frames} ${m.seconds}s ${m.alternate ? "ease-in-out" : "linear"} infinite${m.alternate ? " alternate" : ""}`;
-          if (b.motion) layer.style.setProperty("animation", anim(b.motion));
+          if (b.motion) layer.style.setProperty("animation", motionCss(b.motion));
           if (b.motion?.over) {
             const over = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
             over.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key}-b)`);
             over.style.setProperty("mix-blend-mode", `var(--fantasy-easel-blend-${b.key})`);
-            over.style.setProperty("animation", anim(b.motion.over));
+            over.style.setProperty("animation", motionCss(b.motion.over));
           }
           const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
           card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
@@ -936,6 +855,8 @@ var FantasyEaselPlugin = class extends import_obsidian6.Plugin {
     const settings = saved ? normalize(saved) : { ...DEFAULT_SETTINGS, look: ss.look };
     this.store = new Store(settings, (s) => this.saveData(s));
     if (!saved) await this.saveData(settings);
+    document.body.style.setProperty("--fantasy-easel-delay", `-${Math.round(Math.random() * 600)}s`);
+    this.register(() => document.body.style.removeProperty("--fantasy-easel-delay"));
     this.applier = new Applier(document.body, () => this.store.settings);
     this.applier.attach();
     this.statusBar = new StatusBar(this.app, this, this.store);
