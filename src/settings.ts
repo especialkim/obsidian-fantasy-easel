@@ -28,7 +28,7 @@ export const DEFAULT_LOOK: Look = {
   color: THEME_DEFAULTS.color,
   background: THEME_DEFAULTS.background,
   accent: false,
-  card: false,
+  card: true,
   urls: ["", "", ""],
 };
 
@@ -60,7 +60,8 @@ export async function readStyleSettingsLook(app: App): Promise<{ look: Look; fou
       color,
       background: backgroundById(bgId) ? bgId : DEFAULT_LOOK.background,
       accent: get(SS_KEYS.accent) === true,
-      card: get(SS_KEYS.card) === true,
+      // new toggle = "card off"; else the old "card on" toggle; else the theme default (on)
+      card: typeof get(SS_KEYS.cardOff) === "boolean" ? get(SS_KEYS.cardOff) !== true : typeof get(SS_KEYS.cardLegacy) === "boolean" ? get(SS_KEYS.cardLegacy) === true : true,
       urls,
     },
   };
@@ -75,7 +76,7 @@ export function normalize(data: Partial<FantasyEaselSettings> | null | undefined
       color: typeof look.color === "string" && colorByCls(look.color) ? look.color : DEFAULT_LOOK.color,
       background: typeof look.background === "string" && backgroundById(look.background) ? look.background : DEFAULT_LOOK.background,
       accent: look.accent === true,
-      card: look.card === true,
+      card: look.card !== false,
       urls: [0, 1, 2].map((i) => (typeof urls[i] === "string" ? urls[i] : "")) as Look["urls"],
     },
     motion: MOTIONS.includes(data?.motion as Motion) ? (data!.motion as Motion) : "auto",

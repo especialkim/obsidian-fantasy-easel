@@ -1,11 +1,11 @@
 import { Notice } from "obsidian";
-import { ACCENT_CLASS, BACKGROUNDS, backgroundById, CARD_CLASS, FORCE_MOTION_CLASS, MARKER_CLASS, MOTION_CLASS, STILL_CLASS, THEME_COLORS } from "./catalog";
+import { ACCENT_CLASS, BACKGROUNDS, backgroundById, CARD_OFF_CLASS, FORCE_MOTION_CLASS, MARKER_CLASS, MOTION_CLASS, STILL_CLASS, THEME_COLORS, LEGACY_CARD_CLASS } from "./catalog";
 import type { FantasyEaselSettings, Look } from "./settings";
 
 /** Every body class Fantasy Easel may add or remove. Other body classes are never touched. */
-const MANAGED = new Set<string>([...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.map((b) => b.cls), ACCENT_CLASS, CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS]);
+const MANAGED = new Set<string>([...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS]);
 /** Classes Style Settings also owns (its Fantasy group). */
-const THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.filter((b) => b.kind === "theme").map((b) => b.cls), ACCENT_CLASS, CARD_CLASS];
+const THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.filter((b) => b.kind === "theme").map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
 const URL_VARS = ["--background-url1", "--background-url2", "--background-url3"] as const;
 
 /** Classes the body should have for this look. */
@@ -15,7 +15,7 @@ export function wantedClasses(s: FantasyEaselSettings): Set<string> {
   if (bg) out.add(bg.cls);
   if (bg?.kind === "motion") out.add(MOTION_CLASS);
   if (s.look.accent) out.add(ACCENT_CLASS);
-  if (s.look.card) out.add(CARD_CLASS);
+  if (!s.look.card) out.add(CARD_OFF_CLASS);
   if (s.motion === "off") out.add(STILL_CLASS);
   if (s.motion === "on") out.add(FORCE_MOTION_CLASS);
   return out;

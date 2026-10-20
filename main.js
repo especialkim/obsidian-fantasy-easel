@@ -23,10 +23,396 @@ __export(main_exports, {
   default: () => FantasyEaselPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian5 = require("obsidian");
+var import_obsidian6 = require("obsidian");
 
 // src/apply.ts
 var import_obsidian = require("obsidian");
+
+// src/backgrounds.ts
+var solid = (c) => `linear-gradient(${c}, ${c})`;
+var blob = (shape, at, c, fade = 60) => `radial-gradient(${shape} at ${at}, ${c}, transparent ${fade}%)`;
+var CSS_BACKGROUNDS = [
+  // ---------- theme color ----------
+  {
+    key: "bloom",
+    name: "Bloom",
+    kind: "static",
+    palette: "theme",
+    day: [
+      blob("ellipse 70% 60%", "15% 20%", "hsl({H} 90% 72%)"),
+      blob("ellipse 60% 60%", "85% 25%", "hsl({H+50} 90% 74%)"),
+      blob("ellipse 70% 60%", "70% 90%", "hsl({H-50} 85% 72%)"),
+      blob("ellipse 60% 50%", "20% 85%", "hsl({H+120} 80% 78%)"),
+      solid("hsl({H} 60% 92%)")
+    ],
+    night: [
+      blob("ellipse 70% 60%", "15% 20%", "hsl({H} 80% 34%)"),
+      blob("ellipse 60% 60%", "85% 25%", "hsl({H+50} 80% 30%)"),
+      blob("ellipse 70% 60%", "70% 90%", "hsl({H-50} 75% 28%)"),
+      blob("ellipse 60% 50%", "20% 85%", "hsl({H+120} 70% 26%)"),
+      solid("hsl({H} 45% 7%)")
+    ]
+  },
+  {
+    key: "silk",
+    name: "Silk",
+    kind: "static",
+    palette: "theme",
+    day: [
+      "linear-gradient(180deg, hsl(0 0% 100% / 0.35), transparent 60%)",
+      "conic-gradient(from 210deg at 30% 40%, hsl({H} 85% 72%), hsl({H+40} 85% 76%), hsl({H+100} 80% 74%), hsl({H+180} 70% 78%), hsl({H} 85% 72%))"
+    ],
+    night: [
+      "linear-gradient(180deg, hsl({H} 50% 5% / 0.55), transparent 70%)",
+      "conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 30%), hsl({H+40} 75% 26%), hsl({H+100} 70% 24%), hsl({H+180} 60% 22%), hsl({H} 75% 30%))"
+    ]
+  },
+  {
+    key: "glow",
+    name: "Light Leak",
+    kind: "static",
+    palette: "theme",
+    day: [
+      blob("ellipse 55% 50%", "0% 0%", "hsl({H+30} 100% 70% / 0.9)", 70),
+      blob("ellipse 60% 55%", "100% 100%", "hsl({H-40} 100% 72% / 0.85)", 70),
+      blob("ellipse 30% 53%", "80% 15%", "hsl({H+90} 100% 80% / 0.7)", 70),
+      solid("hsl({H} 40% 95%)")
+    ],
+    night: [
+      blob("ellipse 55% 50%", "0% 0%", "hsl({H+30} 90% 42% / 0.85)", 70),
+      blob("ellipse 60% 55%", "100% 100%", "hsl({H-40} 90% 38% / 0.8)", 70),
+      blob("ellipse 30% 53%", "80% 15%", "hsl({H+90} 90% 45% / 0.55)", 70),
+      solid("hsl({H} 50% 6%)")
+    ]
+  },
+  {
+    key: "veil",
+    name: "Veil",
+    kind: "static",
+    palette: "theme",
+    day: [
+      "linear-gradient(100deg, transparent 8%, hsl({H+60} 90% 70% / 0.6) 24%, transparent 38%, hsl({H} 90% 68% / 0.55) 55%, transparent 70%, hsl({H-60} 85% 72% / 0.55) 85%, transparent 96%)",
+      "linear-gradient(180deg, hsl({H+20} 70% 90%), hsl({H} 60% 84%))"
+    ],
+    night: [
+      "linear-gradient(100deg, transparent 8%, hsl({H+60} 85% 38% / 0.65) 24%, transparent 38%, hsl({H} 85% 36% / 0.6) 55%, transparent 70%, hsl({H-60} 80% 34% / 0.6) 85%, transparent 96%)",
+      "linear-gradient(180deg, hsl({H+20} 50% 6%), hsl({H} 45% 11%))"
+    ]
+  },
+  {
+    key: "dusk",
+    name: "Dusk",
+    kind: "static",
+    palette: "theme",
+    day: ["linear-gradient(160deg, hsl({H} 85% 78%) 0%, hsl({H+40} 85% 76%) 40%, hsl({H+90} 80% 80%) 75%, hsl({H+130} 70% 86%) 100%)"],
+    night: ["linear-gradient(160deg, hsl({H} 70% 26%) 0%, hsl({H+40} 65% 18%) 40%, hsl({H+90} 60% 12%) 75%, hsl({H+130} 50% 7%) 100%)"]
+  },
+  // ---------- fixed palettes ----------
+  {
+    key: "horizon",
+    name: "Sky",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 35% 30%", "75% 82%", "#fff3c4", 70),
+      "linear-gradient(180deg, #7fb3ff 0%, #b9a7ff 40%, #ffb3c7 70%, #ffd29a 100%)"
+    ],
+    night: [
+      blob("ellipse 18% 32%", "80% 18%", "rgb(170 190 255 / 0.35)", 70),
+      blob("ellipse 80% 35%", "50% 100%", "rgb(120 60 170 / 0.45)", 70),
+      "linear-gradient(180deg, #050816 0%, #0d1b4a 45%, #24195a 75%, #3a2160 100%)"
+    ]
+  },
+  {
+    key: "ocean",
+    name: "Ocean",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 70% 35%", "50% 0%", "rgb(255 255 255 / 0.55)", 70),
+      "linear-gradient(170deg, #b4f3ff 0%, #6fdcef 40%, #3bbcd9 75%, #2ea3c7 100%)"
+    ],
+    night: [
+      blob("ellipse 35% 30%", "28% 72%", "rgb(25 227 214 / 0.35)", 70),
+      blob("ellipse 30% 30%", "75% 40%", "rgb(58 123 255 / 0.3)", 70),
+      "linear-gradient(170deg, #031426 0%, #062a45 50%, #0a3d5c 100%)"
+    ]
+  },
+  {
+    key: "aurora",
+    name: "Aurora",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 60% 45%", "25% 30%", "#a8f7d6"),
+      blob("ellipse 55% 50%", "75% 28%", "#d2c2ff"),
+      blob("ellipse 70% 40%", "50% 85%", "#b2e8ff"),
+      solid("#f2fbff")
+    ],
+    night: [
+      blob("ellipse 60% 40%", "30% 35%", "rgb(25 230 140 / 0.55)", 65),
+      blob("ellipse 55% 45%", "70% 30%", "rgb(122 60 255 / 0.5)", 65),
+      blob("ellipse 70% 35%", "50% 78%", "rgb(0 194 255 / 0.35)", 65),
+      solid("#04060f")
+    ]
+  },
+  {
+    key: "citrus",
+    name: "Citrus / Ember",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 60% 55%", "20% 25%", "#fff27a"),
+      blob("ellipse 55% 55%", "80% 30%", "#c4f56b"),
+      blob("ellipse 65% 55%", "60% 90%", "#ffc061"),
+      solid("#fffbe6")
+    ],
+    night: [
+      blob("ellipse 60% 55%", "20% 25%", "rgb(255 106 26 / 0.4)"),
+      blob("ellipse 55% 55%", "80% 30%", "rgb(255 176 0 / 0.3)"),
+      blob("ellipse 65% 55%", "60% 90%", "rgb(212 20 90 / 0.35)"),
+      solid("#120805")
+    ]
+  },
+  {
+    key: "rose",
+    name: "Ros\xE9 / Wine",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 60% 55%", "20% 20%", "#ffc3d0"),
+      blob("ellipse 55% 55%", "85% 35%", "#ffd6b8"),
+      blob("ellipse 65% 55%", "45% 90%", "#e8c1ff"),
+      solid("#fff5f7")
+    ],
+    night: [
+      blob("ellipse 60% 55%", "20% 20%", "rgb(176 48 106 / 0.5)"),
+      blob("ellipse 55% 55%", "85% 35%", "rgb(109 42 143 / 0.45)"),
+      blob("ellipse 65% 55%", "45% 90%", "rgb(255 122 138 / 0.22)"),
+      solid("#14060d")
+    ]
+  },
+  {
+    key: "forest",
+    name: "Forest",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      "linear-gradient(115deg, transparent 20%, rgb(255 247 194 / 0.7) 30%, transparent 42%, rgb(255 247 194 / 0.5) 55%, transparent 65%)",
+      blob("ellipse 60% 55%", "20% 75%", "#a6dd90"),
+      blob("ellipse 55% 55%", "85% 30%", "#7fd3a8"),
+      solid("#eef7e8")
+    ],
+    night: [
+      blob("ellipse 6% 11%", "30% 60%", "rgb(216 255 106 / 0.35)", 80),
+      blob("ellipse 5% 9%", "70% 35%", "rgb(216 255 106 / 0.3)", 80),
+      blob("ellipse 60% 55%", "20% 75%", "rgb(31 107 58 / 0.55)"),
+      blob("ellipse 55% 55%", "85% 30%", "rgb(15 77 74 / 0.5)"),
+      solid("#040d07")
+    ]
+  },
+  {
+    key: "cosmos",
+    name: "Cotton / Cosmos",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 60% 55%", "20% 30%", "#ffb6e6"),
+      blob("ellipse 55% 55%", "80% 25%", "#a9c9ff"),
+      blob("ellipse 65% 55%", "55% 90%", "#c7b3ff"),
+      solid("#f8f4ff")
+    ],
+    night: [
+      blob("ellipse 55% 50%", "25% 30%", "rgb(123 47 247 / 0.5)"),
+      blob("ellipse 45% 45%", "78% 30%", "rgb(241 7 163 / 0.32)"),
+      blob("ellipse 60% 45%", "55% 85%", "rgb(31 209 249 / 0.28)"),
+      solid("#07020f")
+    ]
+  },
+  {
+    key: "prism",
+    name: "Prism / Neon",
+    kind: "static",
+    palette: "fixed",
+    day: ["conic-gradient(from 0deg at 50% 50%, #ffd1f0, #c9f0ff, #d9ffcf, #fff2c2, #e2d1ff, #ffd1f0)"],
+    night: [
+      blob("ellipse 45% 80%", "50% 50%", "rgb(4 2 12 / 0.75)", 75),
+      "conic-gradient(from 0deg at 50% 50%, #8a1166, #116a8a, #3a138a, #8a5a11, #8a1166)"
+    ]
+  },
+  {
+    key: "magma",
+    name: "Coral / Magma",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 60% 55%", "20% 30%", "#ff9a8b"),
+      blob("ellipse 55% 55%", "80% 25%", "#ffcf8b"),
+      blob("ellipse 65% 55%", "55% 90%", "#ff8fab"),
+      solid("#fff1ec")
+    ],
+    night: [
+      blob("ellipse 55% 45%", "25% 80%", "rgb(255 61 0 / 0.45)"),
+      blob("ellipse 50% 45%", "75% 70%", "rgb(255 145 0 / 0.3)"),
+      blob("ellipse 60% 45%", "50% 20%", "rgb(179 0 27 / 0.4)"),
+      solid("#1a0402")
+    ]
+  },
+  {
+    key: "arctic",
+    name: "Arctic",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 60% 50%", "25% 25%", "#ffffff"),
+      blob("ellipse 60% 55%", "80% 70%", "#bfe3ff"),
+      blob("ellipse 50% 45%", "20% 85%", "#cfd8ff"),
+      solid("#e8f6ff")
+    ],
+    night: [
+      blob("ellipse 70% 30%", "50% 25%", "rgb(43 255 176 / 0.22)", 70),
+      blob("ellipse 60% 55%", "80% 80%", "rgb(20 80 150 / 0.5)"),
+      solid("#020b18")
+    ]
+  },
+  {
+    key: "dune",
+    name: "Dune",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      "linear-gradient(175deg, #a7d4ff 0%, #ffe6c2 45%, #ffd19a 70%, #f2a66b 100%)"
+    ],
+    night: [
+      blob("ellipse 14% 25%", "75% 22%", "rgb(255 236 200 / 0.25)", 70),
+      "linear-gradient(175deg, #0b0a24 0%, #1e1846 45%, #33234f 70%, #3d2a1e 100%)"
+    ]
+  },
+  {
+    key: "grain",
+    name: "Paper / Ink",
+    kind: "static",
+    palette: "fixed",
+    day: [
+      blob("ellipse 80% 70%", "50% 45%", "rgb(255 255 255 / 0.6)", 75),
+      "repeating-linear-gradient(115deg, rgb(120 90 50 / 0.035) 0 2px, transparent 2px 6px)",
+      solid("#f3ead9")
+    ],
+    night: [
+      blob("ellipse 80% 70%", "50% 45%", "rgb(60 60 72 / 0.5)", 75),
+      "repeating-linear-gradient(115deg, rgb(255 255 255 / 0.025) 0 2px, transparent 2px 6px)",
+      solid("#121216")
+    ]
+  },
+  // ---------- motion ----------
+  {
+    key: "aurora-drift",
+    name: "Aurora Drift",
+    kind: "motion",
+    palette: "fixed",
+    motion: { frames: "drift", seconds: 60, alternate: true },
+    day: [
+      blob("ellipse 60% 45%", "22% 30%", "#a8f7d6", 70),
+      blob("ellipse 55% 50%", "78% 35%", "#d2c2ff", 70),
+      blob("ellipse 70% 40%", "50% 85%", "#b2e8ff", 70),
+      solid("#f2fbff")
+    ],
+    night: [
+      blob("ellipse 60% 40%", "22% 30%", "rgb(25 230 140 / 0.55)", 70),
+      blob("ellipse 55% 45%", "78% 35%", "rgb(122 60 255 / 0.5)", 70),
+      blob("ellipse 70% 35%", "50% 85%", "rgb(0 194 255 / 0.35)", 70),
+      solid("#04060f")
+    ]
+  },
+  {
+    key: "tide",
+    name: "Tide",
+    kind: "motion",
+    palette: "theme",
+    motion: { frames: "tide", seconds: 45, alternate: true },
+    day: ["linear-gradient(115deg, hsl({H} 70% 86%) 0%, hsl({H+30} 80% 76%) 30%, hsl({H-20} 85% 70%) 50%, hsl({H+30} 80% 76%) 70%, hsl({H} 70% 86%) 100%)"],
+    night: ["linear-gradient(115deg, hsl({H} 60% 8%) 0%, hsl({H+30} 65% 20%) 30%, hsl({H-20} 70% 32%) 50%, hsl({H+30} 65% 20%) 70%, hsl({H} 60% 8%) 100%)"]
+  },
+  {
+    key: "swell",
+    name: "Ocean Swell",
+    kind: "motion",
+    palette: "fixed",
+    motion: { frames: "swell", seconds: 50, alternate: true },
+    day: [
+      blob("ellipse 80% 30%", "50% 20%", "rgb(255 255 255 / 0.5)", 70),
+      "linear-gradient(170deg, #b4f3ff 0%, #6fdcef 45%, #3bbcd9 80%, #2ea3c7 100%)"
+    ],
+    night: [
+      blob("ellipse 40% 25%", "30% 70%", "rgb(25 227 214 / 0.35)", 70),
+      blob("ellipse 35% 25%", "72% 45%", "rgb(58 123 255 / 0.3)", 70),
+      "linear-gradient(170deg, #031426 0%, #062a45 50%, #0a3d5c 100%)"
+    ]
+  },
+  {
+    key: "nebula",
+    name: "Nebula",
+    kind: "motion",
+    palette: "fixed",
+    motion: { frames: "nebula", seconds: 80, alternate: true },
+    day: [
+      blob("ellipse 45% 80%", "35% 40%", "#ffb6e6", 65),
+      blob("ellipse 45% 80%", "65% 60%", "#a9c9ff", 65),
+      solid("#f6f1ff")
+    ],
+    night: [
+      blob("ellipse 40% 71%", "35% 40%", "rgb(123 47 247 / 0.5)", 65),
+      blob("ellipse 40% 71%", "65% 60%", "rgb(31 209 249 / 0.3)", 65),
+      blob("ellipse 25% 44%", "55% 30%", "rgb(241 7 163 / 0.25)", 65),
+      solid("#07020f")
+    ]
+  },
+  {
+    key: "lava",
+    name: "Lava Lamp",
+    kind: "motion",
+    palette: "fixed",
+    motion: { frames: "lava", seconds: 70, alternate: true },
+    day: [
+      blob("ellipse 30% 53%", "30% 35%", "#ff9a8b", 70),
+      blob("ellipse 28% 50%", "70% 60%", "#ffcf8b", 70),
+      blob("ellipse 22% 39%", "45% 80%", "#ff8fab", 70),
+      solid("#fff1ec")
+    ],
+    night: [
+      blob("ellipse 30% 53%", "30% 35%", "rgb(255 61 0 / 0.42)", 70),
+      blob("ellipse 28% 50%", "70% 60%", "rgb(255 145 0 / 0.3)", 70),
+      blob("ellipse 22% 39%", "45% 80%", "rgb(179 0 27 / 0.4)", 70),
+      solid("#1a0402")
+    ]
+  },
+  {
+    key: "breathe",
+    name: "Breathe",
+    kind: "motion",
+    palette: "theme",
+    motion: { frames: "breathe", seconds: 40, alternate: true },
+    day: [
+      blob("ellipse 50% 45%", "50% 50%", "hsl({H} 90% 72%)", 70),
+      blob("ellipse 70% 60%", "50% 50%", "hsl({H+40} 80% 82%)", 70),
+      solid("hsl({H} 50% 94%)")
+    ],
+    night: [
+      blob("ellipse 50% 45%", "50% 50%", "hsl({H} 80% 32%)", 70),
+      blob("ellipse 70% 60%", "50% 50%", "hsl({H+40} 70% 18%)", 70),
+      solid("hsl({H} 45% 6%)")
+    ]
+  },
+  {
+    key: "iris",
+    name: "Iris",
+    kind: "motion",
+    palette: "theme",
+    motion: { frames: "iris", seconds: 120 },
+    day: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 85% 74%), hsl({H+60} 85% 78%), hsl({H+150} 80% 76%), hsl({H+240} 75% 78%), hsl({H} 85% 74%))"],
+    night: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 30%), hsl({H+60} 75% 24%), hsl({H+150} 70% 22%), hsl({H+240} 65% 24%), hsl({H} 75% 30%))"]
+  }
+];
 
 // src/catalog.ts
 var THEME_COLORS = [
@@ -43,7 +429,6 @@ var THEME_COLORS = [
   { cls: "fantasy-theme-Black", name: "Dark" }
 ];
 var themeBg = (key, name) => ({ id: key, name, kind: "theme", cls: `fantasy-theme-background-${key}` });
-var cssBg = (key, name, kind) => ({ id: `css-${key}`, name, kind, cls: `fantasy-easel-bg-${key}` });
 var BACKGROUNDS = [
   themeBg("none", "None"),
   themeBg("paper", "Paper Texture"),
@@ -54,17 +439,12 @@ var BACKGROUNDS = [
   themeBg("custom1", "Custom URL 1"),
   themeBg("custom2", "Custom URL 2"),
   themeBg("custom3", "Custom URL 3"),
-  cssBg("dusk", "Dusk", "static"),
-  cssBg("aurora", "Aurora", "static"),
-  cssBg("horizon", "Horizon", "static"),
-  cssBg("prism", "Prism Mesh", "static"),
-  cssBg("grain", "Soft Grain", "static"),
-  cssBg("aurora-drift", "Aurora Drift", "motion"),
-  cssBg("tide", "Tide", "motion"),
-  cssBg("nebula", "Nebula", "motion")
+  // CSS backgrounds: src/backgrounds.ts is the source
+  ...CSS_BACKGROUNDS.map((b) => ({ id: `css-${b.key}`, name: b.name, kind: b.kind, palette: b.palette, cls: `fantasy-easel-bg-${b.key}` }))
 ];
 var ACCENT_CLASS = "fantasy-theme-accent";
-var CARD_CLASS = "fantasy-theme-card-layout";
+var CARD_OFF_CLASS = "fantasy-theme-card-off";
+var LEGACY_CARD_CLASS = "fantasy-theme-card-layout";
 var MARKER_CLASS = "fantasy-easel";
 var STILL_CLASS = "fantasy-easel-still";
 var FORCE_MOTION_CLASS = "fantasy-easel-force-motion";
@@ -74,7 +454,9 @@ var SS_KEYS = {
   color: "fantasy-theme",
   background: "fantasy-theme-background",
   accent: "fantasy-theme-accent",
-  card: "fantasy-theme-card-layout",
+  cardOff: "fantasy-theme-card-off",
+  /** old toggle (on = card layout); read on import if the new one was never saved */
+  cardLegacy: "fantasy-theme-card-layout",
   url: ["background-url1", "background-url2", "background-url3"]
 };
 var THEME_DEFAULTS = {
@@ -85,8 +467,8 @@ var colorByCls = (cls) => THEME_COLORS.find((c) => c.cls === cls);
 var backgroundById = (id) => BACKGROUNDS.find((b) => b.id === id);
 
 // src/apply.ts
-var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.map((b) => b.cls), ACCENT_CLASS, CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS]);
-var THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.filter((b) => b.kind === "theme").map((b) => b.cls), ACCENT_CLASS, CARD_CLASS];
+var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS]);
+var THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.filter((b) => b.kind === "theme").map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
 var URL_VARS = ["--background-url1", "--background-url2", "--background-url3"];
 function wantedClasses(s) {
   const bg = backgroundById(s.look.background);
@@ -94,7 +476,7 @@ function wantedClasses(s) {
   if (bg) out.add(bg.cls);
   if (bg?.kind === "motion") out.add(MOTION_CLASS);
   if (s.look.accent) out.add(ACCENT_CLASS);
-  if (s.look.card) out.add(CARD_CLASS);
+  if (!s.look.card) out.add(CARD_OFF_CLASS);
   if (s.motion === "off") out.add(STILL_CLASS);
   if (s.motion === "on") out.add(FORCE_MOTION_CLASS);
   return out;
@@ -179,11 +561,78 @@ var Applier = class {
   }
 };
 
-// src/menus.ts
+// src/gallery.ts
 var import_obsidian2 = require("obsidian");
+var GROUPS = [
+  { title: "Theme color", desc: "Follows the theme color.", pick: (b) => b.kind === "static" && b.palette === "theme" },
+  { title: "Fixed palette", desc: "Same colors with any theme color.", pick: (b) => b.kind === "static" && b.palette === "fixed" },
+  { title: "Motion", desc: "Moves slowly. Pauses when the window is not focused.", pick: (b) => b.kind === "motion" }
+];
+var GalleryModal = class extends import_obsidian2.Modal {
+  constructor(app, store) {
+    super(app);
+    this.store = store;
+    this.unsubscribe = null;
+  }
+  onOpen() {
+    this.modalEl.addClass("fantasy-easel-gallery-modal");
+    this.setTitle("Backgrounds");
+    this.unsubscribe = this.store.subscribe(() => this.markCurrent());
+    const root = this.contentEl.createDiv({ cls: "fantasy-easel-gallery" });
+    const { motion } = this.store.settings;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const moving = motion === "on" || motion === "auto" && !reduced;
+    root.toggleClass("is-still", !moving);
+    const head = root.createDiv({ cls: "fantasy-easel-gallery-head" });
+    head.createSpan({ text: "Day" });
+    head.createSpan({ text: "Night" });
+    for (const g of GROUPS) {
+      const section = root.createDiv({ cls: "fantasy-easel-gallery-group" });
+      section.createDiv({ cls: "fantasy-easel-gallery-title", text: g.title });
+      section.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: g.desc });
+      for (const b of CSS_BACKGROUNDS.filter(g.pick)) {
+        const row = section.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": `css-${b.key}` } });
+        const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
+        label.createSpan({ text: b.name });
+        const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
+        (0, import_obsidian2.setIcon)(check, "check");
+        for (const side of ["day", "night"]) {
+          const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
+          const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
+          layer.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key})`);
+          if (b.motion) layer.style.setProperty("animation", `fantasy-easel-${b.motion.frames} ${b.motion.seconds}s ${b.motion.alternate ? "ease-in-out" : "linear"} infinite${b.motion.alternate ? " alternate" : ""}`);
+          const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
+          card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
+          card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
+          tile.addEventListener("click", () => this.store.setLook({ background: `css-${b.key}` }));
+          tile.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              this.store.setLook({ background: `css-${b.key}` });
+            }
+          });
+        }
+      }
+    }
+    this.markCurrent();
+    root.querySelector(".fantasy-easel-gallery-row.is-current")?.scrollIntoView({ block: "center" });
+  }
+  markCurrent() {
+    const id = this.store.settings.look.background;
+    this.contentEl.querySelectorAll(".fantasy-easel-gallery-row").forEach((r) => r.toggleClass("is-current", r.dataset.id === id));
+  }
+  onClose() {
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    this.contentEl.empty();
+  }
+};
+
+// src/menus.ts
+var import_obsidian3 = require("obsidian");
 var KIND_LABEL = { theme: "Theme images", static: "CSS \xB7 static", motion: "CSS \xB7 motion" };
 function colorMenu(store) {
-  const menu = new import_obsidian2.Menu();
+  const menu = new import_obsidian3.Menu();
   for (const c of THEME_COLORS) {
     menu.addItem(
       (item) => item.setTitle(c.name).setChecked(store.settings.look.color === c.cls).onClick(() => store.setLook({ color: c.cls }))
@@ -192,7 +641,7 @@ function colorMenu(store) {
   return menu;
 }
 function backgroundMenu(store) {
-  const menu = new import_obsidian2.Menu();
+  const menu = new import_obsidian3.Menu();
   for (const kind of ["theme", "static", "motion"]) {
     if (kind !== "theme") menu.addSeparator();
     menu.addItem((item) => item.setTitle(KIND_LABEL[kind]).setIsLabel(true));
@@ -216,7 +665,7 @@ var DEFAULT_LOOK = {
   color: THEME_DEFAULTS.color,
   background: THEME_DEFAULTS.background,
   accent: false,
-  card: false,
+  card: true,
   urls: ["", "", ""]
 };
 var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "auto", statusBar: true };
@@ -244,7 +693,8 @@ async function readStyleSettingsLook(app) {
       color,
       background: backgroundById(bgId) ? bgId : DEFAULT_LOOK.background,
       accent: get(SS_KEYS.accent) === true,
-      card: get(SS_KEYS.card) === true,
+      // new toggle = "card off"; else the old "card on" toggle; else the theme default (on)
+      card: typeof get(SS_KEYS.cardOff) === "boolean" ? get(SS_KEYS.cardOff) !== true : typeof get(SS_KEYS.cardLegacy) === "boolean" ? get(SS_KEYS.cardLegacy) === true : true,
       urls
     }
   };
@@ -257,7 +707,7 @@ function normalize(data) {
       color: typeof look.color === "string" && colorByCls(look.color) ? look.color : DEFAULT_LOOK.color,
       background: typeof look.background === "string" && backgroundById(look.background) ? look.background : DEFAULT_LOOK.background,
       accent: look.accent === true,
-      card: look.card === true,
+      card: look.card !== false,
       urls: [0, 1, 2].map((i) => typeof urls[i] === "string" ? urls[i] : "")
     },
     motion: MOTIONS.includes(data?.motion) ? data.motion : "auto",
@@ -266,8 +716,8 @@ function normalize(data) {
 }
 
 // src/settings-tab.ts
-var import_obsidian3 = require("obsidian");
-var FantasyEaselSettingTab = class extends import_obsidian3.PluginSettingTab {
+var import_obsidian4 = require("obsidian");
+var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
@@ -297,13 +747,13 @@ var FantasyEaselSettingTab = class extends import_obsidian3.PluginSettingTab {
       cls: "setting-item-description",
       text: `While Fantasy Easel is on, it owns the Fantasy look. Changes made in Style Settings' Fantasy section are put back right away. Use "Import from Style Settings" below to take those values.`
     });
-    new import_obsidian3.Setting(containerEl).setName("Theme color").setDesc(colorByCls(look.color)?.name ?? look.color).addButton((b) => b.setButtonText("Change").onClick((ev) => colorMenu(store).showAtMouseEvent(ev)));
+    new import_obsidian4.Setting(containerEl).setName("Theme color").setDesc(colorByCls(look.color)?.name ?? look.color).addButton((b) => b.setButtonText("Change").onClick((ev) => colorMenu(store).showAtMouseEvent(ev)));
     const bg = backgroundById(look.background);
-    new import_obsidian3.Setting(containerEl).setName("Background").setDesc(bg ? `${bg.name} (${bg.kind === "theme" ? "theme image" : `CSS \xB7 ${bg.kind}`})` : look.background).addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
-    new import_obsidian3.Setting(containerEl).setName("Theme accent").setDesc("Use the theme color as the accent.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
-    new import_obsidian3.Setting(containerEl).setName("Card layout").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
+    new import_obsidian4.Setting(containerEl).setName("Background").setDesc(bg ? `${bg.name} (${bg.kind === "theme" ? "theme image" : `CSS \xB7 ${bg.kind}`})` : look.background).addButton((b) => b.setButtonText("Gallery").onClick(() => new GalleryModal(this.app, store).open())).addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
+    new import_obsidian4.Setting(containerEl).setName("Theme accent").setDesc("Use the theme color as the accent.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
+    new import_obsidian4.Setting(containerEl).setName("Card layout").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
     look.urls.forEach((url, i) => {
-      new import_obsidian3.Setting(containerEl).setName(`Custom background URL ${i + 1}`).setDesc('CSS value, same as Style Settings: url("https://\u2026"). Empty = theme default.').addText((t) => {
+      new import_obsidian4.Setting(containerEl).setName(`Custom background URL ${i + 1}`).setDesc('CSS value, same as Style Settings: url("https://\u2026"). Empty = theme default.').addText((t) => {
         t.inputEl.type = "text";
         t.setValue(url).setPlaceholder('url("\u2026")');
         t.inputEl.addEventListener("change", () => {
@@ -313,13 +763,13 @@ var FantasyEaselSettingTab = class extends import_obsidian3.PluginSettingTab {
         });
       });
     });
-    new import_obsidian3.Setting(containerEl).setName("Motion backgrounds").setDesc(`Auto follows the OS "reduce motion" setting${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? " (on here, so motion is paused)" : ""}. On moves anyway. All pause while the window is not focused.`).addButton((b) => b.setButtonText(motion === "auto" ? "Auto" : motion === "on" ? "On" : "Off").onClick((ev) => {
-      const menu = new import_obsidian3.Menu();
+    new import_obsidian4.Setting(containerEl).setName("Motion backgrounds").setDesc(`Auto follows the OS "reduce motion" setting${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? " (on here, so motion is paused)" : ""}. On moves anyway. All pause while the window is not focused.`).addButton((b) => b.setButtonText(motion === "auto" ? "Auto" : motion === "on" ? "On" : "Off").onClick((ev) => {
+      const menu = new import_obsidian4.Menu();
       for (const m of MOTIONS) menu.addItem((i) => i.setTitle(m === "auto" ? "Auto" : m === "on" ? "On" : "Off").setChecked(m === motion).onClick(() => store.set({ motion: m })));
       menu.showAtMouseEvent(ev);
     }));
-    new import_obsidian3.Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls for trying looks.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
-    new import_obsidian3.Setting(containerEl).setName("Import from Style Settings").setDesc("Take the Fantasy values saved in Style Settings.").addButton((b) => b.setButtonText("Import").onClick(() => void this.plugin.importFromStyleSettings()));
+    new import_obsidian4.Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls for trying looks.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
+    new import_obsidian4.Setting(containerEl).setName("Import from Style Settings").setDesc("Take the Fantasy values saved in Style Settings.").addButton((b) => b.setButtonText("Import").onClick(() => void this.plugin.importFromStyleSettings()));
   }
   hide() {
     this.unsubscribe?.();
@@ -328,7 +778,7 @@ var FantasyEaselSettingTab = class extends import_obsidian3.PluginSettingTab {
 };
 
 // src/statusbar.ts
-var import_obsidian4 = require("obsidian");
+var import_obsidian5 = require("obsidian");
 var TIP = { delay: 100, placement: "top" };
 var StatusBar = class {
   constructor(app, plugin, store) {
@@ -344,7 +794,7 @@ var StatusBar = class {
       const el = this.plugin.addStatusBarItem();
       el.addClass("mod-clickable", "fantasy-easel-sb", cls);
       el.setAttr("aria-label", label);
-      (0, import_obsidian4.setTooltip)(el, label, TIP);
+      (0, import_obsidian5.setTooltip)(el, label, TIP);
       this.plugin.registerDomEvent(el, "click", onClick);
       this.items.push(el);
       return el;
@@ -353,20 +803,21 @@ var StatusBar = class {
     const color = add("fantasy-easel-sb-color", "Theme color", (ev) => menuAt(ev, () => colorMenu(this.store)));
     this.swatch = color.createSpan({ cls: "fantasy-easel-swatch" });
     this.colorName = color.createSpan({ cls: "fantasy-easel-sb-text" });
-    (0, import_obsidian4.setIcon)(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left");
+    (0, import_obsidian5.setIcon)(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left");
     const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store)));
     this.bgKind = bg.createSpan({ cls: "fantasy-easel-sb-kind" });
     this.bgName = bg.createSpan({ cls: "fantasy-easel-sb-text fantasy-easel-sb-bgname" });
-    (0, import_obsidian4.setIcon)(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right");
+    (0, import_obsidian5.setIcon)(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right");
+    (0, import_obsidian5.setIcon)(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store).open()), "layout-grid");
     this.accent = add("fantasy-easel-sb-toggle", "Theme accent on / off", () => this.store.setLook({ accent: !this.store.settings.look.accent }));
-    (0, import_obsidian4.setIcon)(this.accent, "droplet");
+    (0, import_obsidian5.setIcon)(this.accent, "droplet");
     this.card = add("fantasy-easel-sb-toggle", "Card layout on / off", () => this.store.setLook({ card: !this.store.settings.look.card }));
-    (0, import_obsidian4.setIcon)(this.card, "layout-dashboard");
+    (0, import_obsidian5.setIcon)(this.card, "layout-dashboard");
     this.still = add("fantasy-easel-sb-toggle", "Motion", () => {
       const order = MOTIONS;
       this.store.set({ motion: order[(order.indexOf(this.store.settings.motion) + 1) % order.length] });
     });
-    (0, import_obsidian4.setIcon)(
+    (0, import_obsidian5.setIcon)(
       add("fantasy-easel-sb-mode", "Dark / light", () => this.app.commands.executeCommandById("theme:toggle-light-dark")),
       "sun-moon"
     );
@@ -386,14 +837,14 @@ var StatusBar = class {
     this.colorName.setText(color?.name ?? look.color);
     const bg = backgroundById(look.background);
     this.bgName.setText(bg?.name ?? look.background);
-    (0, import_obsidian4.setIcon)(this.bgKind, bg?.kind === "motion" ? "wind" : bg?.kind === "static" ? "palette" : "image");
+    (0, import_obsidian5.setIcon)(this.bgKind, bg?.kind === "motion" ? "wind" : bg?.kind === "static" ? "palette" : "image");
     this.accent.toggleClass("is-on", look.accent);
     this.card.toggleClass("is-on", look.card);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    (0, import_obsidian4.setIcon)(this.still, motion === "off" ? "pause" : motion === "on" ? "play" : "circle-play");
+    (0, import_obsidian5.setIcon)(this.still, motion === "off" ? "pause" : motion === "on" ? "play" : "circle-play");
     const tip = motion === "auto" ? `Motion: auto (follows OS reduced motion${reduced ? " \u2014 now paused" : ""}). Click: on` : motion === "on" ? "Motion: on (moves even with OS reduced motion). Click: off" : "Motion: off. Click: auto";
     this.still.setAttr("aria-label", tip);
-    (0, import_obsidian4.setTooltip)(this.still, tip, TIP);
+    (0, import_obsidian5.setTooltip)(this.still, tip, TIP);
     this.still.toggleClass("is-on", motion === "on");
     this.still.toggleClass("is-idle", bg?.kind !== "motion");
   }
@@ -431,7 +882,7 @@ var Store = class {
 
 // src/main.ts
 var STYLE_SETTINGS_ID = "obsidian-style-settings";
-var FantasyEaselPlugin = class extends import_obsidian5.Plugin {
+var FantasyEaselPlugin = class extends import_obsidian6.Plugin {
   constructor() {
     super(...arguments);
     /** Menu builders, also for CLI checks (a Menu closes at once when the window has no focus). */
@@ -460,6 +911,7 @@ var FantasyEaselPlugin = class extends import_obsidian5.Plugin {
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
     this.addCommand({ id: "next-background", name: "Next background", callback: () => stepBackground(this.store, 1) });
     this.addCommand({ id: "previous-background", name: "Previous background", callback: () => stepBackground(this.store, -1) });
+    this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => new GalleryModal(this.app, this.store).open() });
     this.addCommand({ id: "import-style-settings", name: "Import from Style Settings", callback: () => void this.importFromStyleSettings() });
     this.app.workspace.onLayoutReady(() => this.applier.reconcile());
   }
@@ -477,6 +929,6 @@ var FantasyEaselPlugin = class extends import_obsidian5.Plugin {
     const ss = await readStyleSettingsLook(this.app);
     this.ssLook = ss.found ? ss.look : null;
     this.store.setLook(ss.look);
-    new import_obsidian5.Notice(ss.found ? "Fantasy Easel: imported from Style Settings." : "Fantasy Easel: no Style Settings values, used theme defaults.");
+    new import_obsidian6.Notice(ss.found ? "Fantasy Easel: imported from Style Settings." : "Fantasy Easel: no Style Settings values, used theme defaults.");
   }
 };

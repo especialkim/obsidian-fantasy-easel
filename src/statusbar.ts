@@ -1,5 +1,6 @@
 import { setIcon, setTooltip, type App, type Plugin } from "obsidian";
 import { backgroundById, colorByCls } from "./catalog";
+import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu, stepBackground } from "./menus";
 import { MOTIONS } from "./settings";
 import type { Store } from "./store";
@@ -46,6 +47,7 @@ export class StatusBar {
     this.bgKind = bg.createSpan({ cls: "fantasy-easel-sb-kind" });
     this.bgName = bg.createSpan({ cls: "fantasy-easel-sb-text fantasy-easel-sb-bgname" });
     setIcon(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right");
+    setIcon(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store).open()), "layout-grid");
 
     this.accent = add("fantasy-easel-sb-toggle", "Theme accent on / off", () => this.store.setLook({ accent: !this.store.settings.look.accent }));
     setIcon(this.accent, "droplet");

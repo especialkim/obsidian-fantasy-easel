@@ -1,5 +1,6 @@
 import { Notice, Plugin } from "obsidian";
 import { Applier } from "./apply";
+import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu, stepBackground } from "./menus";
 import { DEFAULT_SETTINGS, normalize, readStyleSettingsLook, type FantasyEaselSettings, type Look } from "./settings";
 import { FantasyEaselSettingTab } from "./settings-tab";
@@ -45,6 +46,7 @@ export default class FantasyEaselPlugin extends Plugin {
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
     this.addCommand({ id: "next-background", name: "Next background", callback: () => stepBackground(this.store, 1) });
     this.addCommand({ id: "previous-background", name: "Previous background", callback: () => stepBackground(this.store, -1) });
+    this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => new GalleryModal(this.app, this.store).open() });
     this.addCommand({ id: "import-style-settings", name: "Import from Style Settings", callback: () => void this.importFromStyleSettings() });
     // Style Settings may apply after us on startup; the observer handles that, this is a last check.
     this.app.workspace.onLayoutReady(() => this.applier.reconcile());

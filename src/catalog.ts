@@ -1,5 +1,6 @@
 // Values Fantasy Easel can choose. Class names must match theme.css (checked by scripts/selftest.js).
-// CSS backgrounds themselves are drawn in styles.css (`.fantasy-easel-bg-<id>`).
+// CSS backgrounds come from src/backgrounds.ts (styles.css is generated from it).
+import { CSS_BACKGROUNDS, type BgPalette } from "./backgrounds";
 
 export interface ThemeColor {
   /** body class written by the theme's Style Settings `class-select` */
@@ -28,12 +29,13 @@ export interface Background {
   id: string;
   name: string;
   kind: BackgroundKind;
-  /** body class: theme background class, or `fantasy-easel-bg-<id>` for CSS backgrounds */
+  /** CSS backgrounds: follows the theme color, or a fixed palette */
+  palette?: BgPalette;
+  /** body class: theme background class, or `fantasy-easel-bg-<key>` for CSS backgrounds */
   cls: string;
 }
 
 const themeBg = (key: string, name: string): Background => ({ id: key, name, kind: "theme", cls: `fantasy-theme-background-${key}` });
-const cssBg = (key: string, name: string, kind: "static" | "motion"): Background => ({ id: `css-${key}`, name, kind, cls: `fantasy-easel-bg-${key}` });
 
 export const BACKGROUNDS: Background[] = [
   themeBg("none", "None"),
@@ -45,18 +47,15 @@ export const BACKGROUNDS: Background[] = [
   themeBg("custom1", "Custom URL 1"),
   themeBg("custom2", "Custom URL 2"),
   themeBg("custom3", "Custom URL 3"),
-  cssBg("dusk", "Dusk", "static"),
-  cssBg("aurora", "Aurora", "static"),
-  cssBg("horizon", "Horizon", "static"),
-  cssBg("prism", "Prism Mesh", "static"),
-  cssBg("grain", "Soft Grain", "static"),
-  cssBg("aurora-drift", "Aurora Drift", "motion"),
-  cssBg("tide", "Tide", "motion"),
-  cssBg("nebula", "Nebula", "motion"),
+  // CSS backgrounds: src/backgrounds.ts is the source
+  ...CSS_BACKGROUNDS.map((b): Background => ({ id: `css-${b.key}`, name: b.name, kind: b.kind, palette: b.palette, cls: `fantasy-easel-bg-${b.key}` })),
 ];
 
 export const ACCENT_CLASS = "fantasy-theme-accent";
-export const CARD_CLASS = "fantasy-theme-card-layout";
+/** Card layout is on by default in the theme; this class turns it off. */
+export const CARD_OFF_CLASS = "fantasy-theme-card-off";
+/** Old "card layout on" class (theme before 2026-10-20). Only removed, never added. */
+export const LEGACY_CARD_CLASS = "fantasy-theme-card-layout";
 /** Present on body while Fantasy Easel manages the theme. */
 export const MARKER_CLASS = "fantasy-easel";
 /** Present on body when motion backgrounds should not move (motion: off). */
@@ -72,7 +71,9 @@ export const SS_KEYS = {
   color: "fantasy-theme",
   background: "fantasy-theme-background",
   accent: "fantasy-theme-accent",
-  card: "fantasy-theme-card-layout",
+  cardOff: "fantasy-theme-card-off",
+  /** old toggle (on = card layout); read on import if the new one was never saved */
+  cardLegacy: "fantasy-theme-card-layout",
   url: ["background-url1", "background-url2", "background-url3"] as const,
 };
 

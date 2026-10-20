@@ -1,6 +1,7 @@
 import { Menu, PluginSettingTab, Setting, type App } from "obsidian";
 import { backgroundById, colorByCls } from "./catalog";
 import type FantasyEaselPlugin from "./main";
+import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu } from "./menus";
 import { MOTIONS } from "./settings";
 
@@ -51,6 +52,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Background")
       .setDesc(bg ? `${bg.name} (${bg.kind === "theme" ? "theme image" : `CSS · ${bg.kind}`})` : look.background)
+      .addButton((b) => b.setButtonText("Gallery").onClick(() => new GalleryModal(this.app, store).open()))
       .addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
 
     new Setting(containerEl).setName("Theme accent").setDesc("Use the theme color as the accent.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
