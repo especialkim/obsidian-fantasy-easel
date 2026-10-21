@@ -365,6 +365,16 @@ body.fantasy-easel.fantasy-easel-motion.fantasy-easel-still .app-container::afte
 	margin-bottom: var(--size-4-2);
 }
 
+.fantasy-easel-gallery-add {
+	margin-left: var(--size-4-2);
+}
+
+/* Settings: your pictures, one row each */
+.fantasy-easel-settings .fantasy-easel-picture input[type="text"] {
+	width: 100%;
+	min-width: 16em;
+}
+
 .fantasy-easel-gallery-row {
 	margin-bottom: var(--size-4-3);
 }

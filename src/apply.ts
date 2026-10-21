@@ -1,18 +1,21 @@
 import { Notice } from "obsidian";
-import { ACCENT_CLASS, BACKGROUNDS, backgroundById, CARD_OFF_CLASS, FORCE_MOTION_CLASS, MARKER_CLASS, MOTION_CLASS, STILL_CLASS, THEME_COLORS, LEGACY_CARD_CLASS } from "./catalog";
-import type { FantasyEaselSettings, Look } from "./settings";
+import { ACCENT_CLASS, backgroundById, CARD_OFF_CLASS, CSS_BG, FORCE_MOTION_CLASS, MARKER_CLASS, MOTION_CLASS, STILL_CLASS, THEME_COLORS, LEGACY_CARD_CLASS } from "./catalog";
+import type { FantasyEaselSettings } from "./settings";
 
 /** Every body class Fantasy Easel may add or remove. Other body classes are never touched. */
-const MANAGED = new Set<string>([...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS]);
+const MANAGED = new Set<string>([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls!), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS]);
 /** Classes Style Settings also owns (its Fantasy group). */
-const THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.filter((b) => b.kind === "theme").map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
-const URL_VARS = ["--background-url1", "--background-url2", "--background-url3"] as const;
+const THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
+/** Your picture goes here as a body inline variable (beats the theme's Plasma and any class rule). */
+const URL_VAR = "--background-url";
+/** Variables older versions wrote inline; only removed. */
+const OLD_VARS = ["--background-url1", "--background-url2", "--background-url3"] as const;
 
 /** Classes the body should have for this look. */
 export function wantedClasses(s: FantasyEaselSettings): Set<string> {
-  const bg = backgroundById(s.look.background);
+  const bg = backgroundById(s.look.background, s.look.images);
   const out = new Set<string>([MARKER_CLASS, s.look.color]);
-  if (bg) out.add(bg.cls);
+  if (bg?.cls) out.add(bg.cls);
   if (bg?.kind === "motion") out.add(MOTION_CLASS);
   if (s.look.accent) out.add(ACCENT_CLASS);
   if (!s.look.card) out.add(CARD_OFF_CLASS);
@@ -54,12 +57,11 @@ export class Applier {
       if (want.has(c) && !has) { cl.add(c); changed++; }
       else if (!want.has(c) && has) { cl.remove(c); changed++; }
     }
-    URL_VARS.forEach((v, i) => {
-      const value = s.look.urls[i];
-      const now = this.body.style.getPropertyValue(v);
-      if (value && now !== value) { this.body.style.setProperty(v, value); changed++; }
-      else if (!value && now) { this.body.style.removeProperty(v); changed++; }
-    });
+    const value = backgroundById(s.look.background, s.look.images)?.url ?? "";
+    const now = this.body.style.getPropertyValue(URL_VAR);
+    if (value && now !== value) { this.body.style.setProperty(URL_VAR, value); changed++; }
+    else if (!value && now) { this.body.style.removeProperty(URL_VAR); changed++; }
+    for (const v of OLD_VARS) if (this.body.style.getPropertyValue(v)) { this.body.style.removeProperty(v); changed++; }
     this.observer?.takeRecords();
     if (changed) this.runs++;
     return changed;
@@ -81,25 +83,18 @@ export class Applier {
   }
 
   /**
-   * Hand the look back. Only Easel's own things are removed; if Style Settings is on, it
-   * re-applies its own values (with its own rules) on `parse-style-settings`.
+   * Hand the look back. Only Easel's own things are removed (the theme shows Plasma, still);
+   * if Style Settings is on, it re-applies its own values on `parse-style-settings`.
    */
-  detach(styleSettings: { enabled: boolean; look: Look | null; trigger: () => void }) {
+  detach(styleSettings: { enabled: boolean; trigger: () => void }) {
     this.observer?.disconnect();
     this.observer = null;
     const cl = this.body.classList;
-    const usingCssBg = BACKGROUNDS.some((b) => b.kind !== "theme" && cl.contains(b.cls));
-    for (const b of BACKGROUNDS) if (b.kind !== "theme") cl.remove(b.cls);
+    for (const b of CSS_BG) cl.remove(b.cls!);
     cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS);
-    URL_VARS.forEach((v) => this.body.style.removeProperty(v));
-    if (styleSettings.enabled) {
-      // Avoid an empty background for the ~100ms until Style Settings re-applies.
-      const bg = styleSettings.look && backgroundById(styleSettings.look.background);
-      if (usingCssBg && bg) cl.add(bg.cls);
-      styleSettings.trigger();
-    } else {
-      // Same as "no Easel": nobody owns these classes now.
-      for (const c of THEME_GROUP) cl.remove(c);
-    }
+    for (const v of [URL_VAR, ...OLD_VARS]) this.body.style.removeProperty(v);
+    if (styleSettings.enabled) styleSettings.trigger();
+    // Same as "no Easel": nobody owns these classes now.
+    else for (const c of THEME_GROUP) cl.remove(c);
   }
 }

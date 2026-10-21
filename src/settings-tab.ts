@@ -1,5 +1,5 @@
 import { Menu, PluginSettingTab, Setting, type App } from "obsidian";
-import { backgroundById, colorByCls } from "./catalog";
+import { backgroundById, colorByCls, DEFAULT_BACKGROUND, newImageId, toCssUrl } from "./catalog";
 import type FantasyEaselPlugin from "./main";
 import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu } from "./menus";
@@ -14,6 +14,8 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
   }
 
   private queued = false;
+  /** after +: focus the new picture field once */
+  private focusLast = false;
 
   display() {
     // Subscribe once per open; store changes (here, status bar, commands) redraw via render().
@@ -48,30 +50,51 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
       .setDesc(colorByCls(look.color)?.name ?? look.color)
       .addButton((b) => b.setButtonText("Change").onClick((ev) => colorMenu(store).showAtMouseEvent(ev)));
 
-    const bg = backgroundById(look.background);
+    const bg = backgroundById(look.background, look.images);
     new Setting(containerEl)
       .setName("Background")
-      .setDesc(bg ? `${bg.name} (${bg.kind === "theme" ? "theme image" : `CSS · ${bg.kind}`})` : look.background)
+      .setDesc(bg ? `${bg.name} (${bg.kind === "image" ? "your picture" : `CSS · ${bg.kind}`})` : look.background)
       .addButton((b) => b.setButtonText("Gallery").onClick(() => new GalleryModal(this.app, store).open()))
       .addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
 
     new Setting(containerEl).setName("Theme accent").setDesc("Use the theme color as the accent.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
     new Setting(containerEl).setName("Card layout").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
 
-    look.urls.forEach((url, i) => {
-      new Setting(containerEl)
-        .setName(`Custom background URL ${i + 1}`)
-        .setDesc('CSS value, same as Style Settings: url("https://…"). Empty = theme default.')
-        .addText((t) => {
-          t.inputEl.type = "text";
-          t.setValue(url).setPlaceholder('url("…")');
-          // Save on blur so redraws do not steal focus while typing.
-          t.inputEl.addEventListener("change", () => {
-            const urls = [...store.settings.look.urls] as typeof look.urls;
-            urls[i] = t.getValue().trim();
-            store.setLook({ urls });
-          });
+    new Setting(containerEl)
+      .setName("Your pictures")
+      .setDesc('A picture URL (https://…) or a CSS value like url("…"). Add as many as you like with +.')
+      .setHeading()
+      .addExtraButton((b) => b.setIcon("plus").setTooltip("Add picture").onClick(() => {
+        store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] });
+        this.focusLast = true;
+      }));
+    look.images.forEach((img, i) => {
+      const id = `img-${img.id}`;
+      const usable = !!toCssUrl(img.src);
+      const row = new Setting(containerEl).setClass("fantasy-easel-picture").setName(`Picture ${i + 1}`);
+      row.addText((t) => {
+        t.setValue(img.src).setPlaceholder("https://…");
+        // Save on change (blur / Enter) so redraws do not steal focus while typing.
+        t.inputEl.addEventListener("change", () => {
+          const src = t.getValue().trim();
+          const images = store.settings.look.images.map((x) => (x.id === img.id ? { ...x, src } : x));
+          // An emptied picture cannot stay the background.
+          const patch = !src && store.settings.look.background === id ? { images, background: DEFAULT_BACKGROUND } : { images };
+          store.setLook(patch);
         });
+        if (this.focusLast && i === look.images.length - 1) {
+          this.focusLast = false;
+          window.setTimeout(() => t.inputEl.focus(), 0);
+        }
+      });
+      row.addButton((b) => {
+        b.setButtonText(look.background === id ? "In use" : "Use").setDisabled(!usable || look.background === id).onClick(() => store.setLook({ background: id }));
+        if (look.background === id) b.setCta();
+      });
+      row.addExtraButton((b) => b.setIcon("trash-2").setTooltip("Remove").onClick(() => {
+        const images = store.settings.look.images.filter((x) => x.id !== img.id);
+        store.setLook(store.settings.look.background === id ? { images, background: DEFAULT_BACKGROUND } : { images });
+      }));
     });
 
     new Setting(containerEl)

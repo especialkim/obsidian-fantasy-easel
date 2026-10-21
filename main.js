@@ -380,20 +380,16 @@ var THEME_COLORS = [
   { cls: "fantasy-theme-OrchidMagenta", name: "Orchid Magenta" },
   { cls: "fantasy-theme-Black", name: "Dark" }
 ];
-var themeBg = (key, name) => ({ id: key, name, kind: "theme", cls: `fantasy-theme-background-${key}` });
-var BACKGROUNDS = [
-  themeBg("none", "None"),
-  themeBg("paper", "Paper Texture"),
-  themeBg("newspaper", "News Texture"),
-  themeBg("beach", "Beach"),
-  themeBg("rainy", "Rainy"),
-  themeBg("snow", "Snow"),
-  themeBg("custom1", "Custom URL 1"),
-  themeBg("custom2", "Custom URL 2"),
-  themeBg("custom3", "Custom URL 3"),
-  // CSS backgrounds: src/backgrounds.ts is the source
-  ...CSS_BACKGROUNDS.map((b) => ({ id: `css-${b.key}`, name: b.name, kind: b.kind, palette: b.palette, cls: `fantasy-easel-bg-${b.key}` }))
-];
+var CSS_BG = CSS_BACKGROUNDS.map((b) => ({ id: `css-${b.key}`, name: b.name, kind: b.kind, palette: b.palette, cls: `fantasy-easel-bg-${b.key}` }));
+function toCssUrl(src) {
+  const s = src.trim();
+  if (!s) return "";
+  if (/^url\(/i.test(s)) return s;
+  return `url("${s.replace(/["\\]/g, "\\$&")}")`;
+}
+var imageBackgrounds = (images) => images.map((img, i) => ({ id: `img-${img.id}`, name: `Picture ${i + 1}`, kind: "image", url: toCssUrl(img.src) })).filter((b) => b.url);
+var allBackgrounds = (images) => [...CSS_BG, ...imageBackgrounds(images)];
+var newImageId = () => Math.random().toString(36).slice(2, 8);
 var ACCENT_CLASS = "fantasy-theme-accent";
 var CARD_OFF_CLASS = "fantasy-theme-card-off";
 var LEGACY_CARD_CLASS = "fantasy-theme-card-layout";
@@ -404,6 +400,7 @@ var MOTION_CLASS = "fantasy-easel-motion";
 var SS_SECTION = "Fantasy-theme-settings";
 var SS_KEYS = {
   color: "fantasy-theme",
+  /** removed from the theme (2026-10-21); read once to bring old custom pictures over */
   background: "fantasy-theme-background",
   accent: "fantasy-theme-accent",
   cardOff: "fantasy-theme-card-off",
@@ -412,20 +409,21 @@ var SS_KEYS = {
   url: ["background-url1", "background-url2", "background-url3"]
 };
 var THEME_DEFAULTS = {
-  color: "fantasy-theme-Black",
-  background: "custom3"
+  color: "fantasy-theme-Black"
 };
+var DEFAULT_BACKGROUND = "css-plasma";
 var colorByCls = (cls) => THEME_COLORS.find((c) => c.cls === cls);
-var backgroundById = (id) => BACKGROUNDS.find((b) => b.id === id);
+var backgroundById = (id, images = []) => allBackgrounds(images).find((b) => b.id === id);
 
 // src/apply.ts
-var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS]);
-var THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ...BACKGROUNDS.filter((b) => b.kind === "theme").map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
-var URL_VARS = ["--background-url1", "--background-url2", "--background-url3"];
+var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS]);
+var THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
+var URL_VAR = "--background-url";
+var OLD_VARS = ["--background-url1", "--background-url2", "--background-url3"];
 function wantedClasses(s) {
-  const bg = backgroundById(s.look.background);
+  const bg = backgroundById(s.look.background, s.look.images);
   const out = /* @__PURE__ */ new Set([MARKER_CLASS, s.look.color]);
-  if (bg) out.add(bg.cls);
+  if (bg?.cls) out.add(bg.cls);
   if (bg?.kind === "motion") out.add(MOTION_CLASS);
   if (s.look.accent) out.add(ACCENT_CLASS);
   if (!s.look.card) out.add(CARD_OFF_CLASS);
@@ -463,17 +461,19 @@ var Applier = class {
         changed++;
       }
     }
-    URL_VARS.forEach((v, i) => {
-      const value = s.look.urls[i];
-      const now = this.body.style.getPropertyValue(v);
-      if (value && now !== value) {
-        this.body.style.setProperty(v, value);
-        changed++;
-      } else if (!value && now) {
-        this.body.style.removeProperty(v);
-        changed++;
-      }
-    });
+    const value = backgroundById(s.look.background, s.look.images)?.url ?? "";
+    const now = this.body.style.getPropertyValue(URL_VAR);
+    if (value && now !== value) {
+      this.body.style.setProperty(URL_VAR, value);
+      changed++;
+    } else if (!value && now) {
+      this.body.style.removeProperty(URL_VAR);
+      changed++;
+    }
+    for (const v of OLD_VARS) if (this.body.style.getPropertyValue(v)) {
+      this.body.style.removeProperty(v);
+      changed++;
+    }
     this.observer?.takeRecords();
     if (changed) this.runs++;
     return changed;
@@ -492,24 +492,18 @@ var Applier = class {
     this.reconcile();
   }
   /**
-   * Hand the look back. Only Easel's own things are removed; if Style Settings is on, it
-   * re-applies its own values (with its own rules) on `parse-style-settings`.
+   * Hand the look back. Only Easel's own things are removed (the theme shows Plasma, still);
+   * if Style Settings is on, it re-applies its own values on `parse-style-settings`.
    */
   detach(styleSettings) {
     this.observer?.disconnect();
     this.observer = null;
     const cl = this.body.classList;
-    const usingCssBg = BACKGROUNDS.some((b) => b.kind !== "theme" && cl.contains(b.cls));
-    for (const b of BACKGROUNDS) if (b.kind !== "theme") cl.remove(b.cls);
+    for (const b of CSS_BG) cl.remove(b.cls);
     cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS);
-    URL_VARS.forEach((v) => this.body.style.removeProperty(v));
-    if (styleSettings.enabled) {
-      const bg = styleSettings.look && backgroundById(styleSettings.look.background);
-      if (usingCssBg && bg) cl.add(bg.cls);
-      styleSettings.trigger();
-    } else {
-      for (const c of THEME_GROUP) cl.remove(c);
-    }
+    for (const v of [URL_VAR, ...OLD_VARS]) this.body.style.removeProperty(v);
+    if (styleSettings.enabled) styleSettings.trigger();
+    else for (const c of THEME_GROUP) cl.remove(c);
   }
 };
 
@@ -521,9 +515,10 @@ var GROUPS = [
   { title: "Motion", desc: "Moves slowly. Pauses when the window is not focused.", pick: (b) => b.kind === "motion" }
 ];
 var GalleryModal = class extends import_obsidian2.Modal {
-  constructor(app, store) {
+  constructor(app, store, managePictures) {
     super(app);
     this.store = store;
+    this.managePictures = managePictures;
     this.unsubscribe = null;
   }
   onOpen() {
@@ -539,11 +534,11 @@ var GalleryModal = class extends import_obsidian2.Modal {
     head.createSpan({ text: "Day" });
     head.createSpan({ text: "Night" });
     for (const g of GROUPS) {
-      const section = root.createDiv({ cls: "fantasy-easel-gallery-group" });
-      section.createDiv({ cls: "fantasy-easel-gallery-title", text: g.title });
-      section.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: g.desc });
+      const section2 = root.createDiv({ cls: "fantasy-easel-gallery-group" });
+      section2.createDiv({ cls: "fantasy-easel-gallery-title", text: g.title });
+      section2.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: g.desc });
       for (const b of CSS_BACKGROUNDS.filter(g.pick)) {
-        const row = section.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": `css-${b.key}` } });
+        const row = section2.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": `css-${b.key}` } });
         const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
         label.createSpan({ text: b.name });
         const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
@@ -572,6 +567,39 @@ var GalleryModal = class extends import_obsidian2.Modal {
         }
       }
     }
+    const mine = imageBackgrounds(this.store.settings.look.images);
+    const section = root.createDiv({ cls: "fantasy-easel-gallery-group" });
+    section.createDiv({ cls: "fantasy-easel-gallery-title", text: "Your pictures" });
+    const desc = section.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: "Added in settings with +. Same picture in day and night." });
+    if (this.managePictures) {
+      const add = desc.createEl("button", { cls: "fantasy-easel-gallery-add", text: "Add picture" });
+      add.addEventListener("click", () => {
+        this.close();
+        this.managePictures?.();
+      });
+    }
+    for (const b of mine) {
+      const row = section.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": b.id } });
+      const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
+      label.createSpan({ text: b.name });
+      const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
+      (0, import_obsidian2.setIcon)(check, "check");
+      for (const side of ["day", "night"]) {
+        const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
+        const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
+        layer.style.setProperty("background-image", b.url);
+        const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
+        card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
+        card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
+        tile.addEventListener("click", () => this.store.setLook({ background: b.id }));
+        tile.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            this.store.setLook({ background: b.id });
+          }
+        });
+      }
+    }
     this.markCurrent();
     root.querySelector(".fantasy-easel-gallery-row.is-current")?.scrollIntoView({ block: "center" });
   }
@@ -588,7 +616,7 @@ var GalleryModal = class extends import_obsidian2.Modal {
 
 // src/menus.ts
 var import_obsidian3 = require("obsidian");
-var KIND_LABEL = { theme: "Theme images", static: "CSS \xB7 static", motion: "CSS \xB7 motion" };
+var KIND_LABEL = { static: "CSS \xB7 static", motion: "CSS \xB7 motion", image: "Your pictures" };
 function colorMenu(store) {
   const menu = new import_obsidian3.Menu();
   for (const c of THEME_COLORS) {
@@ -598,22 +626,27 @@ function colorMenu(store) {
   }
   return menu;
 }
-function backgroundMenu(store) {
+function backgroundMenu(store, managePictures) {
   const menu = new import_obsidian3.Menu();
-  for (const kind of ["theme", "static", "motion"]) {
-    if (kind !== "theme") menu.addSeparator();
+  const all = allBackgrounds(store.settings.look.images);
+  for (const kind of ["static", "motion", "image"]) {
+    const list = all.filter((b) => b.kind === kind);
+    if (kind === "image" && !list.length && !managePictures) continue;
+    if (kind !== "static") menu.addSeparator();
     menu.addItem((item) => item.setTitle(KIND_LABEL[kind]).setIsLabel(true));
-    for (const b of BACKGROUNDS.filter((b2) => b2.kind === kind)) {
+    for (const b of list) {
       menu.addItem(
         (item) => item.setTitle(b.name).setChecked(store.settings.look.background === b.id).onClick(() => store.setLook({ background: b.id }))
       );
     }
+    if (kind === "image" && managePictures) menu.addItem((item) => item.setTitle("Add picture\u2026").setIcon("plus").onClick(managePictures));
   }
   return menu;
 }
 function stepBackground(store, dir) {
-  const i = BACKGROUNDS.findIndex((b) => b.id === store.settings.look.background);
-  const next = BACKGROUNDS[(i + dir + BACKGROUNDS.length) % BACKGROUNDS.length];
+  const all = allBackgrounds(store.settings.look.images);
+  const i = all.findIndex((b) => b.id === store.settings.look.background);
+  const next = all[(i + dir + all.length) % all.length];
   store.setLook({ background: next.id });
 }
 
@@ -621,10 +654,10 @@ function stepBackground(store, dir) {
 var MOTIONS = ["auto", "on", "off"];
 var DEFAULT_LOOK = {
   color: THEME_DEFAULTS.color,
-  background: THEME_DEFAULTS.background,
+  background: DEFAULT_BACKGROUND,
   accent: false,
   card: true,
-  urls: ["", "", ""]
+  images: []
 };
 var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "auto", statusBar: true };
 var SS_DATA = (app) => `${app.vault.configDir}/plugins/obsidian-style-settings/data.json`;
@@ -642,31 +675,47 @@ async function readStyleSettingsLook(app) {
   }
   const get = (key) => raw[`${SS_SECTION}@@${key}`];
   const color = typeof get(SS_KEYS.color) === "string" && colorByCls(get(SS_KEYS.color)) ? get(SS_KEYS.color) : DEFAULT_LOOK.color;
-  const bgCls = get(SS_KEYS.background);
-  const bgId = typeof bgCls === "string" ? bgCls.replace("fantasy-theme-background-", "") : "";
-  const urls = SS_KEYS.url.map((k) => typeof get(k) === "string" ? get(k) : "");
+  const old = fromOldUrls(SS_KEYS.url.map((k) => get(k)), get(SS_KEYS.background));
   return {
     found,
     look: {
       color,
-      background: backgroundById(bgId) ? bgId : DEFAULT_LOOK.background,
+      background: old.background ?? DEFAULT_LOOK.background,
       accent: get(SS_KEYS.accent) === true,
       // new toggle = "card off"; else the old "card on" toggle; else the theme default (on)
       card: typeof get(SS_KEYS.cardOff) === "boolean" ? get(SS_KEYS.cardOff) !== true : typeof get(SS_KEYS.cardLegacy) === "boolean" ? get(SS_KEYS.cardLegacy) === true : true,
-      urls
+      images: old.images
     }
   };
 }
+function fromOldUrls(urls, chosen) {
+  const images = [];
+  let background;
+  const pick = typeof chosen === "string" ? chosen.replace("fantasy-theme-background-", "") : "";
+  urls.forEach((u, i) => {
+    if (typeof u !== "string" || !u.trim()) return;
+    const img = { id: newImageId(), src: u.trim() };
+    images.push(img);
+    if (pick === `custom${i + 1}`) background = `img-${img.id}`;
+  });
+  return { images, background };
+}
 function normalize(data) {
   const look = data?.look ?? {};
-  const urls = Array.isArray(look.urls) ? look.urls : [];
+  let images = Array.isArray(look.images) ? look.images.filter((x) => !!x && typeof x.id === "string" && typeof x.src === "string").map((x) => ({ id: x.id, src: x.src })) : [];
+  let background = typeof look.background === "string" ? look.background : "";
+  if (!Array.isArray(look.images) && Array.isArray(look.urls)) {
+    const old = fromOldUrls(look.urls, background);
+    images = old.images;
+    if (old.background) background = old.background;
+  }
   return {
     look: {
       color: typeof look.color === "string" && colorByCls(look.color) ? look.color : DEFAULT_LOOK.color,
-      background: typeof look.background === "string" && backgroundById(look.background) ? look.background : DEFAULT_LOOK.background,
+      background: backgroundById(background, images) ? background : DEFAULT_LOOK.background,
       accent: look.accent === true,
       card: look.card !== false,
-      urls: [0, 1, 2].map((i) => typeof urls[i] === "string" ? urls[i] : "")
+      images
     },
     motion: MOTIONS.includes(data?.motion) ? data.motion : "auto",
     statusBar: data?.statusBar !== false
@@ -681,6 +730,8 @@ var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
     this.plugin = plugin;
     this.unsubscribe = null;
     this.queued = false;
+    /** after +: focus the new picture field once */
+    this.focusLast = false;
   }
   display() {
     if (!this.unsubscribe) this.unsubscribe = this.plugin.store.subscribe(() => this.queueRender());
@@ -706,20 +757,39 @@ var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
       text: `While Fantasy Easel is on, it owns the Fantasy look. Changes made in Style Settings' Fantasy section are put back right away. Use "Import from Style Settings" below to take those values.`
     });
     new import_obsidian4.Setting(containerEl).setName("Theme color").setDesc(colorByCls(look.color)?.name ?? look.color).addButton((b) => b.setButtonText("Change").onClick((ev) => colorMenu(store).showAtMouseEvent(ev)));
-    const bg = backgroundById(look.background);
-    new import_obsidian4.Setting(containerEl).setName("Background").setDesc(bg ? `${bg.name} (${bg.kind === "theme" ? "theme image" : `CSS \xB7 ${bg.kind}`})` : look.background).addButton((b) => b.setButtonText("Gallery").onClick(() => new GalleryModal(this.app, store).open())).addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
+    const bg = backgroundById(look.background, look.images);
+    new import_obsidian4.Setting(containerEl).setName("Background").setDesc(bg ? `${bg.name} (${bg.kind === "image" ? "your picture" : `CSS \xB7 ${bg.kind}`})` : look.background).addButton((b) => b.setButtonText("Gallery").onClick(() => new GalleryModal(this.app, store).open())).addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
     new import_obsidian4.Setting(containerEl).setName("Theme accent").setDesc("Use the theme color as the accent.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
     new import_obsidian4.Setting(containerEl).setName("Card layout").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
-    look.urls.forEach((url, i) => {
-      new import_obsidian4.Setting(containerEl).setName(`Custom background URL ${i + 1}`).setDesc('CSS value, same as Style Settings: url("https://\u2026"). Empty = theme default.').addText((t) => {
-        t.inputEl.type = "text";
-        t.setValue(url).setPlaceholder('url("\u2026")');
+    new import_obsidian4.Setting(containerEl).setName("Your pictures").setDesc('A picture URL (https://\u2026) or a CSS value like url("\u2026"). Add as many as you like with +.').setHeading().addExtraButton((b) => b.setIcon("plus").setTooltip("Add picture").onClick(() => {
+      store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] });
+      this.focusLast = true;
+    }));
+    look.images.forEach((img, i) => {
+      const id = `img-${img.id}`;
+      const usable = !!toCssUrl(img.src);
+      const row = new import_obsidian4.Setting(containerEl).setClass("fantasy-easel-picture").setName(`Picture ${i + 1}`);
+      row.addText((t) => {
+        t.setValue(img.src).setPlaceholder("https://\u2026");
         t.inputEl.addEventListener("change", () => {
-          const urls = [...store.settings.look.urls];
-          urls[i] = t.getValue().trim();
-          store.setLook({ urls });
+          const src = t.getValue().trim();
+          const images = store.settings.look.images.map((x) => x.id === img.id ? { ...x, src } : x);
+          const patch = !src && store.settings.look.background === id ? { images, background: DEFAULT_BACKGROUND } : { images };
+          store.setLook(patch);
         });
+        if (this.focusLast && i === look.images.length - 1) {
+          this.focusLast = false;
+          window.setTimeout(() => t.inputEl.focus(), 0);
+        }
       });
+      row.addButton((b) => {
+        b.setButtonText(look.background === id ? "In use" : "Use").setDisabled(!usable || look.background === id).onClick(() => store.setLook({ background: id }));
+        if (look.background === id) b.setCta();
+      });
+      row.addExtraButton((b) => b.setIcon("trash-2").setTooltip("Remove").onClick(() => {
+        const images = store.settings.look.images.filter((x) => x.id !== img.id);
+        store.setLook(store.settings.look.background === id ? { images, background: DEFAULT_BACKGROUND } : { images });
+      }));
     });
     new import_obsidian4.Setting(containerEl).setName("Motion backgrounds").setDesc(`Auto follows the OS "reduce motion" setting${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? " (on here, so motion is paused)" : ""}. On moves anyway. All pause while the window is not focused.`).addButton((b) => b.setButtonText(motion === "auto" ? "Auto" : motion === "on" ? "On" : "Off").onClick((ev) => {
       const menu = new import_obsidian4.Menu();
@@ -739,10 +809,11 @@ var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
 var import_obsidian5 = require("obsidian");
 var TIP = { delay: 100, placement: "top" };
 var StatusBar = class {
-  constructor(app, plugin, store) {
+  constructor(app, plugin, store, managePictures) {
     this.app = app;
     this.plugin = plugin;
     this.store = store;
+    this.managePictures = managePictures;
     this.items = [];
     this.unsubscribe = null;
   }
@@ -762,11 +833,11 @@ var StatusBar = class {
     this.swatch = color.createSpan({ cls: "fantasy-easel-swatch" });
     this.colorName = color.createSpan({ cls: "fantasy-easel-sb-text" });
     (0, import_obsidian5.setIcon)(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left");
-    const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store)));
+    const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store, this.managePictures)));
     this.bgKind = bg.createSpan({ cls: "fantasy-easel-sb-kind" });
     this.bgName = bg.createSpan({ cls: "fantasy-easel-sb-text fantasy-easel-sb-bgname" });
     (0, import_obsidian5.setIcon)(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right");
-    (0, import_obsidian5.setIcon)(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store).open()), "layout-grid");
+    (0, import_obsidian5.setIcon)(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store, this.managePictures).open()), "layout-grid");
     this.accent = add("fantasy-easel-sb-toggle", "Theme accent on / off", () => this.store.setLook({ accent: !this.store.settings.look.accent }));
     (0, import_obsidian5.setIcon)(this.accent, "droplet");
     this.card = add("fantasy-easel-sb-toggle", "Card layout on / off", () => this.store.setLook({ card: !this.store.settings.look.card }));
@@ -793,7 +864,7 @@ var StatusBar = class {
     const color = colorByCls(look.color);
     this.swatch.className = `fantasy-easel-swatch ${look.color}`;
     this.colorName.setText(color?.name ?? look.color);
-    const bg = backgroundById(look.background);
+    const bg = backgroundById(look.background, look.images);
     this.bgName.setText(bg?.name ?? look.background);
     (0, import_obsidian5.setIcon)(this.bgKind, bg?.kind === "motion" ? "wind" : bg?.kind === "static" ? "palette" : "image");
     this.accent.toggleClass("is-on", look.accent);
@@ -844,14 +915,11 @@ var FantasyEaselPlugin = class extends import_obsidian6.Plugin {
   constructor() {
     super(...arguments);
     /** Menu builders, also for CLI checks (a Menu closes at once when the window has no focus). */
-    this.menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store) };
-    /** Style Settings' saved Fantasy look, for the hand-back on unload. */
-    this.ssLook = null;
+    this.menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.openSettings()) };
   }
   async onload() {
     const saved = await this.loadData();
     const ss = await readStyleSettingsLook(this.app);
-    this.ssLook = ss.found ? ss.look : null;
     const settings = saved ? normalize(saved) : { ...DEFAULT_SETTINGS, look: ss.look };
     this.store = new Store(settings, (s) => this.saveData(s));
     if (!saved) await this.saveData(settings);
@@ -859,7 +927,7 @@ var FantasyEaselPlugin = class extends import_obsidian6.Plugin {
     this.register(() => document.body.style.removeProperty("--fantasy-easel-delay"));
     this.applier = new Applier(document.body, () => this.store.settings);
     this.applier.attach();
-    this.statusBar = new StatusBar(this.app, this, this.store);
+    this.statusBar = new StatusBar(this.app, this, this.store, () => this.openSettings());
     if (settings.statusBar) this.statusBar.show();
     this.register(
       this.store.subscribe(() => {
@@ -871,7 +939,7 @@ var FantasyEaselPlugin = class extends import_obsidian6.Plugin {
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
     this.addCommand({ id: "next-background", name: "Next background", callback: () => stepBackground(this.store, 1) });
     this.addCommand({ id: "previous-background", name: "Previous background", callback: () => stepBackground(this.store, -1) });
-    this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => new GalleryModal(this.app, this.store).open() });
+    this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => new GalleryModal(this.app, this.store, () => this.openSettings()).open() });
     this.addCommand({ id: "import-style-settings", name: "Import from Style Settings", callback: () => void this.importFromStyleSettings() });
     this.app.workspace.onLayoutReady(() => this.applier.reconcile());
   }
@@ -881,14 +949,20 @@ var FantasyEaselPlugin = class extends import_obsidian6.Plugin {
     const plugins = this.app.plugins;
     this.applier.detach({
       enabled: !!plugins.plugins[STYLE_SETTINGS_ID],
-      look: this.ssLook,
       trigger: () => this.app.workspace.trigger("parse-style-settings")
     });
   }
+  /** Open this plugin's settings tab (to add pictures). */
+  openSettings() {
+    const setting = this.app.setting;
+    setting.open();
+    setting.openTabById(this.manifest.id);
+  }
   async importFromStyleSettings() {
     const ss = await readStyleSettingsLook(this.app);
-    this.ssLook = ss.found ? ss.look : null;
-    this.store.setLook(ss.look);
+    const have = new Set(this.store.settings.look.images.map((i) => i.src));
+    const images = [...this.store.settings.look.images, ...ss.look.images.filter((i) => !have.has(i.src))];
+    this.store.setLook({ color: ss.look.color, accent: ss.look.accent, card: ss.look.card, images });
     new import_obsidian6.Notice(ss.found ? "Fantasy Easel: imported from Style Settings." : "Fantasy Easel: no Style Settings values, used theme defaults.");
   }
 };

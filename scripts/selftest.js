@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Source checks (no Obsidian needed):
-// 1. catalog classes exist where they must (theme.css or generated styles.css); @settings covered
+// 1. catalog classes exist where they must (theme.css or generated styles.css); @settings covered;
+//    theme has no network resources and shows Plasma still (same picture as src/backgrounds.ts)
 // 2. plugin UI CSS and src/ (except picture data in backgrounds.ts) have no color literals (UI rule 1-1)
 // 3. the marker class alone changes nothing
 // 4. Store: re-subscribing listener does not loop
@@ -23,13 +24,23 @@ function loadTs(file) {
   new Function("module", "exports", "require", out)(mod, mod.exports, require);
   return mod.exports;
 }
-const { THEME_COLORS, BACKGROUNDS } = loadTs("src/catalog.ts");
-const { CSS_BACKGROUNDS } = loadTs("src/backgrounds.ts");
+const { THEME_COLORS, CSS_BG, DEFAULT_BACKGROUND, toCssUrl, allBackgrounds } = loadTs("src/catalog.ts");
+const { CSS_BACKGROUNDS, resolveHue } = loadTs("src/backgrounds.ts");
 
 // ---------- 1. classes ----------
 check(THEME_COLORS.length === 11, `theme colors: expected 11, got ${THEME_COLORS.length}`);
 for (const c of THEME_COLORS) check(new RegExp(`\\n\\.${c.cls} \\{`).test(theme), `theme.css has no .${c.cls}`);
-for (const b of BACKGROUNDS.filter((b) => b.kind === "theme")) check(theme.includes(`body.${b.cls} {`), `theme.css has no ${b.cls}`);
+// theme: no network resources, no background choice; Plasma still = Easel's Plasma base layer
+check(!/url\(\s*["']?https?:/.test(theme), "theme.css loads a network resource");
+check(!theme.includes("fantasy-theme-background"), "theme.css still has background classes");
+{
+  const plasma = CSS_BACKGROUNDS.find((b) => `css-${b.key}` === DEFAULT_BACKGROUND);
+  check(!!plasma, `default background ${DEFAULT_BACKGROUND} is not a CSS background`);
+  if (plasma) for (const [mode, side] of [["dark", "night"], ["light", "day"]]) {
+    const want = `body.theme-${mode} {\n\t--background-url: ${plasma[side].map((l) => resolveHue(l)).join(", ")};`;
+    check(theme.includes(want), `theme.css ${mode} background is not ${plasma.name} (${side}) from src/backgrounds.ts`);
+  }
+}
 for (const b of CSS_BACKGROUNDS) {
   check(styles.includes(`body.fantasy-easel.fantasy-easel-bg-${b.key} {`), `styles.css (generated) has no fantasy-easel-bg-${b.key}; run npm run build`);
   check(styles.includes(`--fantasy-easel-grad-${b.key}:`), `styles.css has no gradient for ${b.key}`);
@@ -41,11 +52,15 @@ for (const b of CSS_BACKGROUNDS) {
   // known invalid CSS: a circle radius must be a length (circle 30% makes the whole value invalid)
   for (const l of [...b.day, ...b.night, ...(b.motion && b.motion.over ? [...b.motion.over.day, ...b.motion.over.night] : [])]) check(!/circle [\d.]+%/.test(l), `${b.key}: "circle N%" is invalid CSS, use "ellipse X% Y%"`);
 }
-check(new Set(BACKGROUNDS.map((b) => b.id)).size === BACKGROUNDS.length, "background ids are unique");
+check(new Set(CSS_BG.map((b) => b.id)).size === CSS_BG.length, "background ids are unique");
+// your pictures: URL → CSS value, empty ones left out
+check(toCssUrl("https://a.b/c.png") === 'url("https://a.b/c.png")', "toCssUrl wraps a plain URL");
+check(toCssUrl('url("x")') === 'url("x")' && toCssUrl("  ") === "", "toCssUrl keeps url() and drops empty");
+check(allBackgrounds([{ id: "a", src: "" }, { id: "b", src: "https://x" }]).filter((b) => b.kind === "image").map((b) => b.id).join() === "img-b", "empty pictures are not backgrounds");
 const settings = theme.slice(theme.indexOf("/* @settings"), theme.indexOf("*/", theme.indexOf("/* @settings")));
 const values = [...settings.matchAll(/value: (fantasy-theme-[A-Za-z0-9-]+)/g)].map((m) => m[1]);
-for (const v of values) check(BACKGROUNDS.some((b) => b.cls === v) || THEME_COLORS.some((c) => c.cls === v), `@settings value ${v} not in catalog`);
-for (const id of ["fantasy-theme-accent", "fantasy-theme-card-off", "background-url1", "background-url2", "background-url3"]) check(settings.includes(`id: ${id}`), `@settings has no ${id}`);
+for (const v of values) check(THEME_COLORS.some((c) => c.cls === v), `@settings value ${v} not in catalog`);
+for (const id of ["fantasy-theme", "fantasy-theme-accent", "fantasy-theme-card-off"]) check(settings.includes(`id: ${id}`), `@settings has no ${id}`);
 
 // ---------- 2. color literals ----------
 const lit = /#[0-9a-fA-F]{3,8}\b|\brgba?\(/;
@@ -130,5 +145,5 @@ for (const b of CSS_BACKGROUNDS) {
 }
 if (process.argv.includes("--contrast")) console.log(report.join("  "));
 
-console.log(fail ? `${fail} failed` : `ok: ${THEME_COLORS.length} colors, ${BACKGROUNDS.length - CSS_BACKGROUNDS.length} theme backgrounds, ${CSS_BACKGROUNDS.length} CSS backgrounds, contrast >= 4.5`);
+console.log(fail ? `${fail} failed` : `ok: ${THEME_COLORS.length} colors, ${CSS_BACKGROUNDS.length} CSS backgrounds (theme: ${DEFAULT_BACKGROUND}), contrast >= 4.5`);
 process.exit(fail ? 1 : 0);

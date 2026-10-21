@@ -1,8 +1,8 @@
 import { Menu } from "obsidian";
-import { BACKGROUNDS, THEME_COLORS } from "./catalog";
+import { allBackgrounds, THEME_COLORS } from "./catalog";
 import type { Store } from "./store";
 
-const KIND_LABEL = { theme: "Theme images", static: "CSS · static", motion: "CSS · motion" } as const;
+const KIND_LABEL = { static: "CSS · static", motion: "CSS · motion", image: "Your pictures" } as const;
 
 /** Theme color list. Same menu from the status bar and the settings tab. */
 export function colorMenu(store: Store): Menu {
@@ -18,13 +18,16 @@ export function colorMenu(store: Store): Menu {
   return menu;
 }
 
-/** Background list grouped by kind (theme images, CSS static, CSS motion). */
-export function backgroundMenu(store: Store): Menu {
+/** Background list grouped by kind (CSS static, CSS motion, your pictures). */
+export function backgroundMenu(store: Store, managePictures?: () => void): Menu {
   const menu = new Menu();
-  for (const kind of ["theme", "static", "motion"] as const) {
-    if (kind !== "theme") menu.addSeparator();
+  const all = allBackgrounds(store.settings.look.images);
+  for (const kind of ["static", "motion", "image"] as const) {
+    const list = all.filter((b) => b.kind === kind);
+    if (kind === "image" && !list.length && !managePictures) continue;
+    if (kind !== "static") menu.addSeparator();
     menu.addItem((item) => item.setTitle(KIND_LABEL[kind]).setIsLabel(true));
-    for (const b of BACKGROUNDS.filter((b) => b.kind === kind)) {
+    for (const b of list) {
       menu.addItem((item) =>
         item
           .setTitle(b.name)
@@ -32,13 +35,15 @@ export function backgroundMenu(store: Store): Menu {
           .onClick(() => store.setLook({ background: b.id })),
       );
     }
+    if (kind === "image" && managePictures) menu.addItem((item) => item.setTitle("Add picture…").setIcon("plus").onClick(managePictures));
   }
   return menu;
 }
 
-/** Next / previous background in catalog order (wraps). */
+/** Next / previous background in menu order (wraps). */
 export function stepBackground(store: Store, dir: 1 | -1) {
-  const i = BACKGROUNDS.findIndex((b) => b.id === store.settings.look.background);
-  const next = BACKGROUNDS[(i + dir + BACKGROUNDS.length) % BACKGROUNDS.length];
+  const all = allBackgrounds(store.settings.look.images);
+  const i = all.findIndex((b) => b.id === store.settings.look.background);
+  const next = all[(i + dir + all.length) % all.length];
   store.setLook({ background: next.id });
 }

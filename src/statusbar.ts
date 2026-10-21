@@ -23,7 +23,7 @@ export class StatusBar {
   private card!: HTMLElement;
   private still!: HTMLElement;
 
-  constructor(private app: App, private plugin: Plugin, private store: Store) {}
+  constructor(private app: App, private plugin: Plugin, private store: Store, private managePictures: () => void) {}
 
   show() {
     if (this.items.length) return;
@@ -43,11 +43,11 @@ export class StatusBar {
     this.colorName = color.createSpan({ cls: "fantasy-easel-sb-text" });
 
     setIcon(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left");
-    const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store)));
+    const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store, this.managePictures)));
     this.bgKind = bg.createSpan({ cls: "fantasy-easel-sb-kind" });
     this.bgName = bg.createSpan({ cls: "fantasy-easel-sb-text fantasy-easel-sb-bgname" });
     setIcon(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right");
-    setIcon(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store).open()), "layout-grid");
+    setIcon(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store, this.managePictures).open()), "layout-grid");
 
     this.accent = add("fantasy-easel-sb-toggle", "Theme accent on / off", () => this.store.setLook({ accent: !this.store.settings.look.accent }));
     setIcon(this.accent, "droplet");
@@ -79,7 +79,7 @@ export class StatusBar {
     // The theme color class on the swatch gives it that color's --fantasy-hue (theme.css).
     this.swatch.className = `fantasy-easel-swatch ${look.color}`;
     this.colorName.setText(color?.name ?? look.color);
-    const bg = backgroundById(look.background);
+    const bg = backgroundById(look.background, look.images);
     this.bgName.setText(bg?.name ?? look.background);
     setIcon(this.bgKind, bg?.kind === "motion" ? "wind" : bg?.kind === "static" ? "palette" : "image");
     this.accent.toggleClass("is-on", look.accent);
