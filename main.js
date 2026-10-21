@@ -1391,6 +1391,7 @@ function normalize(data) {
 
 // src/settings-tab.ts
 var import_obsidian4 = require("obsidian");
+var FANTASY_URL = "https://github.com/especialkim/obsidian-theme-fantasy";
 var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
@@ -1419,6 +1420,10 @@ var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
     const { look, motion, statusBar, skins } = store.settings;
     containerEl.empty();
     containerEl.addClass("fantasy-easel-settings");
+    if (!this.plugin.active) {
+      this.renderNoTheme();
+      return;
+    }
     const heading = (name, desc) => {
       const h = new import_obsidian4.Setting(containerEl).setName(name).setHeading();
       if (desc) h.setDesc(desc);
@@ -1473,6 +1478,16 @@ var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
     }
     heading("Controls");
     new import_obsidian4.Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls: theme color, background, gallery, accent, cards, motion.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
+  }
+  /** Without the Fantasy theme: what this plugin is and where to get the theme. Nothing to set. */
+  renderNoTheme() {
+    const { containerEl } = this;
+    new import_obsidian4.Setting(containerEl).setName("Fantasy Easel").setHeading();
+    containerEl.createEl("p", {
+      cls: "setting-item-description",
+      text: "Fantasy Easel is the companion of the Fantasy theme. With Fantasy it sets the theme color, accent, card layout, CSS and media-art backgrounds (still or moving), your own pictures and plugin skins, with quick status bar controls. With any other theme it does nothing."
+    });
+    new import_obsidian4.Setting(containerEl).setName("Fantasy theme is not in use").setDesc("Install Fantasy, then choose it in Settings \u2192 Appearance \u2192 Themes. These settings appear once Fantasy is active.").addButton((b) => b.setButtonText("Get Fantasy").setCta().onClick(() => window.open(FANTASY_URL)));
   }
   hide() {
     this.unsubscribe?.();
@@ -1622,12 +1637,36 @@ var FantasyEaselPlugin = class extends import_obsidian7.Plugin {
   constructor() {
     super(...arguments);
     this.stage = new StageHost();
+    /** True while the Fantasy theme is the current theme. Otherwise the plugin stays idle. */
+    this.active = false;
     /** Menu builders, also for CLI checks (a Menu closes at once when the window has no focus). */
     this.menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.addPicture()) };
   }
   syncStage() {
     const { look } = this.store.settings;
     this.stage.sync(backgroundById(look.background, look.images)?.stage);
+  }
+  /** Public check: the Fantasy theme defines --fantasy-hue on body (theme.css "Theme - Colors"). */
+  isFantasy() {
+    return getComputedStyle(document.body).getPropertyValue("--fantasy-hue").trim() !== "";
+  }
+  /** Follow the current theme: work with Fantasy, step back fully with any other theme. */
+  refresh() {
+    const on = this.isFantasy();
+    if (on !== this.active) {
+      this.active = on;
+      if (on) this.applier.attach();
+      else this.applier.detach();
+    }
+    if (on) {
+      this.applier.reconcile();
+      this.syncStage();
+      if (this.store.settings.statusBar) this.statusBar.show();
+      else this.statusBar.hide();
+    } else {
+      this.stage.remove();
+      this.statusBar.hide();
+    }
   }
   async onload() {
     const saved = await this.loadData();
@@ -1637,36 +1676,26 @@ var FantasyEaselPlugin = class extends import_obsidian7.Plugin {
     document.body.setCssProps({ "--fantasy-easel-delay": `-${Math.round(Math.random() * 600)}s` });
     this.register(() => document.body.setCssProps({ "--fantasy-easel-delay": "" }));
     this.applier = new Applier(document.body, () => this.store.settings);
-    this.applier.attach();
-    this.syncStage();
     this.statusBar = new StatusBar(this.app, this, this.store, () => this.addPicture());
-    if (settings.statusBar) this.statusBar.show();
-    this.register(
-      this.store.subscribe(() => {
-        this.applier.reconcile();
-        this.syncStage();
-        if (this.store.settings.statusBar) this.statusBar.show();
-        else this.statusBar.hide();
-      })
-    );
+    this.refresh();
+    this.register(this.store.subscribe(() => this.refresh()));
+    this.registerEvent(this.app.workspace.on("css-change", () => this.refresh()));
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
     this.registerObsidianProtocolHandler("fantasy-easel", () => this.openGallery());
     this.addCommand({ id: "next-background", name: "Next background", callback: () => stepBackground(this.store, 1) });
     this.addCommand({ id: "previous-background", name: "Previous background", callback: () => stepBackground(this.store, -1) });
     this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => this.openGallery() });
     this.addCommand({ id: "add-picture", name: "Add picture", callback: () => this.addPicture() });
-    this.app.workspace.onLayoutReady(() => {
-      this.applier.reconcile();
-      this.syncStage();
-    });
+    this.app.workspace.onLayoutReady(() => this.refresh());
   }
   onunload() {
     this.store.flush();
     this.statusBar.hide();
-    this.applier.detach();
+    if (this.active) this.applier.detach();
     this.stage.remove();
   }
   openGallery() {
+    if (!this.active) return void new import_obsidian7.Notice("Fantasy Easel works with the Fantasy theme. Choose Fantasy in Settings \u2192 Appearance \u2192 Themes.");
     new GalleryModal(this.app, this.store, () => this.addPicture()).open();
   }
   addPicture() {

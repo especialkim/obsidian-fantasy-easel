@@ -12,6 +12,8 @@ The theme has no Style Settings options; everything is set here.
 
 Without this plugin the theme shows Dark color, the Plasma background (still) and card layout.
 
+With any other theme the plugin stays idle (no classes, no background, no status bar) and its settings only point to the Fantasy theme. It switches on by itself when Fantasy becomes the current theme.
+
 ## Install (manual)
 
 Copy `manifest.json`, `main.js` and `styles.css` into `<vault>/.obsidian/plugins/fantasy-easel/`, then turn on **Fantasy Easel** in Settings → Community plugins. Desktop only.

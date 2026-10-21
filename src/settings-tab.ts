@@ -6,6 +6,9 @@ import { backgroundMenu, colorMenu } from "./menus";
 import { MOTIONS } from "./settings";
 import { skinOn, SKINS } from "./skins";
 
+/** Where to get the theme (not in the community store yet). */
+const FANTASY_URL = "https://github.com/especialkim/obsidian-theme-fantasy";
+
 /** Sections: Look · Background · Your pictures · Plugin skins · Controls. Lists open as Obsidian Menus (same as the status bar). */
 export class FantasyEaselSettingTab extends PluginSettingTab {
   private unsubscribe: (() => void) | null = null;
@@ -40,6 +43,11 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     const { look, motion, statusBar, skins } = store.settings;
     containerEl.empty();
     containerEl.addClass("fantasy-easel-settings");
+
+    if (!this.plugin.active) {
+      this.renderNoTheme();
+      return;
+    }
 
     const heading = (name: string, desc?: string) => {
       const h = new Setting(containerEl).setName(name).setHeading();
@@ -127,6 +135,20 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     // ---------- Controls ----------
     heading("Controls");
     new Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls: theme color, background, gallery, accent, cards, motion.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
+  }
+
+  /** Without the Fantasy theme: what this plugin is and where to get the theme. Nothing to set. */
+  private renderNoTheme() {
+    const { containerEl } = this;
+    new Setting(containerEl).setName("Fantasy Easel").setHeading();
+    containerEl.createEl("p", {
+      cls: "setting-item-description",
+      text: "Fantasy Easel is the companion of the Fantasy theme. With Fantasy it sets the theme color, accent, card layout, CSS and media-art backgrounds (still or moving), your own pictures and plugin skins, with quick status bar controls. With any other theme it does nothing.",
+    });
+    new Setting(containerEl)
+      .setName("Fantasy theme is not in use")
+      .setDesc("Install Fantasy, then choose it in Settings → Appearance → Themes. These settings appear once Fantasy is active.")
+      .addButton((b) => b.setButtonText("Get Fantasy").setCta().onClick(() => window.open(FANTASY_URL)));
   }
 
   hide() {
