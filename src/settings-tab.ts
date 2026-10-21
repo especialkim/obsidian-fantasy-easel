@@ -4,8 +4,9 @@ import type FantasyEaselPlugin from "./main";
 import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu } from "./menus";
 import { MOTIONS } from "./settings";
+import { isInstalled, skinOn, SKINS } from "./skins";
 
-/** v0.1: lists open as Obsidian Menus (same as the status bar). Swatch grid / tiles come later. */
+/** Sections: Look · Background · Your pictures · Plugin skins · Controls. Lists open as Obsidian Menus (same as the status bar). */
 export class FantasyEaselSettingTab extends PluginSettingTab {
   private unsubscribe: (() => void) | null = null;
 
@@ -36,29 +37,46 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
   private render() {
     const { containerEl } = this;
     const store = this.plugin.store;
-    const { look, motion, statusBar } = store.settings;
+    const { look, motion, statusBar, skins } = store.settings;
     containerEl.empty();
     containerEl.addClass("fantasy-easel-settings");
 
-    containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "While Fantasy Easel is on, it owns the Fantasy look. Changes made in Style Settings' Fantasy section are put back right away. Use \"Import from Style Settings\" below to take those values.",
-    });
+    const heading = (name: string, desc?: string) => {
+      const h = new Setting(containerEl).setName(name).setHeading();
+      if (desc) h.setDesc(desc);
+      return h;
+    };
 
+    // ---------- Look ----------
+    heading("Look", "The Fantasy theme reads these. Without this plugin it shows Dark, Plasma (still) and cards.");
     new Setting(containerEl)
       .setName("Theme color")
       .setDesc(colorByCls(look.color)?.name ?? look.color)
       .addButton((b) => b.setButtonText("Change").onClick((ev) => colorMenu(store).showAtMouseEvent(ev)));
+    new Setting(containerEl).setName("Theme accent").setDesc("Accent from the theme: theme color in light mode, gold in dark mode. Off = Obsidian's accent color.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
+    new Setting(containerEl).setName("Card layout").setDesc("Sidebars and notes as floating glass cards.").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
 
+    // ---------- Background ----------
+    heading("Background");
     const bg = backgroundById(look.background, look.images);
     new Setting(containerEl)
       .setName("Background")
       .setDesc(bg ? `${bg.name} (${bg.kind === "image" ? "your picture" : `CSS · ${bg.kind}`})` : look.background)
       .addButton((b) => b.setButtonText("Gallery").onClick(() => new GalleryModal(this.app, store).open()))
       .addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
+    new Setting(containerEl)
+      .setName("Motion")
+      .setDesc(`For moving backgrounds. Auto follows the OS "reduce motion" setting${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? " (on here, so motion is paused)" : ""}. On moves anyway. `)
+      .addButton((b) => b.setButtonText(motion === "auto" ? "Auto" : motion === "on" ? "On" : "Off").onClick((ev) => {
+        const menu = new Menu();
+        for (const m of MOTIONS) menu.addItem((i) => i.setTitle(m === "auto" ? "Auto" : m === "on" ? "On" : "Off").setChecked(m === motion).onClick(() => store.set({ motion: m })));
+        menu.showAtMouseEvent(ev);
+      }));
 
-    new Setting(containerEl).setName("Theme accent").setDesc("Use the theme color as the accent.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
-    new Setting(containerEl).setName("Card layout").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
+    new Setting(containerEl)
+      .setName("Pause when unfocused")
+      .setDesc("Stop moving backgrounds while you work in another app (saves GPU). Off = keep moving.")
+      .addToggle((t) => t.setValue(this.plugin.store.settings.pauseUnfocused).onChange((v) => store.set({ pauseUnfocused: v })));
 
     new Setting(containerEl)
       .setName("Your pictures")
@@ -97,20 +115,19 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
       }));
     });
 
-    new Setting(containerEl)
-      .setName("Motion backgrounds")
-      .setDesc(`Auto follows the OS "reduce motion" setting${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? " (on here, so motion is paused)" : ""}. On moves anyway. All pause while the window is not focused.`)
-      .addButton((b) => b.setButtonText(motion === "auto" ? "Auto" : motion === "on" ? "On" : "Off").onClick((ev) => {
-        const menu = new Menu();
-        for (const m of MOTIONS) menu.addItem((i) => i.setTitle(m === "auto" ? "Auto" : m === "on" ? "On" : "Off").setChecked(m === motion).onClick(() => store.set({ motion: m })));
-        menu.showAtMouseEvent(ev);
-      }));
-    new Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls for trying looks.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
+    // ---------- Plugin skins ----------
+    heading("Plugin skins", "Extra CSS that fits a plugin to the Fantasy glass. Default: on when the plugin is installed.");
+    for (const s of SKINS) {
+      const installed = isInstalled(this.app, s.plugin);
+      new Setting(containerEl)
+        .setName(installed ? s.name : `${s.name} (not installed)`)
+        .setDesc(s.desc)
+        .addToggle((t) => t.setValue(skinOn(this.app, skins, s)).onChange((v) => store.set({ skins: { ...store.settings.skins, [s.id]: v } })));
+    }
 
-    new Setting(containerEl)
-      .setName("Import from Style Settings")
-      .setDesc("Take the Fantasy values saved in Style Settings.")
-      .addButton((b) => b.setButtonText("Import").onClick(() => void this.plugin.importFromStyleSettings()));
+    // ---------- Controls ----------
+    heading("Controls");
+    new Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls: theme color, background, gallery, accent, cards, motion, dark / light.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
   }
 
   hide() {

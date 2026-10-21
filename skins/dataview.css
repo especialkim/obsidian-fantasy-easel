@@ -1,0 +1,95 @@
+/* Fantasy Easel skin: Dataview. Moved from the Fantasy theme (2026-10-21). Uses theme variables only. */
+.block-language-dataview,
+.block-language-dataviewjs {
+	--dataview-radius: var(--blockquote-border-radius);
+	--p-spacing: 0;
+	--table-header-size: var(--table-text-size);
+}
+
+.block-language-dataviewjs h1,
+.block-language-dataviewjs h2,
+.block-language-dataviewjs h3,
+.block-language-dataviewjs h4,
+.block-language-dataviewjs h6 {
+	--p-spacing: var(--p-spacing-Orin);
+	margin-top: calc(var(--p-spacing) * 4);
+	margin-bottom: calc(var(--p-spacing) * 2);
+}
+
+.block-language-dataviewjs.node-insert-event table {
+	width: 100%
+}
+
+.table-view-table>thead>tr>th {
+	font-size: var(--table-header-size);
+}
+
+.block-language-dataviewjs.node-insert-event h4,
+.block-language-dataviewjs.node-insert-event .result-group,
+.block-language-dataviewjs.node-insert-event tbody,
+.block-language-dataview.node-insert-event tbody,
+.block-language-dataview.node-insert-event,
+ul.dataview.list-view-ul,
+.block-language-dataviewjs.node-insert-event ul.contains-task-list,
+.block-language-dataviewjs.node-insert-event p ul li a.internal-link {
+	font-size: 0.92rem;
+}
+
+.block-language-dataview.node-insert-event .dataview.dataview-container,
+.markdown-source-view .block-language-dataviewjs.node-insert-event .dataview.result-group,
+.block-language-dataviewjs.node-insert-event table,
+.block-language-dataviewjs.node-insert-event ul[dir="auto"],
+ul.dataview.list-view-ul {
+	background-color: var(--background-primary);
+	border-radius: var(--dataview-radius);
+}
+
+.block-language-dataviewjs.node-insert-event .task-list-item ul[dir="auto"] {
+	background-color: transparent;
+}
+
+.block-language-dataviewjs.node-insert-event h4 {
+	padding: 25px 0px 10px 0px !important;
+	color: var(--h2-color);
+	font-size: var(--h4-size);
+}
+
+.block-language-dataviewjs.node-insert-event ul,
+ul.dataview.list-view-ul {
+	padding: 0.5rem;
+}
+
+.block-language-dataviewjs.node-insert-event div>ul {
+	margin-block-start: 0;
+}
+
+.block-language-dataviewjs.node-insert-event tbody td {
+	font-size: inherit;
+}
+
+.is-live-preview .block-language-dataviewjs>p,
+.is-live-preview .block-language-dataviewjs>span {
+	line-height: 1.4;
+}
+
+.block-language-dataviewjs.node-insert-event>p:not(ul) {
+	background-color: var(--background-primary);
+}
+
+.markdown-source-view li.dataview.task-list-basic-item {
+	margin-inline-start: calc(var(--list-indent) * 2.2);
+}
+
+.markdown-preview-view .dataview.dataview-container>ul.contains-task-list {
+	padding-left: 0.5rem;
+}
+
+.markdown-source-view .dataview.result-group>ul.contains-task-list,
+.dataview.result-group {
+	padding: 0;
+}
+
+.markdown-source-view .dataview.result-group>ul.contains-task-list>li.dataview.task-list-item,
+.markdown-source-view .dataview.dataview-container>ul.contains-task-list>li.dataview.task-list-item {
+	margin-inline-start: 0;
+}

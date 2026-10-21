@@ -47,11 +47,11 @@ var CSS_BACKGROUNDS = [
       solid("hsl({H} 60% 92%)")
     ],
     night: [
-      blob("ellipse 70% 60%", "15% 20%", "hsl({H} 80% 34%)"),
-      blob("ellipse 60% 60%", "85% 25%", "hsl({H+50} 80% 30%)"),
-      blob("ellipse 70% 60%", "70% 90%", "hsl({H-50} 75% 28%)"),
-      blob("ellipse 60% 50%", "20% 85%", "hsl({H+120} 70% 26%)"),
-      solid("hsl({H} 45% 7%)")
+      blob("ellipse 70% 60%", "15% 20%", "hsl({H} 80% 56%)"),
+      blob("ellipse 60% 60%", "85% 25%", "hsl({H+50} 80% 56%)"),
+      blob("ellipse 70% 60%", "70% 90%", "hsl({H-50} 75% 56%)"),
+      blob("ellipse 60% 50%", "20% 85%", "hsl({H+120} 70% 56%)"),
+      solid("hsl({H} 45% 43.2%)")
     ]
   },
   {
@@ -64,8 +64,8 @@ var CSS_BACKGROUNDS = [
       "conic-gradient(from 210deg at 30% 40%, hsl({H} 85% 72%), hsl({H+40} 85% 76%), hsl({H+100} 80% 74%), hsl({H+180} 70% 78%), hsl({H} 85% 72%))"
     ],
     night: [
-      "linear-gradient(180deg, hsl({H} 50% 5% / 0.55), transparent 70%)",
-      "conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 30%), hsl({H+40} 75% 26%), hsl({H+100} 70% 24%), hsl({H+180} 60% 22%), hsl({H} 75% 30%))"
+      "linear-gradient(180deg, hsl({H} 50% 41.8% / 0.55), transparent 70%)",
+      "conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 56%), hsl({H+40} 75% 56%), hsl({H+100} 70% 56%), hsl({H+180} 60% 54.5%), hsl({H} 75% 56%))"
     ]
   },
   {
@@ -78,8 +78,8 @@ var CSS_BACKGROUNDS = [
       "linear-gradient(180deg, hsl({H+20} 70% 90%), hsl({H} 60% 84%))"
     ],
     night: [
-      "linear-gradient(100deg, transparent 8%, hsl({H+60} 85% 38% / 0.65) 24%, transparent 38%, hsl({H} 85% 36% / 0.6) 55%, transparent 70%, hsl({H-60} 80% 34% / 0.6) 85%, transparent 96%)",
-      "linear-gradient(180deg, hsl({H+20} 50% 6%), hsl({H} 45% 11%))"
+      "linear-gradient(100deg, transparent 8%, hsl({H+60} 85% 56% / 0.65) 24%, transparent 38%, hsl({H} 85% 56% / 0.6) 55%, transparent 70%, hsl({H-60} 80% 56% / 0.6) 85%, transparent 96%)",
+      "linear-gradient(180deg, hsl({H+20} 50% 42.5%), hsl({H} 45% 46.2%))"
     ]
   },
   {
@@ -88,7 +88,7 @@ var CSS_BACKGROUNDS = [
     kind: "static",
     palette: "theme",
     day: ["linear-gradient(160deg, hsl({H} 85% 78%) 0%, hsl({H+40} 85% 76%) 40%, hsl({H+90} 80% 80%) 75%, hsl({H+130} 70% 86%) 100%)"],
-    night: ["linear-gradient(160deg, hsl({H} 75% 34%) 0%, hsl({H+40} 72% 28%) 40%, hsl({H+90} 70% 26%) 75%, hsl({H+130} 65% 22%) 100%)"]
+    night: ["linear-gradient(160deg, hsl({H} 75% 56%) 0%, hsl({H+40} 72% 56%) 40%, hsl({H+90} 70% 56%) 75%, hsl({H+130} 65% 54.5%) 100%)"]
   },
   // ---------- fixed palettes ----------
   {
@@ -102,8 +102,8 @@ var CSS_BACKGROUNDS = [
     ],
     night: [
       blob("ellipse 16% 28%", "80% 18%", "rgb(190 205 255 / 0.45)", 70),
-      blob("ellipse 80% 40%", "50% 100%", "rgb(200 80 160 / 0.5)", 70),
-      "linear-gradient(180deg, #1b2a72 0%, #2c2a8c 40%, #55308e 70%, #7a3478 100%)"
+      blob("ellipse 80% 40%", "50% 100%", "rgb(201 84 162 / 0.5)", 70),
+      "linear-gradient(180deg, #4a61d4 0%, #5552cb 40%, #8357c6 70%, #bc62b9 100%)"
     ]
   },
   {
@@ -119,10 +119,10 @@ var CSS_BACKGROUNDS = [
       solid("#b5dde6")
     ],
     night: [
-      blob("ellipse 60% 40%", "30% 35%", "rgb(25 230 140 / 0.55)", 65),
+      blob("ellipse 60% 40%", "30% 35%", "rgb(53 233 154 / 0.55)", 65),
       blob("ellipse 55% 45%", "70% 30%", "rgb(122 60 255 / 0.5)", 65),
-      blob("ellipse 70% 35%", "50% 78%", "rgb(0 194 255 / 0.35)", 65),
-      solid("#04060f")
+      blob("ellipse 70% 35%", "50% 78%", "rgb(31 201 255 / 0.35)", 65),
+      solid("#2c42a4")
     ]
   },
   {
@@ -132,28 +132,10 @@ var CSS_BACKGROUNDS = [
     palette: "fixed",
     day: ["conic-gradient(from 0deg at 50% 50%, #ff7fcf, #6fd0ff, #8ff07a, #ffd65c, #b48cff, #ff7fcf)"],
     night: [
-      blob("ellipse 45% 80%", "50% 50%", "rgb(4 2 12 / 0.75)", 75),
-      "conic-gradient(from 0deg at 50% 50%, #8a1166, #116a8a, #3a138a, #8a5a11, #8a1166)"
+      blob("ellipse 45% 80%", "50% 50%", "rgb(58 29 175 / 0.75)", 75),
+      "conic-gradient(from 0deg at 50% 50%, #e637b2, #37b8e6, #713ae4, #e6a137, #e637b2)"
     ]
   },
-  {
-    key: "grain",
-    name: "Paper / Ink",
-    kind: "static",
-    palette: "fixed",
-    day: [
-      blob("ellipse 80% 70%", "50% 45%", "rgb(255 255 255 / 0.6)", 75),
-      "repeating-linear-gradient(115deg, rgb(120 90 50 / 0.035) 0 2px, transparent 2px 6px)",
-      solid("#f3ead9")
-    ],
-    night: [
-      blob("ellipse 45% 55%", "20% 30%", "rgb(95 110 200 / 0.6)", 70),
-      blob("ellipse 40% 50%", "80% 70%", "rgb(150 90 170 / 0.5)", 70),
-      "repeating-linear-gradient(115deg, rgb(255 255 255 / 0.03) 0 2px, transparent 2px 6px)",
-      "linear-gradient(160deg, #46507a 0%, #3c4466 50%, #4a3c66 100%)"
-    ]
-  },
-  // ---------- new (2026-10-21): edge-to-edge, contrast target 5.0~6.0 ----------
   {
     key: "stained",
     name: "Stained Glass",
@@ -178,8 +160,8 @@ var CSS_BACKGROUNDS = [
       "repeating-radial-gradient(circle at 75% 25%, hsl({H} 85% 70%) 0 6%, hsl({H+50} 85% 78%) 6% 12%)"
     ],
     night: [
-      "repeating-radial-gradient(circle at 18% 80%, hsl({H+120} 80% 30% / 0.55) 0 4%, transparent 4% 9%)",
-      "repeating-radial-gradient(circle at 75% 25%, hsl({H} 80% 30%) 0 6%, hsl({H+50} 75% 22%) 6% 12%)"
+      "repeating-radial-gradient(circle at 18% 80%, hsl({H+120} 80% 56% / 0.55) 0 4%, transparent 4% 9%)",
+      "repeating-radial-gradient(circle at 75% 25%, hsl({H} 80% 56%) 0 6%, hsl({H+50} 75% 54.5%) 6% 12%)"
     ]
   },
   {
@@ -197,13 +179,13 @@ var CSS_BACKGROUNDS = [
       solid("#c8bdf0")
     ],
     night: [
-      blob("ellipse 45% 55%", "0% 0%", "#a0306e", 75),
-      blob("ellipse 45% 55%", "50% 0%", "#1d6f92", 75),
-      blob("ellipse 45% 55%", "100% 0%", "#4a7a1f", 75),
-      blob("ellipse 45% 55%", "0% 100%", "#4b2a9a", 75),
-      blob("ellipse 45% 55%", "50% 100%", "#9a5a1d", 75),
-      blob("ellipse 45% 55%", "100% 100%", "#1d7f6a", 75),
-      solid("#241a40")
+      blob("ellipse 45% 55%", "0% 0%", "#cb5295", 75),
+      blob("ellipse 45% 55%", "50% 0%", "#44adda", 75),
+      blob("ellipse 45% 55%", "100% 0%", "#8bd24c", 75),
+      blob("ellipse 45% 55%", "0% 100%", "#744fcf", 75),
+      blob("ellipse 45% 55%", "50% 100%", "#db8d42", 75),
+      blob("ellipse 45% 55%", "100% 100%", "#48d5b7", 75),
+      solid("#6a4eb7")
     ]
   },
   {
@@ -217,7 +199,7 @@ var CSS_BACKGROUNDS = [
     ],
     night: [
       blob("ellipse 60% 45%", "50% 100%", "rgb(255 140 90 / 0.4)", 70),
-      "repeating-conic-gradient(from 0deg at 50% 115%, #5e2a80 0deg 7deg, #4a2272 7deg 14deg, #74307a 14deg 21deg)"
+      "repeating-conic-gradient(from 0deg at 50% 115%, #9b56c8 0deg 7deg, #8f52cb 7deg 14deg, #b85ec0 14deg 21deg)"
     ]
   },
   {
@@ -231,9 +213,9 @@ var CSS_BACKGROUNDS = [
       "linear-gradient(160deg, hsl({H} 55% 84%), hsl({H+30} 50% 80%))"
     ],
     night: [
-      "linear-gradient(35deg, transparent 18%, hsl({H+40} 70% 36% / 0.75) 24%, transparent 30%, transparent 58%, hsl({H-30} 65% 34% / 0.7) 64%, transparent 70%)",
-      "linear-gradient(-20deg, transparent 30%, hsl({H+150} 65% 32% / 0.6) 38%, transparent 46%, transparent 76%, hsl({H} 75% 36% / 0.65) 82%, transparent 88%)",
-      "linear-gradient(160deg, hsl({H} 45% 17%), hsl({H+30} 40% 14%))"
+      "linear-gradient(35deg, transparent 18%, hsl({H+40} 70% 56% / 0.75) 24%, transparent 30%, transparent 58%, hsl({H-30} 65% 56% / 0.7) 64%, transparent 70%)",
+      "linear-gradient(-20deg, transparent 30%, hsl({H+150} 65% 56% / 0.6) 38%, transparent 46%, transparent 76%, hsl({H} 75% 56% / 0.65) 82%, transparent 88%)",
+      "linear-gradient(160deg, hsl({H} 45% 50.8%), hsl({H+30} 40% 48.5%))"
     ]
   },
   // ---------- motion (media art: two layers move apart and blend; 16~30s cycles) ----------
@@ -244,7 +226,7 @@ var CSS_BACKGROUNDS = [
     palette: "theme",
     motion: { parts: [{ frames: "tideX", seconds: 17 }, { frames: "pulseB", seconds: 23 }, { frames: "hue", seconds: 29 }] },
     day: ["linear-gradient(115deg, hsl({H} 75% 80%) 0%, hsl({H+30} 85% 70%) 25%, hsl({H-20} 90% 66%) 50%, hsl({H+30} 85% 70%) 75%, hsl({H} 75% 80%) 100%)"],
-    night: ["linear-gradient(115deg, hsl({H} 65% 14%) 0%, hsl({H+30} 70% 26%) 25%, hsl({H-20} 75% 36%) 50%, hsl({H+30} 70% 26%) 75%, hsl({H} 65% 14%) 100%)"]
+    night: ["linear-gradient(115deg, hsl({H} 65% 48.5%) 0%, hsl({H+30} 70% 56%) 25%, hsl({H-20} 75% 56%) 50%, hsl({H+30} 70% 56%) 75%, hsl({H} 65% 48.5%) 100%)"]
   },
   {
     key: "swell",
@@ -253,7 +235,7 @@ var CSS_BACKGROUNDS = [
     palette: "fixed",
     motion: { parts: [{ frames: "swellY", seconds: 15 }, { frames: "wanderC", seconds: 31 }, { frames: "pulse", seconds: 19 }] },
     day: ["linear-gradient(170deg, #9debff 0%, #5ad2ec 35%, #2fb6dc 65%, #3f9fe0 100%)"],
-    night: ["linear-gradient(170deg, #0f4766 0%, #11678a 35%, #0f84a0 65%, #2463ad 100%)"]
+    night: ["linear-gradient(170deg, #38a5e2 0%, #37b4e6 35%, #32c8ec 65%, #4589d8 100%)"]
   },
   {
     key: "iris",
@@ -262,7 +244,7 @@ var CSS_BACKGROUNDS = [
     palette: "theme",
     motion: { parts: [{ frames: "hueFull", seconds: 37, loop: true }, { frames: "wanderA", seconds: 41 }, { frames: "sway", seconds: 29 }] },
     day: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 85% 72%), hsl({H+60} 85% 74%), hsl({H+150} 80% 72%), hsl({H+240} 75% 74%), hsl({H} 85% 72%))"],
-    night: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 32%), hsl({H+60} 75% 28%), hsl({H+150} 70% 26%), hsl({H+240} 65% 28%), hsl({H} 75% 32%))"]
+    night: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 56%), hsl({H+60} 75% 56%), hsl({H+150} 70% 56%), hsl({H+240} 65% 56%), hsl({H} 75% 56%))"]
   },
   {
     key: "liquid",
@@ -295,10 +277,10 @@ var CSS_BACKGROUNDS = [
       solid("hsl({H+20} 70% 82%)")
     ],
     night: [
-      blob("ellipse 55% 60%", "25% 25%", "hsl({H} 85% 27%)", 70),
-      blob("ellipse 50% 55%", "80% 70%", "hsl({H+60} 85% 24%)", 70),
-      blob("ellipse 45% 50%", "70% 15%", "hsl({H+140} 80% 22%)", 70),
-      solid("hsl({H+20} 55% 11%)")
+      blob("ellipse 55% 60%", "25% 25%", "hsl({H} 85% 56%)", 70),
+      blob("ellipse 50% 55%", "80% 70%", "hsl({H+60} 85% 56%)", 70),
+      blob("ellipse 45% 50%", "70% 15%", "hsl({H+140} 80% 54.5%)", 70),
+      solid("hsl({H+20} 55% 46.2%)")
     ]
   },
   {
@@ -319,7 +301,7 @@ var CSS_BACKGROUNDS = [
       "linear-gradient(100deg, #b8f7dd 0%, #9ae6ff 30%, #d4c2ff 60%, #a9f0d0 100%)"
     ],
     night: [
-      "linear-gradient(100deg, #0b3a2c 0%, #0d2a55 30%, #2a1a5e 60%, #0d3d36 100%)"
+      "linear-gradient(100deg, #27ce9d 0%, #2c74df 30%, #6c4ece 60%, #2cceb6 100%)"
     ]
   },
   {
@@ -362,25 +344,699 @@ var CSS_BACKGROUNDS = [
       }
     },
     day: ["linear-gradient(160deg, #ffc58a 0%, #ff9b8a 40%, #ff86a8 75%, #ffb36b 100%)"],
-    night: ["linear-gradient(160deg, #3a0d06 0%, #5a1208 40%, #4a0820 75%, #5a2a06 100%)"]
+    night: ["linear-gradient(160deg, #db3117 0%, #eb3920 40%, #e61964 75%, #f0761a 100%)"]
   }
 ];
 
+// src/stages.ts
+var STAGES = [
+  {
+    key: "sunlit-canopy",
+    name: "Sunlit Canopy",
+    family: "ambient",
+    speed: 2.2,
+    morph: 0.4,
+    hue: 36,
+    blur: 24,
+    night: {
+      base: "linear-gradient(145deg, #1b4235 0%, #274a2b 50%, #193c42 100%)",
+      layers: [
+        "#389e6c",
+        "#c29632",
+        "#248e84",
+        "#6eb244"
+      ],
+      wave: "repeating-conic-gradient(from 15deg at 45% 45%, rgba(195, 220, 95, 0.36) 0deg 20deg, transparent 20deg 40deg, rgba(60, 190, 138, 0.36) 40deg 60deg, transparent 60deg 72deg)",
+      b2: "screen",
+      b3: "soft-light"
+    },
+    day: {
+      base: "linear-gradient(145deg, #88cfa8 0%, #b5db8c 50%, #7ec6b8 100%)",
+      layers: [
+        "#3eb27c",
+        "#ebb238",
+        "#32a29c",
+        "#72be3e"
+      ],
+      wave: "repeating-conic-gradient(from 15deg at 45% 45%, rgba(245, 200, 65, 0.42) 0deg 20deg, transparent 20deg 40deg, rgba(45, 165, 112, 0.4) 40deg 60deg, transparent 60deg 72deg)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "tidal-caustics",
+    name: "Tidal Caustics",
+    family: "ambient",
+    speed: 0.8,
+    morph: 1.3,
+    hue: 36,
+    blur: 45,
+    night: {
+      base: "linear-gradient(155deg, #173d56 0%, #1c3360 50%, #16484e 100%)",
+      layers: [
+        "#24a4b8",
+        "#3874d2",
+        "#26ba9e",
+        "#588ee6"
+      ],
+      wave: "repeating-radial-gradient(ellipse 40% 32% at 35% 60%, rgba(75, 220, 235, 0.42) 0 7%, transparent 7% 15%), repeating-radial-gradient(ellipse 34% 42% at 68% 36%, rgba(90, 155, 248, 0.38) 0 8%, transparent 8% 16%)",
+      b2: "screen",
+      b3: "soft-light"
+    },
+    day: {
+      base: "linear-gradient(155deg, #7dcde0 0%, #86b8ec 50%, #78d8c4 100%)",
+      layers: [
+        "#2698bc",
+        "#447cd6",
+        "#22b298",
+        "#52a2e2"
+      ],
+      wave: "repeating-radial-gradient(ellipse 40% 32% at 35% 60%, rgba(28, 140, 180, 0.4) 0 7%, transparent 7% 15%), repeating-radial-gradient(ellipse 34% 42% at 68% 36%, rgba(60, 110, 210, 0.36) 0 8%, transparent 8% 16%)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "alpine-mist",
+    name: "Alpine Mist",
+    family: "ambient",
+    speed: 0.63,
+    morph: 1.3,
+    hue: 36,
+    blur: 12,
+    night: {
+      base: "linear-gradient(165deg, #26384e 0%, #332e54 50%, #1e4246 100%)",
+      layers: [
+        "#4e88a0",
+        "#a6688a",
+        "#6a6eb8",
+        "#ca805e"
+      ],
+      wave: "repeating-linear-gradient(112deg, transparent 0 9%, rgba(165, 195, 225, 0.32) 9% 18%, transparent 18% 28%, rgba(220, 150, 170, 0.3) 28% 36%)",
+      b2: "screen",
+      b3: "soft-light"
+    },
+    day: {
+      base: "linear-gradient(165deg, #9abed8 0%, #b8b0e2 50%, #e4b8aa 100%)",
+      layers: [
+        "#5288b2",
+        "#d07492",
+        "#7672c2",
+        "#da8c62"
+      ],
+      wave: "repeating-linear-gradient(112deg, transparent 0 9%, rgba(80, 120, 170, 0.34) 9% 18%, transparent 18% 28%, rgba(190, 100, 130, 0.32) 28% 36%)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "polar-curtain",
+    name: "Polar Curtain",
+    family: "ambient",
+    speed: 0.63,
+    morph: 1.3,
+    hue: 36,
+    blur: 9,
+    night: {
+      base: "linear-gradient(135deg, #183a3e 0%, #222c58 50%, #3a2052 100%)",
+      layers: [
+        "#28c290",
+        "#8852e6",
+        "#24a0d0",
+        "#d44898"
+      ],
+      wave: "repeating-linear-gradient(82deg, transparent 0 6%, rgba(45, 225, 160, 0.46) 10% 17%, transparent 21% 29%, rgba(160, 95, 248, 0.44) 33% 40%, transparent 45% 52%)",
+      b2: "screen",
+      b3: "screen"
+    },
+    day: {
+      base: "linear-gradient(135deg, #86dec6 0%, #98c2f0 50%, #c6a8f0 100%)",
+      layers: [
+        "#20ac82",
+        "#7e52d2",
+        "#2690c6",
+        "#ce5098"
+      ],
+      wave: "repeating-linear-gradient(82deg, transparent 0 6%, rgba(22, 160, 115, 0.42) 10% 17%, transparent 21% 29%, rgba(120, 60, 210, 0.4) 33% 40%, transparent 45% 52%)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "bioluminescence",
+    name: "Bioluminescence",
+    family: "ambient",
+    speed: 0.9,
+    morph: 1.3,
+    hue: 36,
+    blur: 12,
+    night: {
+      base: "linear-gradient(150deg, #182b54 0%, #262156 50%, #153a4e 100%)",
+      layers: [
+        "#1ebdca",
+        "#d03c8e",
+        "#4c6ee2",
+        "#9048de"
+      ],
+      wave: "radial-gradient(circle at 32% 65%, rgba(40, 225, 220, 0.52) 0%, transparent 42%), radial-gradient(circle at 70% 34%, rgba(235, 70, 165, 0.5) 0%, transparent 42%)",
+      b2: "screen",
+      b3: "screen"
+    },
+    day: {
+      base: "linear-gradient(150deg, #88bce8 0%, #a2a8f0 50%, #80d4da 100%)",
+      layers: [
+        "#1aa0b6",
+        "#ce4894",
+        "#466ad2",
+        "#844cd6"
+      ],
+      wave: "radial-gradient(circle at 32% 65%, rgba(18, 150, 170, 0.46) 0%, transparent 42%), radial-gradient(circle at 70% 34%, rgba(200, 50, 135, 0.44) 0%, transparent 42%)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "mirage-oasis",
+    name: "Mirage Oasis",
+    family: "ambient",
+    speed: 0.9,
+    morph: 1.3,
+    hue: 36,
+    blur: 6,
+    night: {
+      base: "linear-gradient(160deg, #4c2820 0%, #4e2238 50%, #382252 100%)",
+      layers: [
+        "#d46836",
+        "#a0429c",
+        "#d04268",
+        "#dc983c"
+      ],
+      wave: "repeating-linear-gradient(22deg, transparent 0 8%, rgba(240, 150, 70, 0.38) 8% 16%, transparent 16% 26%, rgba(200, 80, 150, 0.36) 26% 34%)",
+      b2: "screen",
+      b3: "soft-light"
+    },
+    day: {
+      base: "linear-gradient(160deg, #edb482 0%, #ea9ca8 50%, #c89ee6 100%)",
+      layers: [
+        "#d26232",
+        "#9842a2",
+        "#ce446c",
+        "#da9432"
+      ],
+      wave: "repeating-linear-gradient(22deg, transparent 0 8%, rgba(200, 90, 30, 0.36) 8% 16%, transparent 16% 26%, rgba(160, 50, 130, 0.34) 26% 34%)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "liquid-dichroic",
+    name: "Liquid Dichroic",
+    family: "ambient",
+    speed: 0.9,
+    morph: 1.3,
+    hue: 36,
+    blur: 45,
+    night: {
+      base: "conic-gradient(from 40deg at 42% 48%, #224468, #4c2664, #642848, #205254, #224468)",
+      layers: [
+        "#2cb0d0",
+        "#cc4698",
+        "#824ee2",
+        "#d09c3c"
+      ],
+      wave: "conic-gradient(from 210deg at 58% 52%, rgba(45, 205, 225, 0.48), rgba(215, 75, 165, 0.48), rgba(225, 175, 65, 0.46), rgba(125, 85, 235, 0.48), rgba(45, 205, 225, 0.48))",
+      b2: "screen",
+      b3: "soft-light"
+    },
+    day: {
+      base: "conic-gradient(from 40deg at 42% 48%, #86c8ec, #c6a2f0, #f09ec2, #82dec8, #86c8ec)",
+      layers: [
+        "#2496bc",
+        "#c64896",
+        "#784cd6",
+        "#d29630"
+      ],
+      wave: "conic-gradient(from 210deg at 58% 52%, rgba(35, 165, 205, 0.45), rgba(205, 65, 155, 0.45), rgba(215, 155, 45, 0.42), rgba(115, 75, 215, 0.45), rgba(35, 165, 205, 0.45))",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "ink-in-water",
+    name: "Ink in Water",
+    family: "ambient",
+    speed: 0.9,
+    morph: 1.2,
+    hue: 45,
+    blur: 22,
+    night: {
+      base: "linear-gradient(145deg, #1f3458 0%, #3a2454 50%, #1c424a 100%)",
+      layers: [
+        "#3c7ee0",
+        "#c6428e",
+        "#28ae9a",
+        "#8c4ee8"
+      ],
+      wave: "radial-gradient(ellipse 46% 56% at 34% 38%, rgba(75, 145, 245, 0.5), transparent 64%), radial-gradient(ellipse 56% 44% at 68% 64%, rgba(225, 75, 155, 0.48), transparent 64%)",
+      b2: "screen",
+      b3: "soft-light"
+    },
+    day: {
+      base: "linear-gradient(145deg, #94bce8 0%, #caa8ec 50%, #8ad8cc 100%)",
+      layers: [
+        "#326cce",
+        "#c2408c",
+        "#229c8a",
+        "#824ace"
+      ],
+      wave: "radial-gradient(ellipse 46% 56% at 34% 38%, rgba(55, 115, 225, 0.46), transparent 64%), radial-gradient(ellipse 56% 44% at 68% 64%, rgba(205, 60, 140, 0.44), transparent 64%)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "solar-flare",
+    name: "Solar Flare",
+    family: "ambient",
+    speed: 0.9,
+    morph: 1.2,
+    hue: 45,
+    blur: 39,
+    night: {
+      base: "linear-gradient(155deg, #4e2024 0%, #481e3e 50%, #4c3018 100%)",
+      layers: [
+        "#e05832",
+        "#c03274",
+        "#e0922c",
+        "#9036a0"
+      ],
+      wave: "repeating-conic-gradient(from 0deg at 42% 56%, rgba(240, 115, 50, 0.42) 0deg 18deg, transparent 18deg 36deg, rgba(215, 55, 125, 0.4) 36deg 54deg, transparent 54deg 72deg)",
+      b2: "screen",
+      b3: "soft-light"
+    },
+    day: {
+      base: "linear-gradient(155deg, #f2a888 0%, #ee98b8 50%, #f0c27e 100%)",
+      layers: [
+        "#d8502c",
+        "#c23676",
+        "#da8c22",
+        "#8e3ca2"
+      ],
+      wave: "repeating-conic-gradient(from 0deg at 42% 56%, rgba(220, 85, 35, 0.4) 0deg 18deg, transparent 18deg 36deg, rgba(195, 45, 115, 0.38) 36deg 54deg, transparent 54deg 72deg)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "sakura-wind",
+    name: "Sakura Wind",
+    family: "ambient",
+    speed: 0.9,
+    morph: 1.2,
+    hue: 45,
+    blur: 14,
+    night: {
+      base: "linear-gradient(135deg, #44223a 0%, #30244e 50%, #442a2c 100%)",
+      layers: [
+        "#cc4e80",
+        "#8454cc",
+        "#d0724c",
+        "#369e94"
+      ],
+      wave: "repeating-linear-gradient(128deg, transparent 0 10%, rgba(230, 105, 155, 0.4) 10% 19%, transparent 19% 30%, rgba(155, 115, 235, 0.38) 30% 39%)",
+      b2: "screen",
+      b3: "soft-light"
+    },
+    day: {
+      base: "linear-gradient(135deg, #f0aec8 0%, #cab2f0 50%, #f2bea4 100%)",
+      layers: [
+        "#cc4c7e",
+        "#8052c8",
+        "#d2704a",
+        "#32a296"
+      ],
+      wave: "repeating-linear-gradient(128deg, transparent 0 10%, rgba(205, 75, 130, 0.38) 10% 19%, transparent 19% 30%, rgba(130, 85, 210, 0.36) 30% 39%)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "monsoon-dusk",
+    name: "Monsoon Dusk",
+    family: "ambient",
+    speed: 0.9,
+    morph: 1.2,
+    hue: 45,
+    blur: 12,
+    night: {
+      base: "linear-gradient(175deg, #1e2c52 0%, #322252 50%, #422040 100%)",
+      layers: [
+        "#2e90d0",
+        "#c03e82",
+        "#6e4ed0",
+        "#cc8036"
+      ],
+      wave: "repeating-linear-gradient(96deg, transparent 0 7%, rgba(95, 185, 245, 0.34) 7% 12%, transparent 12% 21%, rgba(225, 95, 165, 0.34) 21% 26%)",
+      b2: "screen",
+      b3: "soft-light"
+    },
+    day: {
+      base: "linear-gradient(175deg, #90b4e8 0%, #b4a0ea 50%, #e69ec0 100%)",
+      layers: [
+        "#287cbe",
+        "#bc3e7e",
+        "#6648ca",
+        "#ca7c2e"
+      ],
+      wave: "repeating-linear-gradient(96deg, transparent 0 7%, rgba(45, 135, 210, 0.34) 7% 12%, transparent 12% 21%, rgba(195, 65, 135, 0.34) 21% 26%)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "velvet-cosmos",
+    name: "Velvet Cosmos",
+    family: "ambient",
+    speed: 0.9,
+    morph: 1.2,
+    hue: 45,
+    blur: 18,
+    night: {
+      base: "conic-gradient(from 140deg at 50% 50%, #222c56, #3c2058, #4a2042, #1a3c4e, #222c56)",
+      layers: [
+        "#8648d4",
+        "#269eb0",
+        "#c04080",
+        "#cc8a3c"
+      ],
+      wave: "conic-gradient(from 290deg at 48% 52%, transparent 0deg, rgba(155, 95, 240, 0.46) 90deg, transparent 180deg, rgba(50, 195, 210, 0.46) 270deg, transparent 360deg)",
+      b2: "screen",
+      b3: "screen"
+    },
+    day: {
+      base: "conic-gradient(from 140deg at 50% 50%, #94b4ec, #c29ef0, #ee9ec4, #84d8d4, #94b4ec)",
+      layers: [
+        "#7c42ca",
+        "#208ea2",
+        "#bc3e7c",
+        "#c88632"
+      ],
+      wave: "conic-gradient(from 290deg at 48% 52%, transparent 0deg, rgba(125, 65, 215, 0.42) 90deg, transparent 180deg, rgba(35, 165, 185, 0.42) 270deg, transparent 360deg)",
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "paper-lanterns",
+    name: "Paper Lanterns",
+    family: "kinetic",
+    speed: 0.6,
+    morph: 1.3,
+    hue: 38,
+    blur: 8,
+    blurMult: [
+      0.7,
+      0.65,
+      0.45
+    ],
+    night: {
+      base: "linear-gradient(180deg, #1d2852 0%, #2e224c 52%, #3e2428 100%)",
+      layers: [
+        "radial-gradient(circle at 26% 32%, #e07838, transparent 48%), radial-gradient(circle at 72% 28%, #e8a23c, transparent 46%), radial-gradient(circle at 52% 68%, #d44c68, transparent 52%)",
+        "radial-gradient(circle at 64% 72%, rgba(240, 145, 60, 0.8), transparent 48%), radial-gradient(circle at 34% 64%, rgba(225, 85, 115, 0.76), transparent 48%), radial-gradient(circle at 48% 30%, rgba(90, 135, 235, 0.72), transparent 52%)",
+        "repeating-linear-gradient(0deg, transparent 0 7%, rgba(245, 175, 85, 0.36) 7% 13%, transparent 13% 21%, rgba(110, 155, 240, 0.32) 21% 27%)",
+        "radial-gradient(circle at 50% 50%, #e48c3c, transparent 56%)"
+      ],
+      b2: "screen",
+      b3: "overlay"
+    },
+    day: {
+      base: "linear-gradient(180deg, #92b4ec 0%, #bfa6ec 52%, #f2b49c 100%)",
+      layers: [
+        "radial-gradient(circle at 26% 32%, #e67e3e, transparent 48%), radial-gradient(circle at 72% 28%, #eea842, transparent 46%), radial-gradient(circle at 52% 68%, #dc5874, transparent 52%)",
+        "radial-gradient(circle at 64% 72%, rgba(215, 115, 38, 0.68), transparent 48%), radial-gradient(circle at 34% 64%, rgba(195, 65, 95, 0.65), transparent 48%), radial-gradient(circle at 48% 30%, rgba(65, 110, 210, 0.62), transparent 52%)",
+        "repeating-linear-gradient(0deg, transparent 0 7%, rgba(215, 135, 45, 0.36) 7% 13%, transparent 13% 21%, rgba(75, 115, 205, 0.32) 21% 27%)",
+        "radial-gradient(circle at 50% 50%, #ea9242, transparent 56%)"
+      ],
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "vapor-horizon",
+    name: "Vapor Horizon",
+    family: "kinetic",
+    speed: 0.4,
+    morph: 1.3,
+    hue: 38,
+    blur: 4,
+    blurMult: [
+      0.6,
+      0.55,
+      0.35
+    ],
+    night: {
+      base: "linear-gradient(165deg, #242258 0%, #481e48 52%, #4c2824 100%)",
+      layers: [
+        "linear-gradient(135deg, #24a8c8 0%, #7c44d8 36%, #d44288 68%, #e08238 100%)",
+        "radial-gradient(ellipse 58% 44% at 50% 62%, rgba(240, 125, 60, 0.82), transparent 62%), radial-gradient(ellipse 54% 46% at 48% 32%, rgba(45, 195, 225, 0.78), transparent 62%)",
+        "repeating-linear-gradient(162deg, transparent 0 8%, rgba(45, 215, 235, 0.4) 8% 14%, transparent 14% 24%, rgba(235, 85, 165, 0.4) 24% 30%)",
+        "radial-gradient(circle at 50% 50%, #d84c92, transparent 56%)"
+      ],
+      b2: "screen",
+      b3: "overlay"
+    },
+    day: {
+      base: "linear-gradient(165deg, #92b0f0 0%, #dca0dc 52%, #f4b494 100%)",
+      layers: [
+        "linear-gradient(135deg, #48bce0 0%, #9868e8 36%, #e664a4 68%, #f09852 100%)",
+        "radial-gradient(ellipse 58% 44% at 50% 62%, rgba(215, 95, 38, 0.65), transparent 62%), radial-gradient(ellipse 54% 46% at 48% 32%, rgba(35, 155, 195, 0.65), transparent 62%)",
+        "repeating-linear-gradient(162deg, transparent 0 8%, rgba(35, 155, 185, 0.36) 8% 14%, transparent 14% 24%, rgba(195, 60, 135, 0.36) 24% 30%)",
+        "radial-gradient(circle at 50% 50%, #e0589c, transparent 56%)"
+      ],
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "turrell-skyspace",
+    name: "Turrell Skyspace",
+    family: "kinetic",
+    speed: 1.15,
+    morph: 1.3,
+    hue: 38,
+    blur: 4,
+    blurMult: [
+      0.85,
+      0.8,
+      0.6
+    ],
+    night: {
+      base: "radial-gradient(ellipse 65% 58% at 50% 50%, #244868 0%, #382458 55%, #4a2436 100%)",
+      layers: [
+        "radial-gradient(ellipse 46% 42% at 50% 50%, #28a8b8 0%, #5c48c8 48%, transparent 74%)",
+        "radial-gradient(ellipse 62% 56% at 48% 52%, rgba(225, 105, 75, 0.78) 0%, rgba(175, 65, 145, 0.72) 45%, transparent 72%)",
+        "conic-gradient(from 0deg at 50% 50%, rgba(60, 205, 215, 0.42), rgba(225, 115, 85, 0.42), rgba(145, 85, 235, 0.42), rgba(60, 205, 215, 0.42))",
+        "radial-gradient(circle at 50% 50%, #32b4c4, transparent 52%)"
+      ],
+      b2: "screen",
+      b3: "soft-light"
+    },
+    day: {
+      base: "radial-gradient(ellipse 65% 58% at 50% 50%, #86cce8 0%, #baa4ec 55%, #eea4bc 100%)",
+      layers: [
+        "radial-gradient(ellipse 46% 42% at 50% 50%, #32b2c4 0%, #7260d8 48%, transparent 74%)",
+        "radial-gradient(ellipse 62% 56% at 48% 52%, rgba(215, 92, 62, 0.65) 0%, rgba(165, 58, 135, 0.62) 45%, transparent 72%)",
+        "conic-gradient(from 0deg at 50% 50%, rgba(40, 165, 180, 0.38), rgba(205, 95, 65, 0.38), rgba(125, 65, 205, 0.38), rgba(40, 165, 180, 0.38))",
+        "radial-gradient(circle at 50% 50%, #38b8c8, transparent 52%)"
+      ],
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "molten-dichro",
+    name: "Molten Dichro",
+    family: "kinetic",
+    speed: 0.9,
+    morph: 1.3,
+    hue: 38,
+    blur: 4,
+    blurMult: [
+      0.65,
+      0.6,
+      0.4
+    ],
+    night: {
+      base: "linear-gradient(145deg, #2c2438 0%, #1e383e 50%, #3e2822 100%)",
+      layers: [
+        "conic-gradient(from 60deg at 40% 50%, #c87442, #289894, #7c52b8, #c89848, #28749c, #c87442)",
+        "conic-gradient(from 240deg at 60% 50%, rgba(55, 195, 185, 0.78), rgba(225, 125, 75, 0.78), rgba(165, 105, 225, 0.75), rgba(55, 195, 185, 0.78))",
+        "repeating-linear-gradient(135deg, transparent 0 10%, rgba(245, 205, 155, 0.42) 10% 16%, transparent 16% 28%, rgba(115, 225, 215, 0.4) 28% 34%)",
+        "radial-gradient(circle at 45% 45%, #d08048, transparent 55%), radial-gradient(circle at 58% 58%, #2ca8a2, transparent 55%)"
+      ],
+      b2: "screen",
+      b3: "overlay"
+    },
+    day: {
+      base: "linear-gradient(145deg, #c2b0de 0%, #88d4d2 50%, #ecb89e 100%)",
+      layers: [
+        "conic-gradient(from 60deg at 40% 50%, #dc824e, #36aba6, #8c62c8, #dca852, #3886b0, #dc824e)",
+        "conic-gradient(from 240deg at 60% 50%, rgba(35, 155, 148, 0.65), rgba(205, 95, 48, 0.65), rgba(135, 75, 195, 0.62), rgba(35, 155, 148, 0.65))",
+        "repeating-linear-gradient(135deg, transparent 0 10%, rgba(195, 135, 75, 0.38) 10% 16%, transparent 16% 28%, rgba(45, 155, 148, 0.38) 28% 34%)",
+        "radial-gradient(circle at 45% 45%, #dc8852, transparent 55%), radial-gradient(circle at 58% 58%, #34b2ac, transparent 55%)"
+      ],
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "cathedral-rose",
+    name: "Cathedral Rose",
+    family: "kinetic",
+    speed: 0.25,
+    morph: 1.3,
+    hue: 38,
+    blur: 38,
+    blurMult: [
+      0.55,
+      0.5,
+      0.3
+    ],
+    night: {
+      base: "linear-gradient(145deg, #241d48 0%, #3d1d38 50%, #18364a 100%)",
+      layers: [
+        "repeating-conic-gradient(from 0deg at 36% 44%, #b83268 0deg 22deg, #2e6ec4 22deg 45deg, #249678 45deg 68deg, #c8822b 68deg 90deg)",
+        "repeating-conic-gradient(from 15deg at 64% 56%, rgba(135, 72, 215, 0.78) 0deg 25deg, transparent 25deg 50deg, rgba(215, 78, 120, 0.75) 50deg 75deg, transparent 75deg 100deg)",
+        "radial-gradient(circle at 50% 50%, rgba(245, 185, 90, 0.45), transparent 55%), repeating-linear-gradient(45deg, rgba(255,255,255,0.12) 0 4%, transparent 4% 12%)",
+        "radial-gradient(circle at 35% 35%, #d64a84, transparent 58%), radial-gradient(circle at 68% 65%, #3498b8, transparent 58%)"
+      ],
+      b2: "screen",
+      b3: "overlay"
+    },
+    day: {
+      base: "linear-gradient(145deg, #98b4ec 0%, #e6a4c4 50%, #86d8c8 100%)",
+      layers: [
+        "repeating-conic-gradient(from 0deg at 36% 44%, #e8689a 0deg 22deg, #5c9ce8 22deg 45deg, #4cc4a4 45deg 68deg, #f0ae54 68deg 90deg)",
+        "repeating-conic-gradient(from 15deg at 64% 56%, rgba(145, 92, 225, 0.65) 0deg 25deg, transparent 25deg 50deg, rgba(225, 88, 130, 0.65) 50deg 75deg, transparent 75deg 100deg)",
+        "radial-gradient(circle at 50% 50%, rgba(250, 200, 110, 0.5), transparent 55%), repeating-linear-gradient(45deg, rgba(60,40,90,0.12) 0 4%, transparent 4% 12%)",
+        "radial-gradient(circle at 35% 35%, #e26498, transparent 58%), radial-gradient(circle at 68% 65%, #46a8c8, transparent 58%)"
+      ],
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "origami-prism",
+    name: "Origami Prism",
+    family: "kinetic",
+    speed: 0.25,
+    morph: 1.3,
+    hue: 38,
+    blur: 18,
+    blurMult: [
+      0.4,
+      0.4,
+      0.25
+    ],
+    night: {
+      base: "linear-gradient(135deg, #1b3456 0%, #342254 50%, #1c444c 100%)",
+      layers: [
+        "linear-gradient(115deg, transparent 12%, rgba(45, 175, 215, 0.75) 13% 34%, transparent 35% 52%, rgba(165, 75, 225, 0.75) 53% 74%, transparent 75%)",
+        "linear-gradient(62deg, transparent 10%, rgba(220, 75, 148, 0.72) 11% 32%, transparent 33% 54%, rgba(45, 195, 165, 0.72) 55% 78%, transparent 79%)",
+        "repeating-linear-gradient(-38deg, rgba(120, 210, 250, 0.35) 0 6%, transparent 6% 15%, rgba(235, 125, 190, 0.35) 15% 21%, transparent 21% 30%)",
+        "conic-gradient(from 90deg at 50% 50%, #2a98c8, #8c4ce0, #d44c98, #28b298, #2a98c8)"
+      ],
+      b2: "screen",
+      b3: "overlay"
+    },
+    day: {
+      base: "linear-gradient(135deg, #8cc4ec 0%, #bca6f0 50%, #84dec8 100%)",
+      layers: [
+        "linear-gradient(115deg, transparent 12%, rgba(35, 145, 195, 0.65) 13% 34%, transparent 35% 52%, rgba(145, 65, 205, 0.65) 53% 74%, transparent 75%)",
+        "linear-gradient(62deg, transparent 10%, rgba(205, 65, 138, 0.62) 11% 32%, transparent 33% 54%, rgba(35, 165, 140, 0.62) 55% 78%, transparent 79%)",
+        "repeating-linear-gradient(-38deg, rgba(50, 130, 190, 0.3) 0 6%, transparent 6% 15%, rgba(190, 75, 145, 0.3) 15% 21%, transparent 21% 30%)",
+        "conic-gradient(from 90deg at 50% 50%, #48aae0, #9c6ce8, #e06ca8, #42c4a8, #48aae0)"
+      ],
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  },
+  {
+    key: "kaleidoscope-bloom",
+    name: "Kaleidoscope Bloom",
+    family: "kinetic",
+    speed: 0.2,
+    morph: 1.3,
+    hue: 38,
+    blur: 56,
+    blurMult: [
+      0.5,
+      0.45,
+      0.35
+    ],
+    night: {
+      base: "radial-gradient(circle at 50% 50%, #3a2252 0%, #1c3652 60%, #243e3c 100%)",
+      layers: [
+        "repeating-conic-gradient(from 0deg at 50% 50%, #26a89e 0deg 15deg, #8848d2 15deg 30deg, #d45278 30deg 45deg, #c89232 45deg 60deg)",
+        "repeating-radial-gradient(circle at 50% 50%, rgba(225, 95, 155, 0.65) 0 8%, transparent 8% 16%, rgba(55, 195, 205, 0.65) 16% 24%, transparent 24% 32%)",
+        "repeating-conic-gradient(from 30deg at 50% 50%, rgba(255, 210, 110, 0.42) 0deg 12deg, transparent 12deg 24deg)",
+        "radial-gradient(circle at 40% 40%, #28b8ac, transparent 55%), radial-gradient(circle at 60% 60%, #d45288, transparent 55%)"
+      ],
+      b2: "screen",
+      b3: "overlay"
+    },
+    day: {
+      base: "radial-gradient(circle at 50% 50%, #c8a8ec 0%, #8ec4ec 60%, #8adecc 100%)",
+      layers: [
+        "repeating-conic-gradient(from 0deg at 50% 50%, #38b8ae 0deg 15deg, #9862e0 15deg 30deg, #e2688c 30deg 45deg, #e0a642 45deg 60deg)",
+        "repeating-radial-gradient(circle at 50% 50%, rgba(195, 65, 130, 0.55) 0 8%, transparent 8% 16%, rgba(35, 155, 170, 0.55) 16% 24%, transparent 24% 32%)",
+        "repeating-conic-gradient(from 30deg at 50% 50%, rgba(215, 145, 40, 0.38) 0deg 12deg, transparent 12deg 24deg)",
+        "radial-gradient(circle at 40% 40%, #32b8ac, transparent 55%), radial-gradient(circle at 60% 60%, #dc6294, transparent 55%)"
+      ],
+      b2: "multiply",
+      b3: "soft-light"
+    }
+  }
+];
+function buildStage(parent, family) {
+  const stage = parent.createDiv({ cls: `fantasy-easel-stage fe-${family}` });
+  for (let i = 1; i <= 4; i++) stage.createDiv({ cls: `fe-l${i}` });
+  return stage;
+}
+var StageHost = class {
+  constructor() {
+    this.el = null;
+  }
+  sync(family) {
+    const host = document.querySelector(".app-container");
+    if (!family || !host) return this.remove();
+    if (!this.el || !this.el.isConnected) {
+      this.el?.remove();
+      this.el = buildStage(host, family);
+      host.prepend(this.el);
+    }
+    this.el.className = `fantasy-easel-stage fe-${family}`;
+  }
+  remove() {
+    this.el?.remove();
+    this.el = null;
+  }
+};
+
 // src/catalog.ts
 var THEME_COLORS = [
-  { cls: "fantasy-theme-MochaBrown", name: "Mocha Brown" },
-  { cls: "fantasy-theme-OceanTeal", name: "Ocean Teal" },
-  { cls: "fantasy-theme-MysticPurple", name: "Mystic Purple" },
+  { cls: "fantasy-theme-Black", name: "Dark" },
   { cls: "fantasy-theme-SkyBlue", name: "Sky Blue" },
+  { cls: "fantasy-theme-OceanTeal", name: "Ocean Teal" },
   { cls: "fantasy-theme-EmeraldGreen", name: "Emerald Green" },
-  { cls: "fantasy-theme-ForestGreen", name: "Forest Green" },
-  { cls: "fantasy-theme-TangerineOrange", name: "Tangerine Orange" },
-  { cls: "fantasy-theme-BurntSienna", name: "Burnt Sienna" },
-  { cls: "fantasy-theme-ChiliPepper", name: "Chili Pepper" },
-  { cls: "fantasy-theme-OrchidMagenta", name: "Orchid Magenta" },
-  { cls: "fantasy-theme-Black", name: "Dark" }
+  { cls: "fantasy-theme-MysticPurple", name: "Mystic Purple" },
+  { cls: "fantasy-theme-OrchidMagenta", name: "Orchid Magenta" }
 ];
-var CSS_BG = CSS_BACKGROUNDS.map((b) => ({ id: `css-${b.key}`, name: b.name, kind: b.kind, palette: b.palette, cls: `fantasy-easel-bg-${b.key}` }));
+var CSS_BG = [
+  ...CSS_BACKGROUNDS.map((b) => ({ id: `css-${b.key}`, name: b.name, kind: b.kind, palette: b.palette, cls: `fantasy-easel-bg-${b.key}` })),
+  ...STAGES.map((s) => ({ id: `css-${s.key}`, name: s.name, kind: "motion", palette: "fixed", cls: `fantasy-easel-bg-${s.key}`, stage: s.family }))
+];
 function toCssUrl(src) {
   const s = src.trim();
   if (!s) return "";
@@ -396,18 +1052,9 @@ var LEGACY_CARD_CLASS = "fantasy-theme-card-layout";
 var MARKER_CLASS = "fantasy-easel";
 var STILL_CLASS = "fantasy-easel-still";
 var FORCE_MOTION_CLASS = "fantasy-easel-force-motion";
+var PAUSE_UNFOCUSED_CLASS = "fantasy-easel-pause-unfocused";
+var STAGE_CLASS = "fantasy-easel-stage-on";
 var MOTION_CLASS = "fantasy-easel-motion";
-var SS_SECTION = "Fantasy-theme-settings";
-var SS_KEYS = {
-  color: "fantasy-theme",
-  /** removed from the theme (2026-10-21); read once to bring old custom pictures over */
-  background: "fantasy-theme-background",
-  accent: "fantasy-theme-accent",
-  cardOff: "fantasy-theme-card-off",
-  /** old toggle (on = card layout); read on import if the new one was never saved */
-  cardLegacy: "fantasy-theme-card-layout",
-  url: ["background-url1", "background-url2", "background-url3"]
-};
 var THEME_DEFAULTS = {
   color: "fantasy-theme-Black"
 };
@@ -416,7 +1063,7 @@ var colorByCls = (cls) => THEME_COLORS.find((c) => c.cls === cls);
 var backgroundById = (id, images = []) => allBackgrounds(images).find((b) => b.id === id);
 
 // src/apply.ts
-var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS]);
+var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS]);
 var THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
 var URL_VAR = "--background-url";
 var OLD_VARS = ["--background-url1", "--background-url2", "--background-url3"];
@@ -424,11 +1071,13 @@ function wantedClasses(s) {
   const bg = backgroundById(s.look.background, s.look.images);
   const out = /* @__PURE__ */ new Set([MARKER_CLASS, s.look.color]);
   if (bg?.cls) out.add(bg.cls);
-  if (bg?.kind === "motion") out.add(MOTION_CLASS);
+  if (bg?.stage) out.add(STAGE_CLASS);
+  else if (bg?.kind === "motion") out.add(MOTION_CLASS);
   if (s.look.accent) out.add(ACCENT_CLASS);
   if (!s.look.card) out.add(CARD_OFF_CLASS);
   if (s.motion === "off") out.add(STILL_CLASS);
   if (s.motion === "on") out.add(FORCE_MOTION_CLASS);
+  if (s.pauseUnfocused) out.add(PAUSE_UNFOCUSED_CLASS);
   return out;
 }
 var Applier = class {
@@ -491,19 +1140,15 @@ var Applier = class {
     }
     this.reconcile();
   }
-  /**
-   * Hand the look back. Only Easel's own things are removed (the theme shows Plasma, still);
-   * if Style Settings is on, it re-applies its own values on `parse-style-settings`.
-   */
-  detach(styleSettings) {
+  /** Remove everything Easel added; the theme shows its defaults (Dark, Plasma still, cards). */
+  detach() {
     this.observer?.disconnect();
     this.observer = null;
     const cl = this.body.classList;
     for (const b of CSS_BG) cl.remove(b.cls);
-    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS);
+    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS);
+    for (const c of THEME_GROUP) cl.remove(c);
     for (const v of [URL_VAR, ...OLD_VARS]) this.body.style.removeProperty(v);
-    if (styleSettings.enabled) styleSettings.trigger();
-    else for (const c of THEME_GROUP) cl.remove(c);
   }
 };
 
@@ -512,7 +1157,7 @@ var import_obsidian2 = require("obsidian");
 var GROUPS = [
   { title: "Theme color", desc: "Follows the theme color.", pick: (b) => b.kind === "static" && b.palette === "theme" },
   { title: "Fixed palette", desc: "Same colors with any theme color.", pick: (b) => b.kind === "static" && b.palette === "fixed" },
-  { title: "Motion", desc: "Moves slowly. Pauses when the window is not focused.", pick: (b) => b.kind === "motion" }
+  { title: "Motion", desc: "Moves slowly.", pick: (b) => b.kind === "motion" }
 ];
 var GalleryModal = class extends import_obsidian2.Modal {
   constructor(app, store, managePictures) {
@@ -562,6 +1207,36 @@ var GalleryModal = class extends import_obsidian2.Modal {
             if (ev.key === "Enter" || ev.key === " ") {
               ev.preventDefault();
               this.store.setLook({ background: `css-${b.key}` });
+            }
+          });
+        }
+      }
+    }
+    for (const [family, title, desc2] of [
+      ["ambient", "Stage \xB7 ambient", "Four layers of color fields and a texture, drifting and turning."],
+      ["kinetic", "Stage \xB7 kinetic", "Four layer pictures: glass, prism and light patterns that slide and turn."]
+    ]) {
+      const section2 = root.createDiv({ cls: "fantasy-easel-gallery-group" });
+      section2.createDiv({ cls: "fantasy-easel-gallery-title", text: title });
+      section2.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: desc2 });
+      for (const s of STAGES.filter((x) => x.family === family)) {
+        const id = `css-${s.key}`;
+        const row = section2.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": id } });
+        const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
+        label.createSpan({ text: s.name });
+        const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
+        (0, import_obsidian2.setIcon)(check, "check");
+        for (const side of ["day", "night"]) {
+          const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side} fantasy-easel-bg-${s.key}`, attr: { "aria-label": `${s.name} (${side})`, role: "button", tabindex: "0" } });
+          buildStage(tile, s.family);
+          const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
+          card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
+          card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
+          tile.addEventListener("click", () => this.store.setLook({ background: id }));
+          tile.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              this.store.setLook({ background: id });
             }
           });
         }
@@ -659,35 +1334,7 @@ var DEFAULT_LOOK = {
   card: true,
   images: []
 };
-var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "auto", statusBar: true };
-var SS_DATA = (app) => `${app.vault.configDir}/plugins/obsidian-style-settings/data.json`;
-async function readStyleSettingsLook(app) {
-  let raw = {};
-  let found = false;
-  try {
-    const path = SS_DATA(app);
-    if (await app.vault.adapter.exists(path)) {
-      raw = JSON.parse(await app.vault.adapter.read(path));
-      found = Object.keys(raw).some((k) => k.startsWith(`${SS_SECTION}@@`));
-    }
-  } catch (e) {
-    console.warn("[fantasy-easel] could not read Style Settings data", e);
-  }
-  const get = (key) => raw[`${SS_SECTION}@@${key}`];
-  const color = typeof get(SS_KEYS.color) === "string" && colorByCls(get(SS_KEYS.color)) ? get(SS_KEYS.color) : DEFAULT_LOOK.color;
-  const old = fromOldUrls(SS_KEYS.url.map((k) => get(k)), get(SS_KEYS.background));
-  return {
-    found,
-    look: {
-      color,
-      background: old.background ?? DEFAULT_LOOK.background,
-      accent: get(SS_KEYS.accent) === true,
-      // new toggle = "card off"; else the old "card on" toggle; else the theme default (on)
-      card: typeof get(SS_KEYS.cardOff) === "boolean" ? get(SS_KEYS.cardOff) !== true : typeof get(SS_KEYS.cardLegacy) === "boolean" ? get(SS_KEYS.cardLegacy) === true : true,
-      images: old.images
-    }
-  };
-}
+var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "auto", pauseUnfocused: false, statusBar: true, skins: {} };
 function fromOldUrls(urls, chosen) {
   const images = [];
   let background;
@@ -709,8 +1356,11 @@ function normalize(data) {
     images = old.images;
     if (old.background) background = old.background;
   }
+  const skins = {};
+  for (const [k, v] of Object.entries(data?.skins ?? {})) if (typeof v === "boolean") skins[k] = v;
   return {
     look: {
+      // a color dropped from the list falls back to Dark
       color: typeof look.color === "string" && colorByCls(look.color) ? look.color : DEFAULT_LOOK.color,
       background: backgroundById(background, images) ? background : DEFAULT_LOOK.background,
       accent: look.accent === true,
@@ -718,8 +1368,36 @@ function normalize(data) {
       images
     },
     motion: MOTIONS.includes(data?.motion) ? data.motion : "auto",
-    statusBar: data?.statusBar !== false
+    pauseUnfocused: data?.pauseUnfocused === true,
+    statusBar: data?.statusBar !== false,
+    skins
   };
+}
+
+// skins/dataview.css
+var dataview_default = '/* Fantasy Easel skin: Dataview. Moved from the Fantasy theme (2026-10-21). Uses theme variables only. */\n.block-language-dataview,\n.block-language-dataviewjs {\n	--dataview-radius: var(--blockquote-border-radius);\n	--p-spacing: 0;\n	--table-header-size: var(--table-text-size);\n}\n\n.block-language-dataviewjs h1,\n.block-language-dataviewjs h2,\n.block-language-dataviewjs h3,\n.block-language-dataviewjs h4,\n.block-language-dataviewjs h6 {\n	--p-spacing: var(--p-spacing-Orin);\n	margin-top: calc(var(--p-spacing) * 4);\n	margin-bottom: calc(var(--p-spacing) * 2);\n}\n\n.block-language-dataviewjs.node-insert-event table {\n	width: 100%\n}\n\n.table-view-table>thead>tr>th {\n	font-size: var(--table-header-size);\n}\n\n.block-language-dataviewjs.node-insert-event h4,\n.block-language-dataviewjs.node-insert-event .result-group,\n.block-language-dataviewjs.node-insert-event tbody,\n.block-language-dataview.node-insert-event tbody,\n.block-language-dataview.node-insert-event,\nul.dataview.list-view-ul,\n.block-language-dataviewjs.node-insert-event ul.contains-task-list,\n.block-language-dataviewjs.node-insert-event p ul li a.internal-link {\n	font-size: 0.92rem;\n}\n\n.block-language-dataview.node-insert-event .dataview.dataview-container,\n.markdown-source-view .block-language-dataviewjs.node-insert-event .dataview.result-group,\n.block-language-dataviewjs.node-insert-event table,\n.block-language-dataviewjs.node-insert-event ul[dir="auto"],\nul.dataview.list-view-ul {\n	background-color: var(--background-primary);\n	border-radius: var(--dataview-radius);\n}\n\n.block-language-dataviewjs.node-insert-event .task-list-item ul[dir="auto"] {\n	background-color: transparent;\n}\n\n.block-language-dataviewjs.node-insert-event h4 {\n	padding: 25px 0px 10px 0px !important;\n	color: var(--h2-color);\n	font-size: var(--h4-size);\n}\n\n.block-language-dataviewjs.node-insert-event ul,\nul.dataview.list-view-ul {\n	padding: 0.5rem;\n}\n\n.block-language-dataviewjs.node-insert-event div>ul {\n	margin-block-start: 0;\n}\n\n.block-language-dataviewjs.node-insert-event tbody td {\n	font-size: inherit;\n}\n\n.is-live-preview .block-language-dataviewjs>p,\n.is-live-preview .block-language-dataviewjs>span {\n	line-height: 1.4;\n}\n\n.block-language-dataviewjs.node-insert-event>p:not(ul) {\n	background-color: var(--background-primary);\n}\n\n.markdown-source-view li.dataview.task-list-basic-item {\n	margin-inline-start: calc(var(--list-indent) * 2.2);\n}\n\n.markdown-preview-view .dataview.dataview-container>ul.contains-task-list {\n	padding-left: 0.5rem;\n}\n\n.markdown-source-view .dataview.result-group>ul.contains-task-list,\n.dataview.result-group {\n	padding: 0;\n}\n\n.markdown-source-view .dataview.result-group>ul.contains-task-list>li.dataview.task-list-item,\n.markdown-source-view .dataview.dataview-container>ul.contains-task-list>li.dataview.task-list-item {\n	margin-inline-start: 0;\n}\n';
+
+// skins/kanban.css
+var kanban_default = '/* Fantasy Easel skin: Kanban. Moved from the Fantasy theme (2026-10-21). Uses theme variables only. */\n.kanban-plugin,\n.kanban-plugin__drag-container {\n	--background-modifier-border: var(--kanban-line-border);\n	--background-primary: transparent;\n	--background-secondary: rgba(var(--fantasy-background-color-rgb), 0.4);\n	--kanban-header-wrapper-bg-accent: hsla(var(--accent-h), calc(var(--accent-s) + 20%), calc(var(--accent-l) - 10%), 0.4);\n	--kanban-header-wrapper-bg: rgba(var(--fantasy-background-color-rgb), 0.8);\n	--kanban-h3-color: var(--h2-color);\n	--kanban-h4-color: var(--h3-color);\n	--kanban-h5-color: var(--h4-color);\n	--kanban-h3-size: 1.2em;\n	--kanban-h4-size: 1em;\n	--kanban-h5-size: 1em;\n	--kanban-line-border: var(--color-base-30);\n	--kanban-line-border-hover: var(--color-base-60);\n	--kanban-line-min-height: 2.3rem;\n	--background-modifier-form-field: transparent;\n	--h-margin: 0;\n	--p-spacing: 0;\n	--text-faint: var(--color-base-80);\n	--lane-width: 320px;\n	--hr-color: var(--color-base-50);\n}\n\n.kanban-plugin__board>div {\n	flex-wrap: wrap;\n	gap: 20px 5px;\n	overflow: auto;\n}\n\n.kanban-plugin__lane {\n	max-height: 35vh;\n	border-radius: 6px;\n}\n\n.kanban-plugin__lane-header-wrapper {\n	background-color: var(--kanban-header-wrapper-bg);\n	height: calc(var(--kanban-line-min-height) + 0.7rem);\n	border-radius: 6px 6px 0px 0px;\n}\n\n.kanban-plugin__lane-header-wrapper p {\n	font-size: 1.1em;\n	color: var(--text-faint);\n}\n\n.kanban-plugin__lane-wrapper:first-child .kanban-plugin__lane-header-wrapper,\n.kanban-plugin__lane-wrapper:nth-last-child(2) .kanban-plugin__lane-header-wrapper {\n	background-color: var(--kanban-header-wrapper-bg-accent);\n}\n\n.kanban-plugin__lane-wrapper:first-child .kanban-plugin__lane-header-wrapper a.kanban-plugin__lane-settings-button.clickable-icon,\n.kanban-plugin__lane-wrapper:nth-last-child(2) .kanban-plugin__lane-header-wrapper a.kanban-plugin__lane-settings-button.clickable-icon {\n	border-color: transparent;\n}\n\n.kanban-plugin__item-title-wrapper {\n	min-height: var(--kanban-line-min-height);\n}\n\n.kanban-plugin__markdown-preview-view h3 {\n	color: var(--kanban-h3-color);\n}\n\n.kanban-plugin__markdown-preview-view h4 {\n	color: var(--kanban-h4-color);\n	font-size: var(--kanban-h4-size);\n}\n\n.kanban-plugin__markdown-preview-view h5 {\n	color: var(--kanban-h5-color);\n	font-size: var(--kanban-h5-size);\n}\n\n.kanban-plugin__board mark[data-markjs="true"] {\n	font-size: 1.5rem;\n}\n\n.kanban-plugin__item:hover {\n	border-color: var(--kanban-line-border-hover);\n}\n\n.kanban-plugin__item-button-wrapper {\n	padding: 0;\n}\n\nbutton.kanban-plugin__new-item-button {\n	height: 3.5em;\n	box-shadow: none;\n}\n\na.kanban-plugin__lane-settings-button.clickable-icon {\n	border: 1px solid var(--background-secondary);\n}\n\na.kanban-plugin__lane-settings-button.clickable-icon:hover,\na.kanban-plugin__item-postfix-button.clickable-icon:hover,\nbutton.kanban-plugin__new-item-button:hover {\n	background-color: var(--background-primary-alt);\n	border: 1px solid var(--kanban-line-border);\n	cursor: pointer;\n	color: var(--color-base-100);\n}\n\na.kanban-plugin__item-postfix-button.is-enabled.clickable-icon svg {\n	--icon-stroke: 4px;\n	color: red;\n}\n';
+
+// src/skins.ts
+var SKINS = [
+  { id: "dataview", name: "Dataview", plugin: "dataview", desc: "Query results (tables, lists, tasks) sit on the glass card with rounded corners and slightly smaller text.", css: dataview_default },
+  { id: "kanban", name: "Kanban", plugin: "obsidian-kanban", desc: "Board, lanes and cards use the glass colors; lane headers follow the heading colors.", css: kanban_default }
+];
+var isInstalled = (app, plugin) => !!app.plugins.manifests[plugin];
+var skinOn = (app, skins, s) => skins[s.id] ?? isInstalled(app, s.plugin);
+var ATTR = "data-fantasy-easel-skin";
+function applySkins(app, skins) {
+  for (const s of SKINS) {
+    const el = document.head.querySelector(`style[${ATTR}="${s.id}"]`);
+    const on = skinOn(app, skins, s);
+    if (on && !el) document.head.createEl("style", { attr: { [ATTR]: s.id }, text: s.css });
+    else if (!on && el) el.remove();
+  }
+}
+function removeSkins() {
+  document.head.querySelectorAll(`style[${ATTR}]`).forEach((el) => el.remove());
 }
 
 // src/settings-tab.ts
@@ -749,18 +1427,27 @@ var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
   render() {
     const { containerEl } = this;
     const store = this.plugin.store;
-    const { look, motion, statusBar } = store.settings;
+    const { look, motion, statusBar, skins } = store.settings;
     containerEl.empty();
     containerEl.addClass("fantasy-easel-settings");
-    containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: `While Fantasy Easel is on, it owns the Fantasy look. Changes made in Style Settings' Fantasy section are put back right away. Use "Import from Style Settings" below to take those values.`
-    });
+    const heading = (name, desc) => {
+      const h = new import_obsidian4.Setting(containerEl).setName(name).setHeading();
+      if (desc) h.setDesc(desc);
+      return h;
+    };
+    heading("Look", "The Fantasy theme reads these. Without this plugin it shows Dark, Plasma (still) and cards.");
     new import_obsidian4.Setting(containerEl).setName("Theme color").setDesc(colorByCls(look.color)?.name ?? look.color).addButton((b) => b.setButtonText("Change").onClick((ev) => colorMenu(store).showAtMouseEvent(ev)));
+    new import_obsidian4.Setting(containerEl).setName("Theme accent").setDesc("Accent from the theme: theme color in light mode, gold in dark mode. Off = Obsidian's accent color.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
+    new import_obsidian4.Setting(containerEl).setName("Card layout").setDesc("Sidebars and notes as floating glass cards.").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
+    heading("Background");
     const bg = backgroundById(look.background, look.images);
     new import_obsidian4.Setting(containerEl).setName("Background").setDesc(bg ? `${bg.name} (${bg.kind === "image" ? "your picture" : `CSS \xB7 ${bg.kind}`})` : look.background).addButton((b) => b.setButtonText("Gallery").onClick(() => new GalleryModal(this.app, store).open())).addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
-    new import_obsidian4.Setting(containerEl).setName("Theme accent").setDesc("Use the theme color as the accent.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
-    new import_obsidian4.Setting(containerEl).setName("Card layout").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
+    new import_obsidian4.Setting(containerEl).setName("Motion").setDesc(`For moving backgrounds. Auto follows the OS "reduce motion" setting${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? " (on here, so motion is paused)" : ""}. On moves anyway. `).addButton((b) => b.setButtonText(motion === "auto" ? "Auto" : motion === "on" ? "On" : "Off").onClick((ev) => {
+      const menu = new import_obsidian4.Menu();
+      for (const m of MOTIONS) menu.addItem((i) => i.setTitle(m === "auto" ? "Auto" : m === "on" ? "On" : "Off").setChecked(m === motion).onClick(() => store.set({ motion: m })));
+      menu.showAtMouseEvent(ev);
+    }));
+    new import_obsidian4.Setting(containerEl).setName("Pause when unfocused").setDesc("Stop moving backgrounds while you work in another app (saves GPU). Off = keep moving.").addToggle((t) => t.setValue(this.plugin.store.settings.pauseUnfocused).onChange((v) => store.set({ pauseUnfocused: v })));
     new import_obsidian4.Setting(containerEl).setName("Your pictures").setDesc('A picture URL (https://\u2026) or a CSS value like url("\u2026"). Add as many as you like with +.').setHeading().addExtraButton((b) => b.setIcon("plus").setTooltip("Add picture").onClick(() => {
       store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] });
       this.focusLast = true;
@@ -791,13 +1478,13 @@ var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
         store.setLook(store.settings.look.background === id ? { images, background: DEFAULT_BACKGROUND } : { images });
       }));
     });
-    new import_obsidian4.Setting(containerEl).setName("Motion backgrounds").setDesc(`Auto follows the OS "reduce motion" setting${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? " (on here, so motion is paused)" : ""}. On moves anyway. All pause while the window is not focused.`).addButton((b) => b.setButtonText(motion === "auto" ? "Auto" : motion === "on" ? "On" : "Off").onClick((ev) => {
-      const menu = new import_obsidian4.Menu();
-      for (const m of MOTIONS) menu.addItem((i) => i.setTitle(m === "auto" ? "Auto" : m === "on" ? "On" : "Off").setChecked(m === motion).onClick(() => store.set({ motion: m })));
-      menu.showAtMouseEvent(ev);
-    }));
-    new import_obsidian4.Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls for trying looks.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
-    new import_obsidian4.Setting(containerEl).setName("Import from Style Settings").setDesc("Take the Fantasy values saved in Style Settings.").addButton((b) => b.setButtonText("Import").onClick(() => void this.plugin.importFromStyleSettings()));
+    heading("Plugin skins", "Extra CSS that fits a plugin to the Fantasy glass. Default: on when the plugin is installed.");
+    for (const s of SKINS) {
+      const installed = isInstalled(this.app, s.plugin);
+      new import_obsidian4.Setting(containerEl).setName(installed ? s.name : `${s.name} (not installed)`).setDesc(s.desc).addToggle((t) => t.setValue(skinOn(this.app, skins, s)).onChange((v) => store.set({ skins: { ...store.settings.skins, [s.id]: v } })));
+    }
+    heading("Controls");
+    new import_obsidian4.Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls: theme color, background, gallery, accent, cards, motion, dark / light.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
   }
   hide() {
     this.unsubscribe?.();
@@ -910,59 +1597,60 @@ var Store = class {
 };
 
 // src/main.ts
-var STYLE_SETTINGS_ID = "obsidian-style-settings";
 var FantasyEaselPlugin = class extends import_obsidian6.Plugin {
   constructor() {
     super(...arguments);
+    this.stage = new StageHost();
     /** Menu builders, also for CLI checks (a Menu closes at once when the window has no focus). */
     this.menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.openSettings()) };
   }
+  syncStage() {
+    const { look } = this.store.settings;
+    this.stage.sync(backgroundById(look.background, look.images)?.stage);
+  }
   async onload() {
     const saved = await this.loadData();
-    const ss = await readStyleSettingsLook(this.app);
-    const settings = saved ? normalize(saved) : { ...DEFAULT_SETTINGS, look: ss.look };
+    const settings = normalize(saved ?? DEFAULT_SETTINGS);
     this.store = new Store(settings, (s) => this.saveData(s));
     if (!saved) await this.saveData(settings);
     document.body.style.setProperty("--fantasy-easel-delay", `-${Math.round(Math.random() * 600)}s`);
     this.register(() => document.body.style.removeProperty("--fantasy-easel-delay"));
     this.applier = new Applier(document.body, () => this.store.settings);
     this.applier.attach();
+    applySkins(this.app, settings.skins);
+    this.syncStage();
     this.statusBar = new StatusBar(this.app, this, this.store, () => this.openSettings());
     if (settings.statusBar) this.statusBar.show();
     this.register(
       this.store.subscribe(() => {
         this.applier.reconcile();
+        applySkins(this.app, this.store.settings.skins);
+        this.syncStage();
         if (this.store.settings.statusBar) this.statusBar.show();
         else this.statusBar.hide();
       })
     );
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
+    this.registerObsidianProtocolHandler("fantasy-easel", () => this.openSettings());
     this.addCommand({ id: "next-background", name: "Next background", callback: () => stepBackground(this.store, 1) });
     this.addCommand({ id: "previous-background", name: "Previous background", callback: () => stepBackground(this.store, -1) });
     this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => new GalleryModal(this.app, this.store, () => this.openSettings()).open() });
-    this.addCommand({ id: "import-style-settings", name: "Import from Style Settings", callback: () => void this.importFromStyleSettings() });
-    this.app.workspace.onLayoutReady(() => this.applier.reconcile());
+    this.app.workspace.onLayoutReady(() => {
+      this.applier.reconcile();
+      this.syncStage();
+    });
   }
   onunload() {
     this.store.flush();
     this.statusBar.hide();
-    const plugins = this.app.plugins;
-    this.applier.detach({
-      enabled: !!plugins.plugins[STYLE_SETTINGS_ID],
-      trigger: () => this.app.workspace.trigger("parse-style-settings")
-    });
+    this.applier.detach();
+    removeSkins();
+    this.stage.remove();
   }
   /** Open this plugin's settings tab (to add pictures). */
   openSettings() {
     const setting = this.app.setting;
     setting.open();
     setting.openTabById(this.manifest.id);
-  }
-  async importFromStyleSettings() {
-    const ss = await readStyleSettingsLook(this.app);
-    const have = new Set(this.store.settings.look.images.map((i) => i.src));
-    const images = [...this.store.settings.look.images, ...ss.look.images.filter((i) => !have.has(i.src))];
-    this.store.setLook({ color: ss.look.color, accent: ss.look.accent, card: ss.look.card, images });
-    new import_obsidian6.Notice(ss.found ? "Fantasy Easel: imported from Style Settings." : "Fantasy Easel: no Style Settings values, used theme defaults.");
   }
 };

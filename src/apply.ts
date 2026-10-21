@@ -1,10 +1,10 @@
 import { Notice } from "obsidian";
-import { ACCENT_CLASS, backgroundById, CARD_OFF_CLASS, CSS_BG, FORCE_MOTION_CLASS, MARKER_CLASS, MOTION_CLASS, STILL_CLASS, THEME_COLORS, LEGACY_CARD_CLASS } from "./catalog";
+import { ACCENT_CLASS, backgroundById, CARD_OFF_CLASS, CSS_BG, FORCE_MOTION_CLASS, MARKER_CLASS, MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, STAGE_CLASS, STILL_CLASS, THEME_COLORS, LEGACY_CARD_CLASS } from "./catalog";
 import type { FantasyEaselSettings } from "./settings";
 
 /** Every body class Fantasy Easel may add or remove. Other body classes are never touched. */
-const MANAGED = new Set<string>([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls!), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS]);
-/** Classes Style Settings also owns (its Fantasy group). */
+const MANAGED = new Set<string>([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls!), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS]);
+/** Theme classes (removed on unload: without Easel the theme shows its defaults). */
 const THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
 /** Your picture goes here as a body inline variable (beats the theme's Plasma and any class rule). */
 const URL_VAR = "--background-url";
@@ -16,19 +16,20 @@ export function wantedClasses(s: FantasyEaselSettings): Set<string> {
   const bg = backgroundById(s.look.background, s.look.images);
   const out = new Set<string>([MARKER_CLASS, s.look.color]);
   if (bg?.cls) out.add(bg.cls);
-  if (bg?.kind === "motion") out.add(MOTION_CLASS);
+  if (bg?.stage) out.add(STAGE_CLASS);
+  else if (bg?.kind === "motion") out.add(MOTION_CLASS);
   if (s.look.accent) out.add(ACCENT_CLASS);
   if (!s.look.card) out.add(CARD_OFF_CLASS);
   if (s.motion === "off") out.add(STILL_CLASS);
   if (s.motion === "on") out.add(FORCE_MOTION_CLASS);
+  if (s.pauseUnfocused) out.add(PAUSE_UNFOCUSED_CLASS);
   return out;
 }
 
 /**
  * The only code that writes body classes / body variables (single gate).
- * Keeps the body equal to the wanted state: Style Settings re-applies its own values on
- * `css-change` (dark/light switch, theme change) by removing the whole Fantasy group, so a
- * class observer puts the wanted state back. Reconcile only fixes differences, so it settles
+ * Keeps the body equal to the wanted state: if anything else changes these classes, a class
+ * observer puts the wanted state back. Reconcile only fixes differences, so it settles
  * by itself (no flag needed); own mutations are dropped with takeRecords().
  */
 export class Applier {
@@ -40,7 +41,6 @@ export class Applier {
   constructor(private body: HTMLElement, private get: () => FantasyEaselSettings) {}
 
   attach() {
-    // Observer first: Style Settings re-applies ~100ms after load and would otherwise win.
     this.observer = new MutationObserver(() => this.onMutation());
     this.observer.observe(this.body, { attributes: true, attributeFilter: ["class"], subtree: false });
     this.reconcile();
@@ -82,19 +82,14 @@ export class Applier {
     this.reconcile();
   }
 
-  /**
-   * Hand the look back. Only Easel's own things are removed (the theme shows Plasma, still);
-   * if Style Settings is on, it re-applies its own values on `parse-style-settings`.
-   */
-  detach(styleSettings: { enabled: boolean; trigger: () => void }) {
+  /** Remove everything Easel added; the theme shows its defaults (Dark, Plasma still, cards). */
+  detach() {
     this.observer?.disconnect();
     this.observer = null;
     const cl = this.body.classList;
     for (const b of CSS_BG) cl.remove(b.cls!);
-    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, FORCE_MOTION_CLASS);
+    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS);
+    for (const c of THEME_GROUP) cl.remove(c);
     for (const v of [URL_VAR, ...OLD_VARS]) this.body.style.removeProperty(v);
-    if (styleSettings.enabled) styleSettings.trigger();
-    // Same as "no Easel": nobody owns these classes now.
-    else for (const c of THEME_GROUP) cl.remove(c);
   }
 }

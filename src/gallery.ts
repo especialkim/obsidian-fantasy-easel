@@ -1,12 +1,13 @@
 import { Modal, setIcon, type App } from "obsidian";
 import { CSS_BACKGROUNDS, motionCss, type CssBackground } from "./backgrounds";
 import { imageBackgrounds } from "./catalog";
+import { buildStage, STAGES } from "./stages";
 import type { Store } from "./store";
 
 const GROUPS: { title: string; desc: string; pick: (b: CssBackground) => boolean }[] = [
   { title: "Theme color", desc: "Follows the theme color.", pick: (b) => b.kind === "static" && b.palette === "theme" },
   { title: "Fixed palette", desc: "Same colors with any theme color.", pick: (b) => b.kind === "static" && b.palette === "fixed" },
-  { title: "Motion", desc: "Moves slowly. Pauses when the window is not focused.", pick: (b) => b.kind === "motion" },
+  { title: "Motion", desc: "Moves slowly.", pick: (b) => b.kind === "motion" },
 ];
 
 /**
@@ -66,6 +67,33 @@ export class GalleryModal extends Modal {
         }
       }
     }
+    // Stages: four moving layers (media-art mockups, 2026-10-21)
+    for (const [family, title, desc] of [
+      ["ambient", "Stage · ambient", "Four layers of color fields and a texture, drifting and turning."],
+      ["kinetic", "Stage · kinetic", "Four layer pictures: glass, prism and light patterns that slide and turn."],
+    ] as const) {
+      const section = root.createDiv({ cls: "fantasy-easel-gallery-group" });
+      section.createDiv({ cls: "fantasy-easel-gallery-title", text: title });
+      section.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: desc });
+      for (const s of STAGES.filter((x) => x.family === family)) {
+        const id = `css-${s.key}`;
+        const row = section.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": id } });
+        const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
+        label.createSpan({ text: s.name });
+        const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
+        setIcon(check, "check");
+        for (const side of ["day", "night"] as const) {
+          const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side} fantasy-easel-bg-${s.key}`, attr: { "aria-label": `${s.name} (${side})`, role: "button", tabindex: "0" } });
+          buildStage(tile, s.family);
+          const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
+          card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
+          card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
+          tile.addEventListener("click", () => this.store.setLook({ background: id }));
+          tile.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); this.store.setLook({ background: id }); } });
+        }
+      }
+    }
+
     // Your pictures: same picture day and night
     const mine = imageBackgrounds(this.store.settings.look.images);
     const section = root.createDiv({ cls: "fantasy-easel-gallery-group" });

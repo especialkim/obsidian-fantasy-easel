@@ -17,6 +17,20 @@ function loadTs(file) {
   return mod.exports;
 }
 
+/** Stage backgrounds: per-background variables (pictures per mode, slider values). */
+function stageCss() {
+  const { STAGES } = loadTs("src/stages.ts");
+  const pic = (p) => [`--fe-base: ${p.base};`, ...p.layers.map((l, i) => `--fe-${i + 1}: ${l};`), ...(p.wave ? [`--fe-wave: ${p.wave};`] : []), `--fe-b2: ${p.b2};`, `--fe-b3: ${p.b3};`].map((l) => `\t${l}`).join("\n");
+  return STAGES.map((s) => {
+    const bm = s.blurMult ? s.blurMult.map((m, i) => ` --fe-bm${i + 1}: ${m};`).join("") : "";
+    return [
+      `.theme-dark.fantasy-easel-bg-${s.key},\n.fantasy-easel-night.fantasy-easel-bg-${s.key} {\n${pic(s.night)}\n}`,
+      `.theme-light.fantasy-easel-bg-${s.key},\n.fantasy-easel-day.fantasy-easel-bg-${s.key} {\n${pic(s.day)}\n}`,
+      `.fantasy-easel-bg-${s.key} { --fe-speed: ${s.speed}; --fe-morph: ${s.morph}; --fe-hue: ${s.hue}deg; --fe-blur: ${s.blur}px;${bm} }`,
+    ].join("\n");
+  }).join("\n\n");
+}
+
 function backgroundCss() {
   const { CSS_BACKGROUNDS, KEYFRAMES, resolveHue, motionCss } = loadTs("src/backgrounds.ts");
   const list = (layers) => layers.map((l) => `\n\t\t${resolveHue(l)}`).join(",");
@@ -46,6 +60,9 @@ function backgroundCss() {
     pick,
     "",
     frames,
+    "",
+    "/* Stage backgrounds (src/stages.ts): pictures per mode and slider values. Layers: section 1-4. */",
+    stageCss(),
     END,
   ].join("\n");
 }
@@ -58,5 +75,5 @@ const next = styles.slice(0, a) + backgroundCss() + styles.slice(b + END.length)
 if (next !== styles) fs.writeFileSync(stylesPath, next);
 
 esbuild
-  .build({ absWorkingDir: root, entryPoints: ["src/main.ts"], outfile: "main.js", bundle: true, platform: "node", format: "cjs", target: "es2020", external: ["obsidian", "electron"], logLevel: "info" })
+  .build({ absWorkingDir: root, entryPoints: ["src/main.ts"], outfile: "main.js", bundle: true, platform: "node", format: "cjs", target: "es2020", external: ["obsidian", "electron"], loader: { ".css": "text" }, logLevel: "info" })
   .catch(() => process.exit(1));

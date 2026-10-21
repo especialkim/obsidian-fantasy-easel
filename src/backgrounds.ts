@@ -76,11 +76,11 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
       solid("hsl({H} 60% 92%)"),
     ],
     night: [
-      blob("ellipse 70% 60%", "15% 20%", "hsl({H} 80% 34%)"),
-      blob("ellipse 60% 60%", "85% 25%", "hsl({H+50} 80% 30%)"),
-      blob("ellipse 70% 60%", "70% 90%", "hsl({H-50} 75% 28%)"),
-      blob("ellipse 60% 50%", "20% 85%", "hsl({H+120} 70% 26%)"),
-      solid("hsl({H} 45% 7%)"),
+      blob("ellipse 70% 60%", "15% 20%", "hsl({H} 80% 56%)"),
+      blob("ellipse 60% 60%", "85% 25%", "hsl({H+50} 80% 56%)"),
+      blob("ellipse 70% 60%", "70% 90%", "hsl({H-50} 75% 56%)"),
+      blob("ellipse 60% 50%", "20% 85%", "hsl({H+120} 70% 56%)"),
+      solid("hsl({H} 45% 43.2%)"),
     ],
   },
   {
@@ -90,8 +90,8 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
       "conic-gradient(from 210deg at 30% 40%, hsl({H} 85% 72%), hsl({H+40} 85% 76%), hsl({H+100} 80% 74%), hsl({H+180} 70% 78%), hsl({H} 85% 72%))",
     ],
     night: [
-      "linear-gradient(180deg, hsl({H} 50% 5% / 0.55), transparent 70%)",
-      "conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 30%), hsl({H+40} 75% 26%), hsl({H+100} 70% 24%), hsl({H+180} 60% 22%), hsl({H} 75% 30%))",
+      "linear-gradient(180deg, hsl({H} 50% 41.8% / 0.55), transparent 70%)",
+      "conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 56%), hsl({H+40} 75% 56%), hsl({H+100} 70% 56%), hsl({H+180} 60% 54.5%), hsl({H} 75% 56%))",
     ],
   },
   {
@@ -101,14 +101,14 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
       "linear-gradient(180deg, hsl({H+20} 70% 90%), hsl({H} 60% 84%))",
     ],
     night: [
-      "linear-gradient(100deg, transparent 8%, hsl({H+60} 85% 38% / 0.65) 24%, transparent 38%, hsl({H} 85% 36% / 0.6) 55%, transparent 70%, hsl({H-60} 80% 34% / 0.6) 85%, transparent 96%)",
-      "linear-gradient(180deg, hsl({H+20} 50% 6%), hsl({H} 45% 11%))",
+      "linear-gradient(100deg, transparent 8%, hsl({H+60} 85% 56% / 0.65) 24%, transparent 38%, hsl({H} 85% 56% / 0.6) 55%, transparent 70%, hsl({H-60} 80% 56% / 0.6) 85%, transparent 96%)",
+      "linear-gradient(180deg, hsl({H+20} 50% 42.5%), hsl({H} 45% 46.2%))",
     ],
   },
   {
     key: "dusk", name: "Dusk", kind: "static", palette: "theme",
     day: ["linear-gradient(160deg, hsl({H} 85% 78%) 0%, hsl({H+40} 85% 76%) 40%, hsl({H+90} 80% 80%) 75%, hsl({H+130} 70% 86%) 100%)"],
-    night: ["linear-gradient(160deg, hsl({H} 75% 34%) 0%, hsl({H+40} 72% 28%) 40%, hsl({H+90} 70% 26%) 75%, hsl({H+130} 65% 22%) 100%)"],
+    night: ["linear-gradient(160deg, hsl({H} 75% 56%) 0%, hsl({H+40} 72% 56%) 40%, hsl({H+90} 70% 56%) 75%, hsl({H+130} 65% 54.5%) 100%)"],
   },
   // ---------- fixed palettes ----------
   {
@@ -119,8 +119,8 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
     ],
     night: [
       blob("ellipse 16% 28%", "80% 18%", "rgb(190 205 255 / 0.45)", 70),
-      blob("ellipse 80% 40%", "50% 100%", "rgb(200 80 160 / 0.5)", 70),
-      "linear-gradient(180deg, #1b2a72 0%, #2c2a8c 40%, #55308e 70%, #7a3478 100%)",
+      blob("ellipse 80% 40%", "50% 100%", "rgb(201 84 162 / 0.5)", 70),
+      "linear-gradient(180deg, #4a61d4 0%, #5552cb 40%, #8357c6 70%, #bc62b9 100%)",
     ],
   },
   {
@@ -133,35 +133,20 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
       solid("#b5dde6"),
     ],
     night: [
-      blob("ellipse 60% 40%", "30% 35%", "rgb(25 230 140 / 0.55)", 65),
+      blob("ellipse 60% 40%", "30% 35%", "rgb(53 233 154 / 0.55)", 65),
       blob("ellipse 55% 45%", "70% 30%", "rgb(122 60 255 / 0.5)", 65),
-      blob("ellipse 70% 35%", "50% 78%", "rgb(0 194 255 / 0.35)", 65),
-      solid("#04060f"),
+      blob("ellipse 70% 35%", "50% 78%", "rgb(31 201 255 / 0.35)", 65),
+      solid("#2c42a4"),
     ],
   },
   {
     key: "prism", name: "Prism / Neon", kind: "static", palette: "fixed",
     day: ["conic-gradient(from 0deg at 50% 50%, #ff7fcf, #6fd0ff, #8ff07a, #ffd65c, #b48cff, #ff7fcf)"],
     night: [
-      blob("ellipse 45% 80%", "50% 50%", "rgb(4 2 12 / 0.75)", 75),
-      "conic-gradient(from 0deg at 50% 50%, #8a1166, #116a8a, #3a138a, #8a5a11, #8a1166)",
+      blob("ellipse 45% 80%", "50% 50%", "rgb(58 29 175 / 0.75)", 75),
+      "conic-gradient(from 0deg at 50% 50%, #e637b2, #37b8e6, #713ae4, #e6a137, #e637b2)",
     ],
   },
-  {
-    key: "grain", name: "Paper / Ink", kind: "static", palette: "fixed",
-    day: [
-      blob("ellipse 80% 70%", "50% 45%", "rgb(255 255 255 / 0.6)", 75),
-      "repeating-linear-gradient(115deg, rgb(120 90 50 / 0.035) 0 2px, transparent 2px 6px)",
-      solid("#f3ead9"),
-    ],
-    night: [
-      blob("ellipse 45% 55%", "20% 30%", "rgb(95 110 200 / 0.6)", 70),
-      blob("ellipse 40% 50%", "80% 70%", "rgb(150 90 170 / 0.5)", 70),
-      "repeating-linear-gradient(115deg, rgb(255 255 255 / 0.03) 0 2px, transparent 2px 6px)",
-      "linear-gradient(160deg, #46507a 0%, #3c4466 50%, #4a3c66 100%)",
-    ],
-  },
-  // ---------- new (2026-10-21): edge-to-edge, contrast target 5.0~6.0 ----------
   {
     key: "stained", name: "Stained Glass", kind: "static", palette: "theme",
     day: [
@@ -180,8 +165,8 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
       "repeating-radial-gradient(circle at 75% 25%, hsl({H} 85% 70%) 0 6%, hsl({H+50} 85% 78%) 6% 12%)",
     ],
     night: [
-      "repeating-radial-gradient(circle at 18% 80%, hsl({H+120} 80% 30% / 0.55) 0 4%, transparent 4% 9%)",
-      "repeating-radial-gradient(circle at 75% 25%, hsl({H} 80% 30%) 0 6%, hsl({H+50} 75% 22%) 6% 12%)",
+      "repeating-radial-gradient(circle at 18% 80%, hsl({H+120} 80% 56% / 0.55) 0 4%, transparent 4% 9%)",
+      "repeating-radial-gradient(circle at 75% 25%, hsl({H} 80% 56%) 0 6%, hsl({H+50} 75% 54.5%) 6% 12%)",
     ],
   },
   {
@@ -196,13 +181,13 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
       solid("#c8bdf0"),
     ],
     night: [
-      blob("ellipse 45% 55%", "0% 0%", "#a0306e", 75),
-      blob("ellipse 45% 55%", "50% 0%", "#1d6f92", 75),
-      blob("ellipse 45% 55%", "100% 0%", "#4a7a1f", 75),
-      blob("ellipse 45% 55%", "0% 100%", "#4b2a9a", 75),
-      blob("ellipse 45% 55%", "50% 100%", "#9a5a1d", 75),
-      blob("ellipse 45% 55%", "100% 100%", "#1d7f6a", 75),
-      solid("#241a40"),
+      blob("ellipse 45% 55%", "0% 0%", "#cb5295", 75),
+      blob("ellipse 45% 55%", "50% 0%", "#44adda", 75),
+      blob("ellipse 45% 55%", "100% 0%", "#8bd24c", 75),
+      blob("ellipse 45% 55%", "0% 100%", "#744fcf", 75),
+      blob("ellipse 45% 55%", "50% 100%", "#db8d42", 75),
+      blob("ellipse 45% 55%", "100% 100%", "#48d5b7", 75),
+      solid("#6a4eb7"),
     ],
   },
   {
@@ -213,7 +198,7 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
     ],
     night: [
       blob("ellipse 60% 45%", "50% 100%", "rgb(255 140 90 / 0.4)", 70),
-      "repeating-conic-gradient(from 0deg at 50% 115%, #5e2a80 0deg 7deg, #4a2272 7deg 14deg, #74307a 14deg 21deg)",
+      "repeating-conic-gradient(from 0deg at 50% 115%, #9b56c8 0deg 7deg, #8f52cb 7deg 14deg, #b85ec0 14deg 21deg)",
     ],
   },
   {
@@ -224,26 +209,26 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
       "linear-gradient(160deg, hsl({H} 55% 84%), hsl({H+30} 50% 80%))",
     ],
     night: [
-      "linear-gradient(35deg, transparent 18%, hsl({H+40} 70% 36% / 0.75) 24%, transparent 30%, transparent 58%, hsl({H-30} 65% 34% / 0.7) 64%, transparent 70%)",
-      "linear-gradient(-20deg, transparent 30%, hsl({H+150} 65% 32% / 0.6) 38%, transparent 46%, transparent 76%, hsl({H} 75% 36% / 0.65) 82%, transparent 88%)",
-      "linear-gradient(160deg, hsl({H} 45% 17%), hsl({H+30} 40% 14%))",
+      "linear-gradient(35deg, transparent 18%, hsl({H+40} 70% 56% / 0.75) 24%, transparent 30%, transparent 58%, hsl({H-30} 65% 56% / 0.7) 64%, transparent 70%)",
+      "linear-gradient(-20deg, transparent 30%, hsl({H+150} 65% 56% / 0.6) 38%, transparent 46%, transparent 76%, hsl({H} 75% 56% / 0.65) 82%, transparent 88%)",
+      "linear-gradient(160deg, hsl({H} 45% 50.8%), hsl({H+30} 40% 48.5%))",
     ],
   },
   // ---------- motion (media art: two layers move apart and blend; 16~30s cycles) ----------
   {
     key: "tide", name: "Tide", kind: "motion", palette: "theme", motion: { parts: [{frames:"tideX",seconds:17},{frames:"pulseB",seconds:23},{frames:"hue",seconds:29}] },
     day: ["linear-gradient(115deg, hsl({H} 75% 80%) 0%, hsl({H+30} 85% 70%) 25%, hsl({H-20} 90% 66%) 50%, hsl({H+30} 85% 70%) 75%, hsl({H} 75% 80%) 100%)"],
-    night: ["linear-gradient(115deg, hsl({H} 65% 14%) 0%, hsl({H+30} 70% 26%) 25%, hsl({H-20} 75% 36%) 50%, hsl({H+30} 70% 26%) 75%, hsl({H} 65% 14%) 100%)"],
+    night: ["linear-gradient(115deg, hsl({H} 65% 48.5%) 0%, hsl({H+30} 70% 56%) 25%, hsl({H-20} 75% 56%) 50%, hsl({H+30} 70% 56%) 75%, hsl({H} 65% 48.5%) 100%)"],
   },
   {
     key: "swell", name: "Ocean Swell", kind: "motion", palette: "fixed", motion: { parts: [{frames:"swellY",seconds:15},{frames:"wanderC",seconds:31},{frames:"pulse",seconds:19}] },
     day: ["linear-gradient(170deg, #9debff 0%, #5ad2ec 35%, #2fb6dc 65%, #3f9fe0 100%)"],
-    night: ["linear-gradient(170deg, #0f4766 0%, #11678a 35%, #0f84a0 65%, #2463ad 100%)"],
+    night: ["linear-gradient(170deg, #38a5e2 0%, #37b4e6 35%, #32c8ec 65%, #4589d8 100%)"],
   },
   {
     key: "iris", name: "Iris", kind: "motion", palette: "theme", motion: { parts: [{frames:"hueFull",seconds:37,loop:true},{frames:"wanderA",seconds:41},{frames:"sway",seconds:29}] },
     day: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 85% 72%), hsl({H+60} 85% 74%), hsl({H+150} 80% 72%), hsl({H+240} 75% 74%), hsl({H} 85% 72%))"],
-    night: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 32%), hsl({H+60} 75% 28%), hsl({H+150} 70% 26%), hsl({H+240} 65% 28%), hsl({H} 75% 32%))"],
+    night: ["conic-gradient(from 210deg at 30% 40%, hsl({H} 75% 56%), hsl({H+60} 75% 56%), hsl({H+150} 70% 56%), hsl({H+240} 65% 56%), hsl({H} 75% 56%))"],
   },
   {
     key: "liquid", name: "Liquid", kind: "motion", palette: "theme",
@@ -272,10 +257,10 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
       solid("hsl({H+20} 70% 82%)"),
     ],
     night: [
-      blob("ellipse 55% 60%", "25% 25%", "hsl({H} 85% 27%)", 70),
-      blob("ellipse 50% 55%", "80% 70%", "hsl({H+60} 85% 24%)", 70),
-      blob("ellipse 45% 50%", "70% 15%", "hsl({H+140} 80% 22%)", 70),
-      solid("hsl({H+20} 55% 11%)"),
+      blob("ellipse 55% 60%", "25% 25%", "hsl({H} 85% 56%)", 70),
+      blob("ellipse 50% 55%", "80% 70%", "hsl({H+60} 85% 56%)", 70),
+      blob("ellipse 45% 50%", "70% 15%", "hsl({H+140} 80% 54.5%)", 70),
+      solid("hsl({H+20} 55% 46.2%)"),
     ],
   },
   {
@@ -292,7 +277,7 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
       "linear-gradient(100deg, #b8f7dd 0%, #9ae6ff 30%, #d4c2ff 60%, #a9f0d0 100%)",
     ],
     night: [
-      "linear-gradient(100deg, #0b3a2c 0%, #0d2a55 30%, #2a1a5e 60%, #0d3d36 100%)",
+      "linear-gradient(100deg, #27ce9d 0%, #2c74df 30%, #6c4ece 60%, #2cceb6 100%)",
     ],
   },
   {
@@ -327,7 +312,7 @@ export const CSS_BACKGROUNDS: CssBackground[] = [
       },
     },
     day: ["linear-gradient(160deg, #ffc58a 0%, #ff9b8a 40%, #ff86a8 75%, #ffb36b 100%)"],
-    night: ["linear-gradient(160deg, #3a0d06 0%, #5a1208 40%, #4a0820 75%, #5a2a06 100%)"],
+    night: ["linear-gradient(160deg, #db3117 0%, #eb3920 40%, #e61964 75%, #f0761a 100%)"],
   },
 ];
 

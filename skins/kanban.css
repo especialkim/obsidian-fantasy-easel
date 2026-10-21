@@ -1,0 +1,109 @@
+/* Fantasy Easel skin: Kanban. Moved from the Fantasy theme (2026-10-21). Uses theme variables only. */
+.kanban-plugin,
+.kanban-plugin__drag-container {
+	--background-modifier-border: var(--kanban-line-border);
+	--background-primary: transparent;
+	--background-secondary: rgba(var(--fantasy-background-color-rgb), 0.4);
+	--kanban-header-wrapper-bg-accent: hsla(var(--accent-h), calc(var(--accent-s) + 20%), calc(var(--accent-l) - 10%), 0.4);
+	--kanban-header-wrapper-bg: rgba(var(--fantasy-background-color-rgb), 0.8);
+	--kanban-h3-color: var(--h2-color);
+	--kanban-h4-color: var(--h3-color);
+	--kanban-h5-color: var(--h4-color);
+	--kanban-h3-size: 1.2em;
+	--kanban-h4-size: 1em;
+	--kanban-h5-size: 1em;
+	--kanban-line-border: var(--color-base-30);
+	--kanban-line-border-hover: var(--color-base-60);
+	--kanban-line-min-height: 2.3rem;
+	--background-modifier-form-field: transparent;
+	--h-margin: 0;
+	--p-spacing: 0;
+	--text-faint: var(--color-base-80);
+	--lane-width: 320px;
+	--hr-color: var(--color-base-50);
+}
+
+.kanban-plugin__board>div {
+	flex-wrap: wrap;
+	gap: 20px 5px;
+	overflow: auto;
+}
+
+.kanban-plugin__lane {
+	max-height: 35vh;
+	border-radius: 6px;
+}
+
+.kanban-plugin__lane-header-wrapper {
+	background-color: var(--kanban-header-wrapper-bg);
+	height: calc(var(--kanban-line-min-height) + 0.7rem);
+	border-radius: 6px 6px 0px 0px;
+}
+
+.kanban-plugin__lane-header-wrapper p {
+	font-size: 1.1em;
+	color: var(--text-faint);
+}
+
+.kanban-plugin__lane-wrapper:first-child .kanban-plugin__lane-header-wrapper,
+.kanban-plugin__lane-wrapper:nth-last-child(2) .kanban-plugin__lane-header-wrapper {
+	background-color: var(--kanban-header-wrapper-bg-accent);
+}
+
+.kanban-plugin__lane-wrapper:first-child .kanban-plugin__lane-header-wrapper a.kanban-plugin__lane-settings-button.clickable-icon,
+.kanban-plugin__lane-wrapper:nth-last-child(2) .kanban-plugin__lane-header-wrapper a.kanban-plugin__lane-settings-button.clickable-icon {
+	border-color: transparent;
+}
+
+.kanban-plugin__item-title-wrapper {
+	min-height: var(--kanban-line-min-height);
+}
+
+.kanban-plugin__markdown-preview-view h3 {
+	color: var(--kanban-h3-color);
+}
+
+.kanban-plugin__markdown-preview-view h4 {
+	color: var(--kanban-h4-color);
+	font-size: var(--kanban-h4-size);
+}
+
+.kanban-plugin__markdown-preview-view h5 {
+	color: var(--kanban-h5-color);
+	font-size: var(--kanban-h5-size);
+}
+
+.kanban-plugin__board mark[data-markjs="true"] {
+	font-size: 1.5rem;
+}
+
+.kanban-plugin__item:hover {
+	border-color: var(--kanban-line-border-hover);
+}
+
+.kanban-plugin__item-button-wrapper {
+	padding: 0;
+}
+
+button.kanban-plugin__new-item-button {
+	height: 3.5em;
+	box-shadow: none;
+}
+
+a.kanban-plugin__lane-settings-button.clickable-icon {
+	border: 1px solid var(--background-secondary);
+}
+
+a.kanban-plugin__lane-settings-button.clickable-icon:hover,
+a.kanban-plugin__item-postfix-button.clickable-icon:hover,
+button.kanban-plugin__new-item-button:hover {
+	background-color: var(--background-primary-alt);
+	border: 1px solid var(--kanban-line-border);
+	cursor: pointer;
+	color: var(--color-base-100);
+}
+
+a.kanban-plugin__item-postfix-button.is-enabled.clickable-icon svg {
+	--icon-stroke: 4px;
+	color: red;
+}

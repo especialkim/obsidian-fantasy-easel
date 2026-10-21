@@ -1,25 +1,23 @@
 // Values Fantasy Easel can choose. Class names must match theme.css (checked by scripts/selftest.js).
 // CSS backgrounds come from src/backgrounds.ts (styles.css is generated from it).
 import { CSS_BACKGROUNDS, type BgPalette } from "./backgrounds";
+import { STAGES, type StageFamily } from "./stages";
 
 export interface ThemeColor {
-  /** body class written by the theme's Style Settings `class-select` */
+  /** body class defined in theme.css */
   cls: string;
   name: string;
 }
 
+/** Theme colors that sit well with the accent (dark accent = gold 44°): cool and purple tones.
+ *  Warm browns / reds / orange (0–30°) and Forest (next to Emerald) were dropped 2026-10-21. */
 export const THEME_COLORS: ThemeColor[] = [
-  { cls: "fantasy-theme-MochaBrown", name: "Mocha Brown" },
-  { cls: "fantasy-theme-OceanTeal", name: "Ocean Teal" },
-  { cls: "fantasy-theme-MysticPurple", name: "Mystic Purple" },
-  { cls: "fantasy-theme-SkyBlue", name: "Sky Blue" },
-  { cls: "fantasy-theme-EmeraldGreen", name: "Emerald Green" },
-  { cls: "fantasy-theme-ForestGreen", name: "Forest Green" },
-  { cls: "fantasy-theme-TangerineOrange", name: "Tangerine Orange" },
-  { cls: "fantasy-theme-BurntSienna", name: "Burnt Sienna" },
-  { cls: "fantasy-theme-ChiliPepper", name: "Chili Pepper" },
-  { cls: "fantasy-theme-OrchidMagenta", name: "Orchid Magenta" },
   { cls: "fantasy-theme-Black", name: "Dark" },
+  { cls: "fantasy-theme-SkyBlue", name: "Sky Blue" },
+  { cls: "fantasy-theme-OceanTeal", name: "Ocean Teal" },
+  { cls: "fantasy-theme-EmeraldGreen", name: "Emerald Green" },
+  { cls: "fantasy-theme-MysticPurple", name: "Mystic Purple" },
+  { cls: "fantasy-theme-OrchidMagenta", name: "Orchid Magenta" },
 ];
 
 export type BackgroundKind = "static" | "motion" | "image";
@@ -35,10 +33,15 @@ export interface Background {
   cls?: string;
   /** your pictures: CSS value for `--background-url` */
   url?: string;
+  /** stage backgrounds (four moving layers, src/stages.ts): which layer set */
+  stage?: StageFamily;
 }
 
 /** CSS backgrounds (src/backgrounds.ts is the source). The theme itself shows Plasma, still. */
-export const CSS_BG: Background[] = CSS_BACKGROUNDS.map((b): Background => ({ id: `css-${b.key}`, name: b.name, kind: b.kind, palette: b.palette, cls: `fantasy-easel-bg-${b.key}` }));
+export const CSS_BG: Background[] = [
+  ...CSS_BACKGROUNDS.map((b): Background => ({ id: `css-${b.key}`, name: b.name, kind: b.kind, palette: b.palette, cls: `fantasy-easel-bg-${b.key}` })),
+  ...STAGES.map((s): Background => ({ id: `css-${s.key}`, name: s.name, kind: "motion", palette: "fixed", cls: `fantasy-easel-bg-${s.key}`, stage: s.family })),
+];
 
 /** A picture the user added (Settings → Your pictures). */
 export interface UserImage {
@@ -75,23 +78,14 @@ export const MARKER_CLASS = "fantasy-easel";
 export const STILL_CLASS = "fantasy-easel-still";
 /** Present on body when motion backgrounds move even with OS reduced motion (motion: on). */
 export const FORCE_MOTION_CLASS = "fantasy-easel-force-motion";
+/** Present on body when moving backgrounds should pause while the window is not focused. */
+export const PAUSE_UNFOCUSED_CLASS = "fantasy-easel-pause-unfocused";
+/** Present on body while a stage background is chosen (shows the four-layer stage). */
+export const STAGE_CLASS = "fantasy-easel-stage-on";
 /** Present on body while a motion background is chosen (draws the moving layer). */
 export const MOTION_CLASS = "fantasy-easel-motion";
 
-/** Style Settings section id and keys of the Fantasy theme (`@settings` in theme.css). */
-export const SS_SECTION = "Fantasy-theme-settings";
-export const SS_KEYS = {
-  color: "fantasy-theme",
-  /** removed from the theme (2026-10-21); read once to bring old custom pictures over */
-  background: "fantasy-theme-background",
-  accent: "fantasy-theme-accent",
-  cardOff: "fantasy-theme-card-off",
-  /** old toggle (on = card layout); read on import if the new one was never saved */
-  cardLegacy: "fantasy-theme-card-layout",
-  url: ["background-url1", "background-url2", "background-url3"] as const,
-};
-
-/** Theme color default declared in theme.css `@settings`. */
+/** Theme color without a class (theme.css body defaults). */
 export const THEME_DEFAULTS = {
   color: "fantasy-theme-Black",
 };

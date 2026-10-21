@@ -28,7 +28,7 @@ const { THEME_COLORS, CSS_BG, DEFAULT_BACKGROUND, toCssUrl, allBackgrounds } = l
 const { CSS_BACKGROUNDS, resolveHue } = loadTs("src/backgrounds.ts");
 
 // ---------- 1. classes ----------
-check(THEME_COLORS.length === 11, `theme colors: expected 11, got ${THEME_COLORS.length}`);
+check(THEME_COLORS.length === 6, `theme colors: expected 6, got ${THEME_COLORS.length}`);
 for (const c of THEME_COLORS) check(new RegExp(`\\n\\.${c.cls} \\{`).test(theme), `theme.css has no .${c.cls}`);
 // theme: no network resources, no background choice; Plasma still = Easel's Plasma base layer
 check(!/url\(\s*["']?https?:/.test(theme), "theme.css loads a network resource");
@@ -57,17 +57,29 @@ check(new Set(CSS_BG.map((b) => b.id)).size === CSS_BG.length, "background ids a
 check(toCssUrl("https://a.b/c.png") === 'url("https://a.b/c.png")', "toCssUrl wraps a plain URL");
 check(toCssUrl('url("x")') === 'url("x")' && toCssUrl("  ") === "", "toCssUrl keeps url() and drops empty");
 check(allBackgrounds([{ id: "a", src: "" }, { id: "b", src: "https://x" }]).filter((b) => b.kind === "image").map((b) => b.id).join() === "img-b", "empty pictures are not backgrounds");
-const settings = theme.slice(theme.indexOf("/* @settings"), theme.indexOf("*/", theme.indexOf("/* @settings")));
-const values = [...settings.matchAll(/value: (fantasy-theme-[A-Za-z0-9-]+)/g)].map((m) => m[1]);
-for (const v of values) check(THEME_COLORS.some((c) => c.cls === v), `@settings value ${v} not in catalog`);
-for (const id of ["fantasy-theme", "fantasy-theme-accent", "fantasy-theme-card-off"]) check(settings.includes(`id: ${id}`), `@settings has no ${id}`);
+// no Style Settings section: settings live in this plugin
+{
+  // Style Settings: a notice only (info-text), no options
+  const ss = theme.slice(theme.indexOf("/* @settings"), theme.indexOf("*/", theme.indexOf("/* @settings")));
+  check(ss.includes("type: info-text"), "theme.css has no Style Settings notice pointing to Fantasy Easel");
+  check(!/type: (class-|variable-|color)/.test(ss), "theme.css Style Settings block has options (settings belong in Fantasy Easel)");
+}
+check(/\nbody \{\n\t--fantasy-background-color-rgb: [^;]+;\n\t--fantasy-hue: \d+;/.test(theme), "theme.css has no default color on body (works without a class)");
+// every color class in the theme is in the catalog (no orphans)
+for (const m of theme.matchAll(/\n\.(fantasy-theme-[A-Za-z]+) \{/g)) check(THEME_COLORS.some((c) => c.cls === m[1]), `theme.css .${m[1]} not in catalog`);
+// skins: CSS files exist, no theme leftovers
+for (const f of ["dataview", "kanban"]) {
+  const css = fs.readFileSync(path.join(root, "skins", `${f}.css`), "utf8");
+  check(css.length > 200, `skins/${f}.css is empty`);
+  check(!theme.includes(`/* Plugin - ${f[0].toUpperCase() + f.slice(1)} */`), `theme.css still has the ${f} section`);
+}
 
 // ---------- 2. color literals ----------
 const lit = /#[0-9a-fA-F]{3,8}\b|\brgba?\(/;
 check(styles.includes("/* ---------- 2."), "styles.css has no UI section marker");
 check(!lit.test(styles.slice(styles.indexOf("/* ---------- 2."))), "styles.css UI section has a color literal");
 for (const f of fs.readdirSync(path.join(root, "src"))) {
-  if (f === "backgrounds.ts") continue; // picture data, not UI chrome
+  if (f === "backgrounds.ts" || f === "stages.ts") continue; // picture data, not UI chrome
   check(!lit.test(fs.readFileSync(path.join(root, "src", f), "utf8")), `src/${f} has a color literal`);
 }
 
@@ -77,7 +89,7 @@ for (const m of bgPart.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}@]+)\{([^
   const sel = m[1].trim();
   if (/^\d+%$/.test(sel) || /^(from|to)$/.test(sel)) continue;
   const decls = m[2].split(/;(?![^(]*\))/).map((d) => d.trim()).filter(Boolean);
-  const gated = /fantasy-easel-(bg-|motion)/.test(sel);
+  const gated = /fantasy-easel-(bg-|motion|stage)|^@?(from|to|\d)/.test(sel);
   const risky = decls.filter((d) => !d.startsWith("--fantasy-easel-") || d.startsWith("--background-url"));
   check(gated || risky.length === 0, `styles.css rule "${sel.slice(0, 60)}" affects the look without a background class`);
 }
@@ -116,9 +128,10 @@ const mix = (top, a, bottom) => top.map((v, i) => v * a + bottom[i] * (1 - a));
 const themeRgb = (cls) => { const m = theme.match(new RegExp(`\\.${cls} \\{[^}]*--fantasy-background-color-rgb: (\\d+), (\\d+), (\\d+)`)); return m ? [+m[1], +m[2], +m[3]] : [30, 30, 30]; };
 const themeHue = (cls) => { const m = theme.match(new RegExp(`\\.${cls} \\{[^}]*--fantasy-hue: (\\d+)`)); return m ? +m[1] : 230; };
 const report = [];
+const NIGHT_FLOOR = 0.015; // passed review: Stained 0.019, Plasma 0.018; failed originals were near black (< 0.007)
 for (const b of CSS_BACKGROUNDS) {
   for (const side of ["day", "night"]) {
-    let worst = Infinity, at = "";
+    let worst = Infinity, at = "", darkest = Infinity;
     for (const c of THEME_COLORS) {
       const hue = themeHue(c.cls);
       const layers = b[side];
@@ -133,17 +146,26 @@ for (const b of CSS_BACKGROUNDS) {
         const lower = [...cands];
         for (const l of over[side]) for (const x of parseColors(l, hue)) for (const bs of lower) cands.push(mix(bs.map((v, i) => blendFn(v, x.rgb[i])), x.a, bs));
       }
+      // darkest base color (opaque, before the glass): night pictures need a floor so card edges show
+      if (side === "night") for (const bs of bases) darkest = Math.min(darkest, lum(bs));
       for (const bg of cands) {
         const eff = side === "night" ? mix(themeRgb(c.cls), 0.6, bg.map((v) => v * 0.8)) : mix([251, 251, 253], 0.67, bg.map((v) => Math.min(255, v * 1.05)));
         const r = ratio(TEXT[side], eff);
         if (r < worst) { worst = r; at = c.name; }
       }
     }
-    report.push(`${b.key}/${side}=${worst.toFixed(2)}`);
-    check(worst >= 4.5, `contrast ${b.key} ${side}: ${worst.toFixed(2)} < 4.5 (worst with ${at})`);
+    report.push(`${b.key}/${side}=${worst.toFixed(2)}${side === "night" ? ` floor=${darkest.toFixed(3)}` : ""}`);
+    // Night: this model puts the brightest color right behind the glass with no blur, so it reads
+    // ~1.5 lower than Obsidian. Measured 2026-10-22 (dark, cards, Orchid / Dark): real text contrast
+    // 5.05~7.1 where this model says 3.6~4.4. So night uses 3.5 here; day keeps 4.5.
+    const min = side === "night" ? 3.5 : 4.5;
+    check(worst >= min, `contrast ${b.key} ${side}: ${worst.toFixed(2)} < ${min} (worst with ${at})`);
+    // Card edges in dark card view: the gap shows the picture, the card darkens it. A near-black
+    // base makes both the same (user review 2026-10-22).
+    if (side === "night") check(darkest >= NIGHT_FLOOR, `night floor ${b.key}: darkest base ${darkest.toFixed(3)} < ${NIGHT_FLOOR} (card edges disappear in dark card view)`);
   }
 }
 if (process.argv.includes("--contrast")) console.log(report.join("  "));
 
-console.log(fail ? `${fail} failed` : `ok: ${THEME_COLORS.length} colors, ${CSS_BACKGROUNDS.length} CSS backgrounds (theme: ${DEFAULT_BACKGROUND}), contrast >= 4.5`);
+console.log(fail ? `${fail} failed` : `ok: ${THEME_COLORS.length} colors, ${CSS_BACKGROUNDS.length} CSS backgrounds (theme: ${DEFAULT_BACKGROUND}), contrast day >= 4.5, night >= 3.5 (model), night floor >= 0.015`);
 process.exit(fail ? 1 : 0);

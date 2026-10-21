@@ -39,10 +39,6 @@ body.theme-light,
 		linear-gradient(#b5dde6, #b5dde6);
 	--fantasy-easel-grad-prism:
 		conic-gradient(from 0deg at 50% 50%, #ff7fcf, #6fd0ff, #8ff07a, #ffd65c, #b48cff, #ff7fcf);
-	--fantasy-easel-grad-grain:
-		radial-gradient(ellipse 80% 70% at 50% 45%, rgb(255 255 255 / 0.6), transparent 75%),
-		repeating-linear-gradient(115deg, rgb(120 90 50 / 0.035) 0 2px, transparent 2px 6px),
-		linear-gradient(#f3ead9, #f3ead9);
 	--fantasy-easel-grad-stained:
 		radial-gradient(ellipse 70% 70% at 38% 46%, hsl(var(--fantasy-hue, 230) 60% 96% / 0.35), transparent 70%),
 		repeating-conic-gradient(from 15deg at 38% 46%, hsl(var(--fantasy-hue, 230) 85% 70%) 0deg 22deg, hsl(calc(var(--fantasy-hue, 230) + 70) 85% 76%) 22deg 47deg, hsl(calc(var(--fantasy-hue, 230) + 160) 80% 72%) 47deg 75deg, hsl(calc(var(--fantasy-hue, 230) + 240) 85% 76%) 75deg 100deg);
@@ -104,68 +100,63 @@ body.theme-light,
 body.theme-dark,
 .fantasy-easel-night {
 	--fantasy-easel-grad-bloom:
-		radial-gradient(ellipse 70% 60% at 15% 20%, hsl(var(--fantasy-hue, 230) 80% 34%), transparent 60%),
-		radial-gradient(ellipse 60% 60% at 85% 25%, hsl(calc(var(--fantasy-hue, 230) + 50) 80% 30%), transparent 60%),
-		radial-gradient(ellipse 70% 60% at 70% 90%, hsl(calc(var(--fantasy-hue, 230) - 50) 75% 28%), transparent 60%),
-		radial-gradient(ellipse 60% 50% at 20% 85%, hsl(calc(var(--fantasy-hue, 230) + 120) 70% 26%), transparent 60%),
-		linear-gradient(hsl(var(--fantasy-hue, 230) 45% 7%), hsl(var(--fantasy-hue, 230) 45% 7%));
+		radial-gradient(ellipse 70% 60% at 15% 20%, hsl(var(--fantasy-hue, 230) 80% 56%), transparent 60%),
+		radial-gradient(ellipse 60% 60% at 85% 25%, hsl(calc(var(--fantasy-hue, 230) + 50) 80% 56%), transparent 60%),
+		radial-gradient(ellipse 70% 60% at 70% 90%, hsl(calc(var(--fantasy-hue, 230) - 50) 75% 56%), transparent 60%),
+		radial-gradient(ellipse 60% 50% at 20% 85%, hsl(calc(var(--fantasy-hue, 230) + 120) 70% 56%), transparent 60%),
+		linear-gradient(hsl(var(--fantasy-hue, 230) 45% 43.2%), hsl(var(--fantasy-hue, 230) 45% 43.2%));
 	--fantasy-easel-grad-silk:
-		linear-gradient(180deg, hsl(var(--fantasy-hue, 230) 50% 5% / 0.55), transparent 70%),
-		conic-gradient(from 210deg at 30% 40%, hsl(var(--fantasy-hue, 230) 75% 30%), hsl(calc(var(--fantasy-hue, 230) + 40) 75% 26%), hsl(calc(var(--fantasy-hue, 230) + 100) 70% 24%), hsl(calc(var(--fantasy-hue, 230) + 180) 60% 22%), hsl(var(--fantasy-hue, 230) 75% 30%));
+		linear-gradient(180deg, hsl(var(--fantasy-hue, 230) 50% 41.8% / 0.55), transparent 70%),
+		conic-gradient(from 210deg at 30% 40%, hsl(var(--fantasy-hue, 230) 75% 56%), hsl(calc(var(--fantasy-hue, 230) + 40) 75% 56%), hsl(calc(var(--fantasy-hue, 230) + 100) 70% 56%), hsl(calc(var(--fantasy-hue, 230) + 180) 60% 54.5%), hsl(var(--fantasy-hue, 230) 75% 56%));
 	--fantasy-easel-grad-veil:
-		linear-gradient(100deg, transparent 8%, hsl(calc(var(--fantasy-hue, 230) + 60) 85% 38% / 0.65) 24%, transparent 38%, hsl(var(--fantasy-hue, 230) 85% 36% / 0.6) 55%, transparent 70%, hsl(calc(var(--fantasy-hue, 230) - 60) 80% 34% / 0.6) 85%, transparent 96%),
-		linear-gradient(180deg, hsl(calc(var(--fantasy-hue, 230) + 20) 50% 6%), hsl(var(--fantasy-hue, 230) 45% 11%));
+		linear-gradient(100deg, transparent 8%, hsl(calc(var(--fantasy-hue, 230) + 60) 85% 56% / 0.65) 24%, transparent 38%, hsl(var(--fantasy-hue, 230) 85% 56% / 0.6) 55%, transparent 70%, hsl(calc(var(--fantasy-hue, 230) - 60) 80% 56% / 0.6) 85%, transparent 96%),
+		linear-gradient(180deg, hsl(calc(var(--fantasy-hue, 230) + 20) 50% 42.5%), hsl(var(--fantasy-hue, 230) 45% 46.2%));
 	--fantasy-easel-grad-dusk:
-		linear-gradient(160deg, hsl(var(--fantasy-hue, 230) 75% 34%) 0%, hsl(calc(var(--fantasy-hue, 230) + 40) 72% 28%) 40%, hsl(calc(var(--fantasy-hue, 230) + 90) 70% 26%) 75%, hsl(calc(var(--fantasy-hue, 230) + 130) 65% 22%) 100%);
+		linear-gradient(160deg, hsl(var(--fantasy-hue, 230) 75% 56%) 0%, hsl(calc(var(--fantasy-hue, 230) + 40) 72% 56%) 40%, hsl(calc(var(--fantasy-hue, 230) + 90) 70% 56%) 75%, hsl(calc(var(--fantasy-hue, 230) + 130) 65% 54.5%) 100%);
 	--fantasy-easel-grad-horizon:
 		radial-gradient(ellipse 16% 28% at 80% 18%, rgb(190 205 255 / 0.45), transparent 70%),
-		radial-gradient(ellipse 80% 40% at 50% 100%, rgb(200 80 160 / 0.5), transparent 70%),
-		linear-gradient(180deg, #1b2a72 0%, #2c2a8c 40%, #55308e 70%, #7a3478 100%);
+		radial-gradient(ellipse 80% 40% at 50% 100%, rgb(201 84 162 / 0.5), transparent 70%),
+		linear-gradient(180deg, #4a61d4 0%, #5552cb 40%, #8357c6 70%, #bc62b9 100%);
 	--fantasy-easel-grad-aurora:
-		radial-gradient(ellipse 60% 40% at 30% 35%, rgb(25 230 140 / 0.55), transparent 65%),
+		radial-gradient(ellipse 60% 40% at 30% 35%, rgb(53 233 154 / 0.55), transparent 65%),
 		radial-gradient(ellipse 55% 45% at 70% 30%, rgb(122 60 255 / 0.5), transparent 65%),
-		radial-gradient(ellipse 70% 35% at 50% 78%, rgb(0 194 255 / 0.35), transparent 65%),
-		linear-gradient(#04060f, #04060f);
+		radial-gradient(ellipse 70% 35% at 50% 78%, rgb(31 201 255 / 0.35), transparent 65%),
+		linear-gradient(#2c42a4, #2c42a4);
 	--fantasy-easel-grad-prism:
-		radial-gradient(ellipse 45% 80% at 50% 50%, rgb(4 2 12 / 0.75), transparent 75%),
-		conic-gradient(from 0deg at 50% 50%, #8a1166, #116a8a, #3a138a, #8a5a11, #8a1166);
-	--fantasy-easel-grad-grain:
-		radial-gradient(ellipse 45% 55% at 20% 30%, rgb(95 110 200 / 0.6), transparent 70%),
-		radial-gradient(ellipse 40% 50% at 80% 70%, rgb(150 90 170 / 0.5), transparent 70%),
-		repeating-linear-gradient(115deg, rgb(255 255 255 / 0.03) 0 2px, transparent 2px 6px),
-		linear-gradient(160deg, #46507a 0%, #3c4466 50%, #4a3c66 100%);
+		radial-gradient(ellipse 45% 80% at 50% 50%, rgb(58 29 175 / 0.75), transparent 75%),
+		conic-gradient(from 0deg at 50% 50%, #e637b2, #37b8e6, #713ae4, #e6a137, #e637b2);
 	--fantasy-easel-grad-stained:
 		radial-gradient(ellipse 70% 70% at 38% 46%, hsl(var(--fantasy-hue, 230) 60% 8% / 0.35), transparent 70%),
 		repeating-conic-gradient(from 15deg at 38% 46%, hsl(var(--fantasy-hue, 230) 80% 30%) 0deg 22deg, hsl(calc(var(--fantasy-hue, 230) + 70) 80% 25%) 22deg 47deg, hsl(calc(var(--fantasy-hue, 230) + 160) 75% 27%) 47deg 75deg, hsl(calc(var(--fantasy-hue, 230) + 240) 80% 25%) 75deg 100deg);
 	--fantasy-easel-grad-ripple:
-		repeating-radial-gradient(circle at 18% 80%, hsl(calc(var(--fantasy-hue, 230) + 120) 80% 30% / 0.55) 0 4%, transparent 4% 9%),
-		repeating-radial-gradient(circle at 75% 25%, hsl(var(--fantasy-hue, 230) 80% 30%) 0 6%, hsl(calc(var(--fantasy-hue, 230) + 50) 75% 22%) 6% 12%);
+		repeating-radial-gradient(circle at 18% 80%, hsl(calc(var(--fantasy-hue, 230) + 120) 80% 56% / 0.55) 0 4%, transparent 4% 9%),
+		repeating-radial-gradient(circle at 75% 25%, hsl(var(--fantasy-hue, 230) 80% 56%) 0 6%, hsl(calc(var(--fantasy-hue, 230) + 50) 75% 54.5%) 6% 12%);
 	--fantasy-easel-grad-holo:
-		radial-gradient(ellipse 45% 55% at 0% 0%, #a0306e, transparent 75%),
-		radial-gradient(ellipse 45% 55% at 50% 0%, #1d6f92, transparent 75%),
-		radial-gradient(ellipse 45% 55% at 100% 0%, #4a7a1f, transparent 75%),
-		radial-gradient(ellipse 45% 55% at 0% 100%, #4b2a9a, transparent 75%),
-		radial-gradient(ellipse 45% 55% at 50% 100%, #9a5a1d, transparent 75%),
-		radial-gradient(ellipse 45% 55% at 100% 100%, #1d7f6a, transparent 75%),
-		linear-gradient(#241a40, #241a40);
+		radial-gradient(ellipse 45% 55% at 0% 0%, #cb5295, transparent 75%),
+		radial-gradient(ellipse 45% 55% at 50% 0%, #44adda, transparent 75%),
+		radial-gradient(ellipse 45% 55% at 100% 0%, #8bd24c, transparent 75%),
+		radial-gradient(ellipse 45% 55% at 0% 100%, #744fcf, transparent 75%),
+		radial-gradient(ellipse 45% 55% at 50% 100%, #db8d42, transparent 75%),
+		radial-gradient(ellipse 45% 55% at 100% 100%, #48d5b7, transparent 75%),
+		linear-gradient(#6a4eb7, #6a4eb7);
 	--fantasy-easel-grad-sunburst:
 		radial-gradient(ellipse 60% 45% at 50% 100%, rgb(255 140 90 / 0.4), transparent 70%),
-		repeating-conic-gradient(from 0deg at 50% 115%, #5e2a80 0deg 7deg, #4a2272 7deg 14deg, #74307a 14deg 21deg);
+		repeating-conic-gradient(from 0deg at 50% 115%, #9b56c8 0deg 7deg, #8f52cb 7deg 14deg, #b85ec0 14deg 21deg);
 	--fantasy-easel-grad-marble:
-		linear-gradient(35deg, transparent 18%, hsl(calc(var(--fantasy-hue, 230) + 40) 70% 36% / 0.75) 24%, transparent 30%, transparent 58%, hsl(calc(var(--fantasy-hue, 230) - 30) 65% 34% / 0.7) 64%, transparent 70%),
-		linear-gradient(-20deg, transparent 30%, hsl(calc(var(--fantasy-hue, 230) + 150) 65% 32% / 0.6) 38%, transparent 46%, transparent 76%, hsl(var(--fantasy-hue, 230) 75% 36% / 0.65) 82%, transparent 88%),
-		linear-gradient(160deg, hsl(var(--fantasy-hue, 230) 45% 17%), hsl(calc(var(--fantasy-hue, 230) + 30) 40% 14%));
+		linear-gradient(35deg, transparent 18%, hsl(calc(var(--fantasy-hue, 230) + 40) 70% 56% / 0.75) 24%, transparent 30%, transparent 58%, hsl(calc(var(--fantasy-hue, 230) - 30) 65% 56% / 0.7) 64%, transparent 70%),
+		linear-gradient(-20deg, transparent 30%, hsl(calc(var(--fantasy-hue, 230) + 150) 65% 56% / 0.6) 38%, transparent 46%, transparent 76%, hsl(var(--fantasy-hue, 230) 75% 56% / 0.65) 82%, transparent 88%),
+		linear-gradient(160deg, hsl(var(--fantasy-hue, 230) 45% 50.8%), hsl(calc(var(--fantasy-hue, 230) + 30) 40% 48.5%));
 	--fantasy-easel-grad-tide:
-		linear-gradient(115deg, hsl(var(--fantasy-hue, 230) 65% 14%) 0%, hsl(calc(var(--fantasy-hue, 230) + 30) 70% 26%) 25%, hsl(calc(var(--fantasy-hue, 230) - 20) 75% 36%) 50%, hsl(calc(var(--fantasy-hue, 230) + 30) 70% 26%) 75%, hsl(var(--fantasy-hue, 230) 65% 14%) 100%);
+		linear-gradient(115deg, hsl(var(--fantasy-hue, 230) 65% 48.5%) 0%, hsl(calc(var(--fantasy-hue, 230) + 30) 70% 56%) 25%, hsl(calc(var(--fantasy-hue, 230) - 20) 75% 56%) 50%, hsl(calc(var(--fantasy-hue, 230) + 30) 70% 56%) 75%, hsl(var(--fantasy-hue, 230) 65% 48.5%) 100%);
 	--fantasy-easel-grad-swell:
-		linear-gradient(170deg, #0f4766 0%, #11678a 35%, #0f84a0 65%, #2463ad 100%);
+		linear-gradient(170deg, #38a5e2 0%, #37b4e6 35%, #32c8ec 65%, #4589d8 100%);
 	--fantasy-easel-grad-iris:
-		conic-gradient(from 210deg at 30% 40%, hsl(var(--fantasy-hue, 230) 75% 32%), hsl(calc(var(--fantasy-hue, 230) + 60) 75% 28%), hsl(calc(var(--fantasy-hue, 230) + 150) 70% 26%), hsl(calc(var(--fantasy-hue, 230) + 240) 65% 28%), hsl(var(--fantasy-hue, 230) 75% 32%));
+		conic-gradient(from 210deg at 30% 40%, hsl(var(--fantasy-hue, 230) 75% 56%), hsl(calc(var(--fantasy-hue, 230) + 60) 75% 56%), hsl(calc(var(--fantasy-hue, 230) + 150) 70% 56%), hsl(calc(var(--fantasy-hue, 230) + 240) 65% 56%), hsl(var(--fantasy-hue, 230) 75% 56%));
 	--fantasy-easel-grad-liquid:
-		radial-gradient(ellipse 55% 60% at 25% 25%, hsl(var(--fantasy-hue, 230) 85% 27%), transparent 70%),
-		radial-gradient(ellipse 50% 55% at 80% 70%, hsl(calc(var(--fantasy-hue, 230) + 60) 85% 24%), transparent 70%),
-		radial-gradient(ellipse 45% 50% at 70% 15%, hsl(calc(var(--fantasy-hue, 230) + 140) 80% 22%), transparent 70%),
-		linear-gradient(hsl(calc(var(--fantasy-hue, 230) + 20) 55% 11%), hsl(calc(var(--fantasy-hue, 230) + 20) 55% 11%));
+		radial-gradient(ellipse 55% 60% at 25% 25%, hsl(var(--fantasy-hue, 230) 85% 56%), transparent 70%),
+		radial-gradient(ellipse 50% 55% at 80% 70%, hsl(calc(var(--fantasy-hue, 230) + 60) 85% 56%), transparent 70%),
+		radial-gradient(ellipse 45% 50% at 70% 15%, hsl(calc(var(--fantasy-hue, 230) + 140) 80% 54.5%), transparent 70%),
+		linear-gradient(hsl(calc(var(--fantasy-hue, 230) + 20) 55% 46.2%), hsl(calc(var(--fantasy-hue, 230) + 20) 55% 46.2%));
 	--fantasy-easel-grad-liquid-b:
 		radial-gradient(ellipse 45% 55% at 70% 30%, hsl(calc(var(--fantasy-hue, 230) + 30) 80% 24%), transparent 70%),
 		radial-gradient(ellipse 40% 50% at 25% 75%, hsl(calc(var(--fantasy-hue, 230) - 70) 80% 22%), transparent 70%),
@@ -173,7 +164,7 @@ body.theme-dark,
 		linear-gradient(hsl(var(--fantasy-hue, 230) 40% 0% / 0), hsl(var(--fantasy-hue, 230) 40% 0% / 0));
 	--fantasy-easel-blend-liquid: screen;
 	--fantasy-easel-grad-aurora-flow:
-		linear-gradient(100deg, #0b3a2c 0%, #0d2a55 30%, #2a1a5e 60%, #0d3d36 100%);
+		linear-gradient(100deg, #27ce9d 0%, #2c74df 30%, #6c4ece 60%, #2cceb6 100%);
 	--fantasy-easel-grad-aurora-flow-b:
 		linear-gradient(80deg, transparent 5%, rgb(20 210 130 / 0.75) 18%, transparent 32%, rgb(120 70 255 / 0.7) 48%, transparent 62%, rgb(0 170 255 / 0.65) 78%, transparent 92%);
 	--fantasy-easel-blend-aurora-flow: screen;
@@ -183,7 +174,7 @@ body.theme-dark,
 		conic-gradient(from 90deg at 60% 45%, hsl(calc(var(--fantasy-hue, 230) + 120) 80% 24%), hsl(calc(var(--fantasy-hue, 230) + 200) 80% 22%), hsl(calc(var(--fantasy-hue, 230) + 300) 80% 24%), hsl(calc(var(--fantasy-hue, 230) + 120) 80% 24%));
 	--fantasy-easel-blend-plasma: screen;
 	--fantasy-easel-grad-lava:
-		linear-gradient(160deg, #3a0d06 0%, #5a1208 40%, #4a0820 75%, #5a2a06 100%);
+		linear-gradient(160deg, #db3117 0%, #eb3920 40%, #e61964 75%, #f0761a 100%);
 	--fantasy-easel-grad-lava-b:
 		radial-gradient(ellipse 30% 45% at 30% 60%, rgb(255 90 20 / 0.7), transparent 70%),
 		radial-gradient(ellipse 28% 40% at 72% 35%, rgb(230 20 90 / 0.6), transparent 70%),
@@ -199,7 +190,6 @@ body.fantasy-easel.fantasy-easel-bg-dusk { --background-url: var(--fantasy-easel
 body.fantasy-easel.fantasy-easel-bg-horizon { --background-url: var(--fantasy-easel-grad-horizon); }
 body.fantasy-easel.fantasy-easel-bg-aurora { --background-url: var(--fantasy-easel-grad-aurora); }
 body.fantasy-easel.fantasy-easel-bg-prism { --background-url: var(--fantasy-easel-grad-prism); }
-body.fantasy-easel.fantasy-easel-bg-grain { --background-url: var(--fantasy-easel-grad-grain); }
 body.fantasy-easel.fantasy-easel-bg-stained { --background-url: var(--fantasy-easel-grad-stained); }
 body.fantasy-easel.fantasy-easel-bg-ripple { --background-url: var(--fantasy-easel-grad-ripple); }
 body.fantasy-easel.fantasy-easel-bg-holo { --background-url: var(--fantasy-easel-grad-holo); }
@@ -224,6 +214,449 @@ body.fantasy-easel.fantasy-easel-bg-lava { --background-url: var(--fantasy-easel
 @keyframes fantasy-easel-sway { 0% { rotate: -7deg; } 100% { rotate: 6deg; } }
 @keyframes fantasy-easel-wanderB { 0% { translate: 10% 8%; } 18% { translate: -6% 11%; } 39% { translate: -12% -4%; } 58% { translate: 3% -12%; } 79% { translate: 12% -2%; } 100% { translate: 5% 10%; } }
 @keyframes fantasy-easel-swayB { 0% { rotate: 5deg; } 35% { rotate: -4deg; } 100% { rotate: -8deg; } }
+
+/* Stage backgrounds (src/stages.ts): pictures per mode and slider values. Layers: section 1-4. */
+.theme-dark.fantasy-easel-bg-sunlit-canopy,
+.fantasy-easel-night.fantasy-easel-bg-sunlit-canopy {
+	--fe-base: linear-gradient(145deg, #1b4235 0%, #274a2b 50%, #193c42 100%);
+	--fe-1: #389e6c;
+	--fe-2: #c29632;
+	--fe-3: #248e84;
+	--fe-4: #6eb244;
+	--fe-wave: repeating-conic-gradient(from 15deg at 45% 45%, rgba(195, 220, 95, 0.36) 0deg 20deg, transparent 20deg 40deg, rgba(60, 190, 138, 0.36) 40deg 60deg, transparent 60deg 72deg);
+	--fe-b2: screen;
+	--fe-b3: soft-light;
+}
+.theme-light.fantasy-easel-bg-sunlit-canopy,
+.fantasy-easel-day.fantasy-easel-bg-sunlit-canopy {
+	--fe-base: linear-gradient(145deg, #88cfa8 0%, #b5db8c 50%, #7ec6b8 100%);
+	--fe-1: #3eb27c;
+	--fe-2: #ebb238;
+	--fe-3: #32a29c;
+	--fe-4: #72be3e;
+	--fe-wave: repeating-conic-gradient(from 15deg at 45% 45%, rgba(245, 200, 65, 0.42) 0deg 20deg, transparent 20deg 40deg, rgba(45, 165, 112, 0.4) 40deg 60deg, transparent 60deg 72deg);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-sunlit-canopy { --fe-speed: 2.2; --fe-morph: 0.4; --fe-hue: 36deg; --fe-blur: 24px; }
+
+.theme-dark.fantasy-easel-bg-tidal-caustics,
+.fantasy-easel-night.fantasy-easel-bg-tidal-caustics {
+	--fe-base: linear-gradient(155deg, #173d56 0%, #1c3360 50%, #16484e 100%);
+	--fe-1: #24a4b8;
+	--fe-2: #3874d2;
+	--fe-3: #26ba9e;
+	--fe-4: #588ee6;
+	--fe-wave: repeating-radial-gradient(ellipse 40% 32% at 35% 60%, rgba(75, 220, 235, 0.42) 0 7%, transparent 7% 15%), repeating-radial-gradient(ellipse 34% 42% at 68% 36%, rgba(90, 155, 248, 0.38) 0 8%, transparent 8% 16%);
+	--fe-b2: screen;
+	--fe-b3: soft-light;
+}
+.theme-light.fantasy-easel-bg-tidal-caustics,
+.fantasy-easel-day.fantasy-easel-bg-tidal-caustics {
+	--fe-base: linear-gradient(155deg, #7dcde0 0%, #86b8ec 50%, #78d8c4 100%);
+	--fe-1: #2698bc;
+	--fe-2: #447cd6;
+	--fe-3: #22b298;
+	--fe-4: #52a2e2;
+	--fe-wave: repeating-radial-gradient(ellipse 40% 32% at 35% 60%, rgba(28, 140, 180, 0.4) 0 7%, transparent 7% 15%), repeating-radial-gradient(ellipse 34% 42% at 68% 36%, rgba(60, 110, 210, 0.36) 0 8%, transparent 8% 16%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-tidal-caustics { --fe-speed: 0.8; --fe-morph: 1.3; --fe-hue: 36deg; --fe-blur: 45px; }
+
+.theme-dark.fantasy-easel-bg-alpine-mist,
+.fantasy-easel-night.fantasy-easel-bg-alpine-mist {
+	--fe-base: linear-gradient(165deg, #26384e 0%, #332e54 50%, #1e4246 100%);
+	--fe-1: #4e88a0;
+	--fe-2: #a6688a;
+	--fe-3: #6a6eb8;
+	--fe-4: #ca805e;
+	--fe-wave: repeating-linear-gradient(112deg, transparent 0 9%, rgba(165, 195, 225, 0.32) 9% 18%, transparent 18% 28%, rgba(220, 150, 170, 0.3) 28% 36%);
+	--fe-b2: screen;
+	--fe-b3: soft-light;
+}
+.theme-light.fantasy-easel-bg-alpine-mist,
+.fantasy-easel-day.fantasy-easel-bg-alpine-mist {
+	--fe-base: linear-gradient(165deg, #9abed8 0%, #b8b0e2 50%, #e4b8aa 100%);
+	--fe-1: #5288b2;
+	--fe-2: #d07492;
+	--fe-3: #7672c2;
+	--fe-4: #da8c62;
+	--fe-wave: repeating-linear-gradient(112deg, transparent 0 9%, rgba(80, 120, 170, 0.34) 9% 18%, transparent 18% 28%, rgba(190, 100, 130, 0.32) 28% 36%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-alpine-mist { --fe-speed: 0.63; --fe-morph: 1.3; --fe-hue: 36deg; --fe-blur: 12px; }
+
+.theme-dark.fantasy-easel-bg-polar-curtain,
+.fantasy-easel-night.fantasy-easel-bg-polar-curtain {
+	--fe-base: linear-gradient(135deg, #183a3e 0%, #222c58 50%, #3a2052 100%);
+	--fe-1: #28c290;
+	--fe-2: #8852e6;
+	--fe-3: #24a0d0;
+	--fe-4: #d44898;
+	--fe-wave: repeating-linear-gradient(82deg, transparent 0 6%, rgba(45, 225, 160, 0.46) 10% 17%, transparent 21% 29%, rgba(160, 95, 248, 0.44) 33% 40%, transparent 45% 52%);
+	--fe-b2: screen;
+	--fe-b3: screen;
+}
+.theme-light.fantasy-easel-bg-polar-curtain,
+.fantasy-easel-day.fantasy-easel-bg-polar-curtain {
+	--fe-base: linear-gradient(135deg, #86dec6 0%, #98c2f0 50%, #c6a8f0 100%);
+	--fe-1: #20ac82;
+	--fe-2: #7e52d2;
+	--fe-3: #2690c6;
+	--fe-4: #ce5098;
+	--fe-wave: repeating-linear-gradient(82deg, transparent 0 6%, rgba(22, 160, 115, 0.42) 10% 17%, transparent 21% 29%, rgba(120, 60, 210, 0.4) 33% 40%, transparent 45% 52%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-polar-curtain { --fe-speed: 0.63; --fe-morph: 1.3; --fe-hue: 36deg; --fe-blur: 9px; }
+
+.theme-dark.fantasy-easel-bg-bioluminescence,
+.fantasy-easel-night.fantasy-easel-bg-bioluminescence {
+	--fe-base: linear-gradient(150deg, #182b54 0%, #262156 50%, #153a4e 100%);
+	--fe-1: #1ebdca;
+	--fe-2: #d03c8e;
+	--fe-3: #4c6ee2;
+	--fe-4: #9048de;
+	--fe-wave: radial-gradient(circle at 32% 65%, rgba(40, 225, 220, 0.52) 0%, transparent 42%), radial-gradient(circle at 70% 34%, rgba(235, 70, 165, 0.5) 0%, transparent 42%);
+	--fe-b2: screen;
+	--fe-b3: screen;
+}
+.theme-light.fantasy-easel-bg-bioluminescence,
+.fantasy-easel-day.fantasy-easel-bg-bioluminescence {
+	--fe-base: linear-gradient(150deg, #88bce8 0%, #a2a8f0 50%, #80d4da 100%);
+	--fe-1: #1aa0b6;
+	--fe-2: #ce4894;
+	--fe-3: #466ad2;
+	--fe-4: #844cd6;
+	--fe-wave: radial-gradient(circle at 32% 65%, rgba(18, 150, 170, 0.46) 0%, transparent 42%), radial-gradient(circle at 70% 34%, rgba(200, 50, 135, 0.44) 0%, transparent 42%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-bioluminescence { --fe-speed: 0.9; --fe-morph: 1.3; --fe-hue: 36deg; --fe-blur: 12px; }
+
+.theme-dark.fantasy-easel-bg-mirage-oasis,
+.fantasy-easel-night.fantasy-easel-bg-mirage-oasis {
+	--fe-base: linear-gradient(160deg, #4c2820 0%, #4e2238 50%, #382252 100%);
+	--fe-1: #d46836;
+	--fe-2: #a0429c;
+	--fe-3: #d04268;
+	--fe-4: #dc983c;
+	--fe-wave: repeating-linear-gradient(22deg, transparent 0 8%, rgba(240, 150, 70, 0.38) 8% 16%, transparent 16% 26%, rgba(200, 80, 150, 0.36) 26% 34%);
+	--fe-b2: screen;
+	--fe-b3: soft-light;
+}
+.theme-light.fantasy-easel-bg-mirage-oasis,
+.fantasy-easel-day.fantasy-easel-bg-mirage-oasis {
+	--fe-base: linear-gradient(160deg, #edb482 0%, #ea9ca8 50%, #c89ee6 100%);
+	--fe-1: #d26232;
+	--fe-2: #9842a2;
+	--fe-3: #ce446c;
+	--fe-4: #da9432;
+	--fe-wave: repeating-linear-gradient(22deg, transparent 0 8%, rgba(200, 90, 30, 0.36) 8% 16%, transparent 16% 26%, rgba(160, 50, 130, 0.34) 26% 34%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-mirage-oasis { --fe-speed: 0.9; --fe-morph: 1.3; --fe-hue: 36deg; --fe-blur: 6px; }
+
+.theme-dark.fantasy-easel-bg-liquid-dichroic,
+.fantasy-easel-night.fantasy-easel-bg-liquid-dichroic {
+	--fe-base: conic-gradient(from 40deg at 42% 48%, #224468, #4c2664, #642848, #205254, #224468);
+	--fe-1: #2cb0d0;
+	--fe-2: #cc4698;
+	--fe-3: #824ee2;
+	--fe-4: #d09c3c;
+	--fe-wave: conic-gradient(from 210deg at 58% 52%, rgba(45, 205, 225, 0.48), rgba(215, 75, 165, 0.48), rgba(225, 175, 65, 0.46), rgba(125, 85, 235, 0.48), rgba(45, 205, 225, 0.48));
+	--fe-b2: screen;
+	--fe-b3: soft-light;
+}
+.theme-light.fantasy-easel-bg-liquid-dichroic,
+.fantasy-easel-day.fantasy-easel-bg-liquid-dichroic {
+	--fe-base: conic-gradient(from 40deg at 42% 48%, #86c8ec, #c6a2f0, #f09ec2, #82dec8, #86c8ec);
+	--fe-1: #2496bc;
+	--fe-2: #c64896;
+	--fe-3: #784cd6;
+	--fe-4: #d29630;
+	--fe-wave: conic-gradient(from 210deg at 58% 52%, rgba(35, 165, 205, 0.45), rgba(205, 65, 155, 0.45), rgba(215, 155, 45, 0.42), rgba(115, 75, 215, 0.45), rgba(35, 165, 205, 0.45));
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-liquid-dichroic { --fe-speed: 0.9; --fe-morph: 1.3; --fe-hue: 36deg; --fe-blur: 45px; }
+
+.theme-dark.fantasy-easel-bg-ink-in-water,
+.fantasy-easel-night.fantasy-easel-bg-ink-in-water {
+	--fe-base: linear-gradient(145deg, #1f3458 0%, #3a2454 50%, #1c424a 100%);
+	--fe-1: #3c7ee0;
+	--fe-2: #c6428e;
+	--fe-3: #28ae9a;
+	--fe-4: #8c4ee8;
+	--fe-wave: radial-gradient(ellipse 46% 56% at 34% 38%, rgba(75, 145, 245, 0.5), transparent 64%), radial-gradient(ellipse 56% 44% at 68% 64%, rgba(225, 75, 155, 0.48), transparent 64%);
+	--fe-b2: screen;
+	--fe-b3: soft-light;
+}
+.theme-light.fantasy-easel-bg-ink-in-water,
+.fantasy-easel-day.fantasy-easel-bg-ink-in-water {
+	--fe-base: linear-gradient(145deg, #94bce8 0%, #caa8ec 50%, #8ad8cc 100%);
+	--fe-1: #326cce;
+	--fe-2: #c2408c;
+	--fe-3: #229c8a;
+	--fe-4: #824ace;
+	--fe-wave: radial-gradient(ellipse 46% 56% at 34% 38%, rgba(55, 115, 225, 0.46), transparent 64%), radial-gradient(ellipse 56% 44% at 68% 64%, rgba(205, 60, 140, 0.44), transparent 64%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-ink-in-water { --fe-speed: 0.9; --fe-morph: 1.2; --fe-hue: 45deg; --fe-blur: 22px; }
+
+.theme-dark.fantasy-easel-bg-solar-flare,
+.fantasy-easel-night.fantasy-easel-bg-solar-flare {
+	--fe-base: linear-gradient(155deg, #4e2024 0%, #481e3e 50%, #4c3018 100%);
+	--fe-1: #e05832;
+	--fe-2: #c03274;
+	--fe-3: #e0922c;
+	--fe-4: #9036a0;
+	--fe-wave: repeating-conic-gradient(from 0deg at 42% 56%, rgba(240, 115, 50, 0.42) 0deg 18deg, transparent 18deg 36deg, rgba(215, 55, 125, 0.4) 36deg 54deg, transparent 54deg 72deg);
+	--fe-b2: screen;
+	--fe-b3: soft-light;
+}
+.theme-light.fantasy-easel-bg-solar-flare,
+.fantasy-easel-day.fantasy-easel-bg-solar-flare {
+	--fe-base: linear-gradient(155deg, #f2a888 0%, #ee98b8 50%, #f0c27e 100%);
+	--fe-1: #d8502c;
+	--fe-2: #c23676;
+	--fe-3: #da8c22;
+	--fe-4: #8e3ca2;
+	--fe-wave: repeating-conic-gradient(from 0deg at 42% 56%, rgba(220, 85, 35, 0.4) 0deg 18deg, transparent 18deg 36deg, rgba(195, 45, 115, 0.38) 36deg 54deg, transparent 54deg 72deg);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-solar-flare { --fe-speed: 0.9; --fe-morph: 1.2; --fe-hue: 45deg; --fe-blur: 39px; }
+
+.theme-dark.fantasy-easel-bg-sakura-wind,
+.fantasy-easel-night.fantasy-easel-bg-sakura-wind {
+	--fe-base: linear-gradient(135deg, #44223a 0%, #30244e 50%, #442a2c 100%);
+	--fe-1: #cc4e80;
+	--fe-2: #8454cc;
+	--fe-3: #d0724c;
+	--fe-4: #369e94;
+	--fe-wave: repeating-linear-gradient(128deg, transparent 0 10%, rgba(230, 105, 155, 0.4) 10% 19%, transparent 19% 30%, rgba(155, 115, 235, 0.38) 30% 39%);
+	--fe-b2: screen;
+	--fe-b3: soft-light;
+}
+.theme-light.fantasy-easel-bg-sakura-wind,
+.fantasy-easel-day.fantasy-easel-bg-sakura-wind {
+	--fe-base: linear-gradient(135deg, #f0aec8 0%, #cab2f0 50%, #f2bea4 100%);
+	--fe-1: #cc4c7e;
+	--fe-2: #8052c8;
+	--fe-3: #d2704a;
+	--fe-4: #32a296;
+	--fe-wave: repeating-linear-gradient(128deg, transparent 0 10%, rgba(205, 75, 130, 0.38) 10% 19%, transparent 19% 30%, rgba(130, 85, 210, 0.36) 30% 39%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-sakura-wind { --fe-speed: 0.9; --fe-morph: 1.2; --fe-hue: 45deg; --fe-blur: 14px; }
+
+.theme-dark.fantasy-easel-bg-monsoon-dusk,
+.fantasy-easel-night.fantasy-easel-bg-monsoon-dusk {
+	--fe-base: linear-gradient(175deg, #1e2c52 0%, #322252 50%, #422040 100%);
+	--fe-1: #2e90d0;
+	--fe-2: #c03e82;
+	--fe-3: #6e4ed0;
+	--fe-4: #cc8036;
+	--fe-wave: repeating-linear-gradient(96deg, transparent 0 7%, rgba(95, 185, 245, 0.34) 7% 12%, transparent 12% 21%, rgba(225, 95, 165, 0.34) 21% 26%);
+	--fe-b2: screen;
+	--fe-b3: soft-light;
+}
+.theme-light.fantasy-easel-bg-monsoon-dusk,
+.fantasy-easel-day.fantasy-easel-bg-monsoon-dusk {
+	--fe-base: linear-gradient(175deg, #90b4e8 0%, #b4a0ea 50%, #e69ec0 100%);
+	--fe-1: #287cbe;
+	--fe-2: #bc3e7e;
+	--fe-3: #6648ca;
+	--fe-4: #ca7c2e;
+	--fe-wave: repeating-linear-gradient(96deg, transparent 0 7%, rgba(45, 135, 210, 0.34) 7% 12%, transparent 12% 21%, rgba(195, 65, 135, 0.34) 21% 26%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-monsoon-dusk { --fe-speed: 0.9; --fe-morph: 1.2; --fe-hue: 45deg; --fe-blur: 12px; }
+
+.theme-dark.fantasy-easel-bg-velvet-cosmos,
+.fantasy-easel-night.fantasy-easel-bg-velvet-cosmos {
+	--fe-base: conic-gradient(from 140deg at 50% 50%, #222c56, #3c2058, #4a2042, #1a3c4e, #222c56);
+	--fe-1: #8648d4;
+	--fe-2: #269eb0;
+	--fe-3: #c04080;
+	--fe-4: #cc8a3c;
+	--fe-wave: conic-gradient(from 290deg at 48% 52%, transparent 0deg, rgba(155, 95, 240, 0.46) 90deg, transparent 180deg, rgba(50, 195, 210, 0.46) 270deg, transparent 360deg);
+	--fe-b2: screen;
+	--fe-b3: screen;
+}
+.theme-light.fantasy-easel-bg-velvet-cosmos,
+.fantasy-easel-day.fantasy-easel-bg-velvet-cosmos {
+	--fe-base: conic-gradient(from 140deg at 50% 50%, #94b4ec, #c29ef0, #ee9ec4, #84d8d4, #94b4ec);
+	--fe-1: #7c42ca;
+	--fe-2: #208ea2;
+	--fe-3: #bc3e7c;
+	--fe-4: #c88632;
+	--fe-wave: conic-gradient(from 290deg at 48% 52%, transparent 0deg, rgba(125, 65, 215, 0.42) 90deg, transparent 180deg, rgba(35, 165, 185, 0.42) 270deg, transparent 360deg);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-velvet-cosmos { --fe-speed: 0.9; --fe-morph: 1.2; --fe-hue: 45deg; --fe-blur: 18px; }
+
+.theme-dark.fantasy-easel-bg-paper-lanterns,
+.fantasy-easel-night.fantasy-easel-bg-paper-lanterns {
+	--fe-base: linear-gradient(180deg, #1d2852 0%, #2e224c 52%, #3e2428 100%);
+	--fe-1: radial-gradient(circle at 26% 32%, #e07838, transparent 48%), radial-gradient(circle at 72% 28%, #e8a23c, transparent 46%), radial-gradient(circle at 52% 68%, #d44c68, transparent 52%);
+	--fe-2: radial-gradient(circle at 64% 72%, rgba(240, 145, 60, 0.8), transparent 48%), radial-gradient(circle at 34% 64%, rgba(225, 85, 115, 0.76), transparent 48%), radial-gradient(circle at 48% 30%, rgba(90, 135, 235, 0.72), transparent 52%);
+	--fe-3: repeating-linear-gradient(0deg, transparent 0 7%, rgba(245, 175, 85, 0.36) 7% 13%, transparent 13% 21%, rgba(110, 155, 240, 0.32) 21% 27%);
+	--fe-4: radial-gradient(circle at 50% 50%, #e48c3c, transparent 56%);
+	--fe-b2: screen;
+	--fe-b3: overlay;
+}
+.theme-light.fantasy-easel-bg-paper-lanterns,
+.fantasy-easel-day.fantasy-easel-bg-paper-lanterns {
+	--fe-base: linear-gradient(180deg, #92b4ec 0%, #bfa6ec 52%, #f2b49c 100%);
+	--fe-1: radial-gradient(circle at 26% 32%, #e67e3e, transparent 48%), radial-gradient(circle at 72% 28%, #eea842, transparent 46%), radial-gradient(circle at 52% 68%, #dc5874, transparent 52%);
+	--fe-2: radial-gradient(circle at 64% 72%, rgba(215, 115, 38, 0.68), transparent 48%), radial-gradient(circle at 34% 64%, rgba(195, 65, 95, 0.65), transparent 48%), radial-gradient(circle at 48% 30%, rgba(65, 110, 210, 0.62), transparent 52%);
+	--fe-3: repeating-linear-gradient(0deg, transparent 0 7%, rgba(215, 135, 45, 0.36) 7% 13%, transparent 13% 21%, rgba(75, 115, 205, 0.32) 21% 27%);
+	--fe-4: radial-gradient(circle at 50% 50%, #ea9242, transparent 56%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-paper-lanterns { --fe-speed: 0.6; --fe-morph: 1.3; --fe-hue: 38deg; --fe-blur: 8px; --fe-bm1: 0.7; --fe-bm2: 0.65; --fe-bm3: 0.45; }
+
+.theme-dark.fantasy-easel-bg-vapor-horizon,
+.fantasy-easel-night.fantasy-easel-bg-vapor-horizon {
+	--fe-base: linear-gradient(165deg, #242258 0%, #481e48 52%, #4c2824 100%);
+	--fe-1: linear-gradient(135deg, #24a8c8 0%, #7c44d8 36%, #d44288 68%, #e08238 100%);
+	--fe-2: radial-gradient(ellipse 58% 44% at 50% 62%, rgba(240, 125, 60, 0.82), transparent 62%), radial-gradient(ellipse 54% 46% at 48% 32%, rgba(45, 195, 225, 0.78), transparent 62%);
+	--fe-3: repeating-linear-gradient(162deg, transparent 0 8%, rgba(45, 215, 235, 0.4) 8% 14%, transparent 14% 24%, rgba(235, 85, 165, 0.4) 24% 30%);
+	--fe-4: radial-gradient(circle at 50% 50%, #d84c92, transparent 56%);
+	--fe-b2: screen;
+	--fe-b3: overlay;
+}
+.theme-light.fantasy-easel-bg-vapor-horizon,
+.fantasy-easel-day.fantasy-easel-bg-vapor-horizon {
+	--fe-base: linear-gradient(165deg, #92b0f0 0%, #dca0dc 52%, #f4b494 100%);
+	--fe-1: linear-gradient(135deg, #48bce0 0%, #9868e8 36%, #e664a4 68%, #f09852 100%);
+	--fe-2: radial-gradient(ellipse 58% 44% at 50% 62%, rgba(215, 95, 38, 0.65), transparent 62%), radial-gradient(ellipse 54% 46% at 48% 32%, rgba(35, 155, 195, 0.65), transparent 62%);
+	--fe-3: repeating-linear-gradient(162deg, transparent 0 8%, rgba(35, 155, 185, 0.36) 8% 14%, transparent 14% 24%, rgba(195, 60, 135, 0.36) 24% 30%);
+	--fe-4: radial-gradient(circle at 50% 50%, #e0589c, transparent 56%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-vapor-horizon { --fe-speed: 0.4; --fe-morph: 1.3; --fe-hue: 38deg; --fe-blur: 4px; --fe-bm1: 0.6; --fe-bm2: 0.55; --fe-bm3: 0.35; }
+
+.theme-dark.fantasy-easel-bg-turrell-skyspace,
+.fantasy-easel-night.fantasy-easel-bg-turrell-skyspace {
+	--fe-base: radial-gradient(ellipse 65% 58% at 50% 50%, #244868 0%, #382458 55%, #4a2436 100%);
+	--fe-1: radial-gradient(ellipse 46% 42% at 50% 50%, #28a8b8 0%, #5c48c8 48%, transparent 74%);
+	--fe-2: radial-gradient(ellipse 62% 56% at 48% 52%, rgba(225, 105, 75, 0.78) 0%, rgba(175, 65, 145, 0.72) 45%, transparent 72%);
+	--fe-3: conic-gradient(from 0deg at 50% 50%, rgba(60, 205, 215, 0.42), rgba(225, 115, 85, 0.42), rgba(145, 85, 235, 0.42), rgba(60, 205, 215, 0.42));
+	--fe-4: radial-gradient(circle at 50% 50%, #32b4c4, transparent 52%);
+	--fe-b2: screen;
+	--fe-b3: soft-light;
+}
+.theme-light.fantasy-easel-bg-turrell-skyspace,
+.fantasy-easel-day.fantasy-easel-bg-turrell-skyspace {
+	--fe-base: radial-gradient(ellipse 65% 58% at 50% 50%, #86cce8 0%, #baa4ec 55%, #eea4bc 100%);
+	--fe-1: radial-gradient(ellipse 46% 42% at 50% 50%, #32b2c4 0%, #7260d8 48%, transparent 74%);
+	--fe-2: radial-gradient(ellipse 62% 56% at 48% 52%, rgba(215, 92, 62, 0.65) 0%, rgba(165, 58, 135, 0.62) 45%, transparent 72%);
+	--fe-3: conic-gradient(from 0deg at 50% 50%, rgba(40, 165, 180, 0.38), rgba(205, 95, 65, 0.38), rgba(125, 65, 205, 0.38), rgba(40, 165, 180, 0.38));
+	--fe-4: radial-gradient(circle at 50% 50%, #38b8c8, transparent 52%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-turrell-skyspace { --fe-speed: 1.15; --fe-morph: 1.3; --fe-hue: 38deg; --fe-blur: 4px; --fe-bm1: 0.85; --fe-bm2: 0.8; --fe-bm3: 0.6; }
+
+.theme-dark.fantasy-easel-bg-molten-dichro,
+.fantasy-easel-night.fantasy-easel-bg-molten-dichro {
+	--fe-base: linear-gradient(145deg, #2c2438 0%, #1e383e 50%, #3e2822 100%);
+	--fe-1: conic-gradient(from 60deg at 40% 50%, #c87442, #289894, #7c52b8, #c89848, #28749c, #c87442);
+	--fe-2: conic-gradient(from 240deg at 60% 50%, rgba(55, 195, 185, 0.78), rgba(225, 125, 75, 0.78), rgba(165, 105, 225, 0.75), rgba(55, 195, 185, 0.78));
+	--fe-3: repeating-linear-gradient(135deg, transparent 0 10%, rgba(245, 205, 155, 0.42) 10% 16%, transparent 16% 28%, rgba(115, 225, 215, 0.4) 28% 34%);
+	--fe-4: radial-gradient(circle at 45% 45%, #d08048, transparent 55%), radial-gradient(circle at 58% 58%, #2ca8a2, transparent 55%);
+	--fe-b2: screen;
+	--fe-b3: overlay;
+}
+.theme-light.fantasy-easel-bg-molten-dichro,
+.fantasy-easel-day.fantasy-easel-bg-molten-dichro {
+	--fe-base: linear-gradient(145deg, #c2b0de 0%, #88d4d2 50%, #ecb89e 100%);
+	--fe-1: conic-gradient(from 60deg at 40% 50%, #dc824e, #36aba6, #8c62c8, #dca852, #3886b0, #dc824e);
+	--fe-2: conic-gradient(from 240deg at 60% 50%, rgba(35, 155, 148, 0.65), rgba(205, 95, 48, 0.65), rgba(135, 75, 195, 0.62), rgba(35, 155, 148, 0.65));
+	--fe-3: repeating-linear-gradient(135deg, transparent 0 10%, rgba(195, 135, 75, 0.38) 10% 16%, transparent 16% 28%, rgba(45, 155, 148, 0.38) 28% 34%);
+	--fe-4: radial-gradient(circle at 45% 45%, #dc8852, transparent 55%), radial-gradient(circle at 58% 58%, #34b2ac, transparent 55%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-molten-dichro { --fe-speed: 0.9; --fe-morph: 1.3; --fe-hue: 38deg; --fe-blur: 4px; --fe-bm1: 0.65; --fe-bm2: 0.6; --fe-bm3: 0.4; }
+
+.theme-dark.fantasy-easel-bg-cathedral-rose,
+.fantasy-easel-night.fantasy-easel-bg-cathedral-rose {
+	--fe-base: linear-gradient(145deg, #241d48 0%, #3d1d38 50%, #18364a 100%);
+	--fe-1: repeating-conic-gradient(from 0deg at 36% 44%, #b83268 0deg 22deg, #2e6ec4 22deg 45deg, #249678 45deg 68deg, #c8822b 68deg 90deg);
+	--fe-2: repeating-conic-gradient(from 15deg at 64% 56%, rgba(135, 72, 215, 0.78) 0deg 25deg, transparent 25deg 50deg, rgba(215, 78, 120, 0.75) 50deg 75deg, transparent 75deg 100deg);
+	--fe-3: radial-gradient(circle at 50% 50%, rgba(245, 185, 90, 0.45), transparent 55%), repeating-linear-gradient(45deg, rgba(255,255,255,0.12) 0 4%, transparent 4% 12%);
+	--fe-4: radial-gradient(circle at 35% 35%, #d64a84, transparent 58%), radial-gradient(circle at 68% 65%, #3498b8, transparent 58%);
+	--fe-b2: screen;
+	--fe-b3: overlay;
+}
+.theme-light.fantasy-easel-bg-cathedral-rose,
+.fantasy-easel-day.fantasy-easel-bg-cathedral-rose {
+	--fe-base: linear-gradient(145deg, #98b4ec 0%, #e6a4c4 50%, #86d8c8 100%);
+	--fe-1: repeating-conic-gradient(from 0deg at 36% 44%, #e8689a 0deg 22deg, #5c9ce8 22deg 45deg, #4cc4a4 45deg 68deg, #f0ae54 68deg 90deg);
+	--fe-2: repeating-conic-gradient(from 15deg at 64% 56%, rgba(145, 92, 225, 0.65) 0deg 25deg, transparent 25deg 50deg, rgba(225, 88, 130, 0.65) 50deg 75deg, transparent 75deg 100deg);
+	--fe-3: radial-gradient(circle at 50% 50%, rgba(250, 200, 110, 0.5), transparent 55%), repeating-linear-gradient(45deg, rgba(60,40,90,0.12) 0 4%, transparent 4% 12%);
+	--fe-4: radial-gradient(circle at 35% 35%, #e26498, transparent 58%), radial-gradient(circle at 68% 65%, #46a8c8, transparent 58%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-cathedral-rose { --fe-speed: 0.25; --fe-morph: 1.3; --fe-hue: 38deg; --fe-blur: 38px; --fe-bm1: 0.55; --fe-bm2: 0.5; --fe-bm3: 0.3; }
+
+.theme-dark.fantasy-easel-bg-origami-prism,
+.fantasy-easel-night.fantasy-easel-bg-origami-prism {
+	--fe-base: linear-gradient(135deg, #1b3456 0%, #342254 50%, #1c444c 100%);
+	--fe-1: linear-gradient(115deg, transparent 12%, rgba(45, 175, 215, 0.75) 13% 34%, transparent 35% 52%, rgba(165, 75, 225, 0.75) 53% 74%, transparent 75%);
+	--fe-2: linear-gradient(62deg, transparent 10%, rgba(220, 75, 148, 0.72) 11% 32%, transparent 33% 54%, rgba(45, 195, 165, 0.72) 55% 78%, transparent 79%);
+	--fe-3: repeating-linear-gradient(-38deg, rgba(120, 210, 250, 0.35) 0 6%, transparent 6% 15%, rgba(235, 125, 190, 0.35) 15% 21%, transparent 21% 30%);
+	--fe-4: conic-gradient(from 90deg at 50% 50%, #2a98c8, #8c4ce0, #d44c98, #28b298, #2a98c8);
+	--fe-b2: screen;
+	--fe-b3: overlay;
+}
+.theme-light.fantasy-easel-bg-origami-prism,
+.fantasy-easel-day.fantasy-easel-bg-origami-prism {
+	--fe-base: linear-gradient(135deg, #8cc4ec 0%, #bca6f0 50%, #84dec8 100%);
+	--fe-1: linear-gradient(115deg, transparent 12%, rgba(35, 145, 195, 0.65) 13% 34%, transparent 35% 52%, rgba(145, 65, 205, 0.65) 53% 74%, transparent 75%);
+	--fe-2: linear-gradient(62deg, transparent 10%, rgba(205, 65, 138, 0.62) 11% 32%, transparent 33% 54%, rgba(35, 165, 140, 0.62) 55% 78%, transparent 79%);
+	--fe-3: repeating-linear-gradient(-38deg, rgba(50, 130, 190, 0.3) 0 6%, transparent 6% 15%, rgba(190, 75, 145, 0.3) 15% 21%, transparent 21% 30%);
+	--fe-4: conic-gradient(from 90deg at 50% 50%, #48aae0, #9c6ce8, #e06ca8, #42c4a8, #48aae0);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-origami-prism { --fe-speed: 0.25; --fe-morph: 1.3; --fe-hue: 38deg; --fe-blur: 18px; --fe-bm1: 0.4; --fe-bm2: 0.4; --fe-bm3: 0.25; }
+
+.theme-dark.fantasy-easel-bg-kaleidoscope-bloom,
+.fantasy-easel-night.fantasy-easel-bg-kaleidoscope-bloom {
+	--fe-base: radial-gradient(circle at 50% 50%, #3a2252 0%, #1c3652 60%, #243e3c 100%);
+	--fe-1: repeating-conic-gradient(from 0deg at 50% 50%, #26a89e 0deg 15deg, #8848d2 15deg 30deg, #d45278 30deg 45deg, #c89232 45deg 60deg);
+	--fe-2: repeating-radial-gradient(circle at 50% 50%, rgba(225, 95, 155, 0.65) 0 8%, transparent 8% 16%, rgba(55, 195, 205, 0.65) 16% 24%, transparent 24% 32%);
+	--fe-3: repeating-conic-gradient(from 30deg at 50% 50%, rgba(255, 210, 110, 0.42) 0deg 12deg, transparent 12deg 24deg);
+	--fe-4: radial-gradient(circle at 40% 40%, #28b8ac, transparent 55%), radial-gradient(circle at 60% 60%, #d45288, transparent 55%);
+	--fe-b2: screen;
+	--fe-b3: overlay;
+}
+.theme-light.fantasy-easel-bg-kaleidoscope-bloom,
+.fantasy-easel-day.fantasy-easel-bg-kaleidoscope-bloom {
+	--fe-base: radial-gradient(circle at 50% 50%, #c8a8ec 0%, #8ec4ec 60%, #8adecc 100%);
+	--fe-1: repeating-conic-gradient(from 0deg at 50% 50%, #38b8ae 0deg 15deg, #9862e0 15deg 30deg, #e2688c 30deg 45deg, #e0a642 45deg 60deg);
+	--fe-2: repeating-radial-gradient(circle at 50% 50%, rgba(195, 65, 130, 0.55) 0 8%, transparent 8% 16%, rgba(35, 155, 170, 0.55) 16% 24%, transparent 24% 32%);
+	--fe-3: repeating-conic-gradient(from 30deg at 50% 50%, rgba(215, 145, 40, 0.38) 0deg 12deg, transparent 12deg 24deg);
+	--fe-4: radial-gradient(circle at 40% 40%, #32b8ac, transparent 55%), radial-gradient(circle at 60% 60%, #dc6294, transparent 55%);
+	--fe-b2: multiply;
+	--fe-b3: soft-light;
+}
+.fantasy-easel-bg-kaleidoscope-bloom { --fe-speed: 0.2; --fe-morph: 1.3; --fe-hue: 38deg; --fe-blur: 56px; --fe-bm1: 0.5; --fe-bm2: 0.45; --fe-bm3: 0.35; }
 /* END generated: CSS backgrounds */
 
 /* ---------- 1-3. Motion layer ---------- */
@@ -259,9 +692,9 @@ body.fantasy-easel.fantasy-easel-motion .app-container::after {
 	animation-delay: var(--fantasy-easel-delay, 0s);
 }
 
-/* Paused: window not focused, motion off, or OS reduced motion (unless motion on) */
-body.fantasy-easel.fantasy-easel-motion:not(.is-focused) .app-container::before,
-body.fantasy-easel.fantasy-easel-motion:not(.is-focused) .app-container::after,
+/* Paused: window not focused (if "pause when unfocused" is on), motion off, or OS reduced motion (unless motion on) */
+body.fantasy-easel.fantasy-easel-motion.fantasy-easel-pause-unfocused:not(.is-focused) .app-container::before,
+body.fantasy-easel.fantasy-easel-motion.fantasy-easel-pause-unfocused:not(.is-focused) .app-container::after,
 body.fantasy-easel.fantasy-easel-motion.fantasy-easel-still .app-container::before,
 body.fantasy-easel.fantasy-easel-motion.fantasy-easel-still .app-container::after {
 	animation-play-state: paused;
@@ -272,6 +705,237 @@ body.fantasy-easel.fantasy-easel-motion.fantasy-easel-still .app-container::afte
 	body.fantasy-easel.fantasy-easel-motion:not(.fantasy-easel-force-motion) .app-container::after {
 		animation-play-state: paused;
 	}
+}
+
+/* ---------- 1-4. Stage (four moving layers, src/stages.ts) ----------
+   A base and four layers, moved with translate / rotate / scale and a hue swing, like the
+   mockups in 9 Craft/93 Artifact (2026-10-21). Per background: pictures (--fe-base, --fe-1..4,
+   --fe-wave, blends) and slider values (--fe-speed, --fe-morph, --fe-hue, --fe-blur), generated
+   above. The element exists only while the plugin shows a stage (body) or in gallery tiles. */
+.fantasy-easel-stage {
+	--fe-seed: var(--fantasy-easel-delay, -7s);
+	display: none;
+	overflow: hidden;
+	isolation: isolate;
+	pointer-events: none;
+	background: var(--fe-base);
+}
+
+/* (0,3,1): beats theme `.is-translucent:not(.is-fullscreen) .app-container` (0,3,0) */
+body.fantasy-easel.fantasy-easel-stage-on .app-container {
+	background-image: none;
+}
+
+body.fantasy-easel.fantasy-easel-stage-on .app-container > .fantasy-easel-stage {
+	display: block;
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+}
+
+.fantasy-easel-tile > .fantasy-easel-stage {
+	display: block;
+	position: absolute;
+	inset: 0;
+}
+
+.fantasy-easel-stage > div {
+	position: absolute;
+	pointer-events: none;
+	will-change: translate, rotate, scale, filter;
+	backface-visibility: hidden;
+}
+
+/* Ambient family (몽환·자연): layers built from four colors + a texture */
+.fantasy-easel-stage.fe-ambient > .fe-l1 {
+	inset: -45%;
+	background:
+		radial-gradient(ellipse 44% 36% at 28% 32%, var(--fe-1), transparent 70%),
+		radial-gradient(ellipse 40% 48% at 74% 68%, var(--fe-2), transparent 70%),
+		conic-gradient(from 35deg at 50% 50%, var(--fe-1), var(--fe-3), var(--fe-2), var(--fe-4), var(--fe-1));
+	opacity: 0.88;
+	filter: blur(var(--fe-blur));
+	animation:
+		fe-a-wanderA calc(11s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-spin calc(26s / var(--fe-speed)) linear infinite,
+		fe-a-stretchA calc(8.5s / var(--fe-speed)) ease-in-out infinite alternate;
+	animation-delay: var(--fe-seed);
+}
+
+.fantasy-easel-stage.fe-ambient > .fe-l2 {
+	inset: -45%;
+	background:
+		radial-gradient(ellipse 50% 34% at 72% 28%, var(--fe-3), transparent 68%),
+		radial-gradient(ellipse 36% 52% at 26% 74%, var(--fe-4), transparent 68%),
+		radial-gradient(ellipse 42% 42% at 52% 48%, var(--fe-1), transparent 65%);
+	mix-blend-mode: var(--fe-b2, screen);
+	opacity: 0.82;
+	filter: blur(var(--fe-blur));
+	animation:
+		fe-a-wanderB calc(13s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-spin-back calc(31s / var(--fe-speed)) linear infinite,
+		fe-a-stretchB calc(9.5s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-a-hue calc(17s / var(--fe-speed)) ease-in-out infinite alternate;
+	animation-delay: calc(var(--fe-seed) * 1.37);
+}
+
+.fantasy-easel-stage.fe-ambient > .fe-l3 {
+	inset: -50%;
+	background: var(--fe-wave);
+	mix-blend-mode: var(--fe-b3, soft-light);
+	opacity: 0.78;
+	filter: blur(calc(var(--fe-blur) * 0.45));
+	animation:
+		fe-a-ribbon calc(9s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-a-sway calc(14s / var(--fe-speed)) ease-in-out infinite alternate;
+	animation-delay: calc(var(--fe-seed) * 0.73);
+}
+
+.fantasy-easel-stage.fe-ambient > .fe-l4 {
+	inset: -35%;
+	background:
+		radial-gradient(ellipse 35% 35% at 36% 38%, var(--fe-4), transparent 62%),
+		radial-gradient(ellipse 38% 34% at 66% 64%, var(--fe-2), transparent 62%);
+	mix-blend-mode: var(--fe-b2, screen);
+	opacity: 0.72;
+	filter: blur(calc(var(--fe-blur) * 0.85));
+	animation:
+		fe-a-wanderC calc(8s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-a-breath calc(6.5s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-a-hue calc(14s / var(--fe-speed)) ease-in-out infinite alternate-reverse;
+	animation-delay: calc(var(--fe-seed) * 1.85);
+}
+
+/* Kinetic family (결·파동): four layer pictures */
+.fantasy-easel-stage.fe-kinetic > .fe-l1 {
+	inset: -48%;
+	background: var(--fe-1);
+	opacity: 0.9;
+	filter: blur(calc(var(--fe-blur) * var(--fe-bm1, 0.75)));
+	animation:
+		fe-k-driftA calc(10s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-spin calc(24s / var(--fe-speed)) linear infinite,
+		fe-a-stretchA calc(7.8s / var(--fe-speed)) ease-in-out infinite alternate;
+	animation-delay: var(--fe-seed);
+}
+
+.fantasy-easel-stage.fe-kinetic > .fe-l2 {
+	inset: -48%;
+	background: var(--fe-2);
+	mix-blend-mode: var(--fe-b2, screen);
+	opacity: 0.85;
+	filter: blur(calc(var(--fe-blur) * var(--fe-bm2, 0.65)));
+	animation:
+		fe-k-driftB calc(12s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-spin-back calc(28s / var(--fe-speed)) linear infinite,
+		fe-a-stretchB calc(8.9s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-k-hue calc(15s / var(--fe-speed)) ease-in-out infinite alternate;
+	animation-delay: calc(var(--fe-seed) * 1.41);
+}
+
+.fantasy-easel-stage.fe-kinetic > .fe-l3 {
+	inset: -52%;
+	background: var(--fe-3);
+	mix-blend-mode: var(--fe-b3, soft-light);
+	opacity: 0.84;
+	filter: blur(calc(var(--fe-blur) * var(--fe-bm3, 0.4)));
+	animation:
+		fe-k-sweep calc(8.5s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-k-sway calc(11.5s / var(--fe-speed)) ease-in-out infinite alternate;
+	animation-delay: calc(var(--fe-seed) * 0.77);
+}
+
+.fantasy-easel-stage.fe-kinetic > .fe-l4 {
+	inset: -38%;
+	background: var(--fe-4);
+	mix-blend-mode: var(--fe-b2, screen);
+	opacity: 0.76;
+	filter: blur(calc(var(--fe-blur) * 1.1));
+	animation:
+		fe-a-wanderC calc(7.4s / var(--fe-speed)) ease-in-out infinite alternate,
+		fe-a-breath calc(6.2s / var(--fe-speed)) ease-in-out infinite alternate;
+	animation-delay: calc(var(--fe-seed) * 1.93);
+}
+
+/* Paused = a still picture: window not focused (if "pause when unfocused" is on), motion off, or OS reduced motion (unless motion on) */
+body.fantasy-easel.fantasy-easel-stage-on.fantasy-easel-pause-unfocused:not(.is-focused) .fantasy-easel-stage > div,
+body.fantasy-easel.fantasy-easel-stage-on.fantasy-easel-still .fantasy-easel-stage > div,
+.fantasy-easel-gallery.is-still .fantasy-easel-stage > div {
+	animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	body.fantasy-easel.fantasy-easel-stage-on:not(.fantasy-easel-force-motion) .fantasy-easel-stage > div {
+		animation-play-state: paused;
+	}
+}
+
+@keyframes fe-spin { from { rotate: 0deg; } to { rotate: 360deg; } }
+@keyframes fe-spin-back { from { rotate: 360deg; } to { rotate: 0deg; } }
+@keyframes fe-a-wanderA {
+	0% { translate: calc(-13% * var(--fe-morph)) calc(-8% * var(--fe-morph)); }
+	33% { translate: calc(10% * var(--fe-morph)) calc(-12% * var(--fe-morph)); }
+	66% { translate: calc(13% * var(--fe-morph)) calc(8% * var(--fe-morph)); }
+	100% { translate: calc(-9% * var(--fe-morph)) calc(12% * var(--fe-morph)); }
+}
+@keyframes fe-a-wanderB {
+	0% { translate: calc(12% * var(--fe-morph)) calc(9% * var(--fe-morph)); }
+	33% { translate: calc(-11% * var(--fe-morph)) calc(11% * var(--fe-morph)); }
+	66% { translate: calc(-13% * var(--fe-morph)) calc(-7% * var(--fe-morph)); }
+	100% { translate: calc(8% * var(--fe-morph)) calc(-12% * var(--fe-morph)); }
+}
+@keyframes fe-a-wanderC {
+	0% { translate: calc(-10% * var(--fe-morph)) calc(11% * var(--fe-morph)); }
+	50% { translate: calc(12% * var(--fe-morph)) calc(-4% * var(--fe-morph)); }
+	100% { translate: calc(-4% * var(--fe-morph)) calc(-12% * var(--fe-morph)); }
+}
+@keyframes fe-a-ribbon {
+	0% { translate: calc(-14% * var(--fe-morph)) calc(6% * var(--fe-morph)); }
+	100% { translate: calc(14% * var(--fe-morph)) calc(-6% * var(--fe-morph)); }
+}
+@keyframes fe-a-stretchA {
+	0% { scale: calc(1 + 0.22 * var(--fe-morph)) 1.02; }
+	100% { scale: 1.02 calc(1 + 0.24 * var(--fe-morph)); }
+}
+@keyframes fe-a-stretchB {
+	0% { scale: 1.02 calc(1 + 0.22 * var(--fe-morph)); }
+	100% { scale: calc(1 + 0.24 * var(--fe-morph)) 1.02; }
+}
+@keyframes fe-a-breath {
+	0% { scale: 0.94; }
+	100% { scale: calc(1.08 + 0.18 * var(--fe-morph)); }
+}
+@keyframes fe-a-sway {
+	0% { rotate: calc(-18deg * var(--fe-morph)); scale: calc(1 + 0.15 * var(--fe-morph)) 1.04; }
+	100% { rotate: calc(18deg * var(--fe-morph)); scale: 1.04 calc(1 + 0.15 * var(--fe-morph)); }
+}
+@keyframes fe-a-hue {
+	0% { filter: blur(var(--fe-blur)) hue-rotate(calc(-1 * var(--fe-hue))); }
+	100% { filter: blur(var(--fe-blur)) hue-rotate(var(--fe-hue)); }
+}
+@keyframes fe-k-driftA {
+	0% { translate: calc(-13% * var(--fe-morph)) calc(-8% * var(--fe-morph)); }
+	33% { translate: calc(10% * var(--fe-morph)) calc(-12% * var(--fe-morph)); }
+	66% { translate: calc(13% * var(--fe-morph)) calc(8% * var(--fe-morph)); }
+	100% { translate: calc(-9% * var(--fe-morph)) calc(12% * var(--fe-morph)); }
+}
+@keyframes fe-k-driftB {
+	0% { translate: calc(12% * var(--fe-morph)) calc(9% * var(--fe-morph)); }
+	33% { translate: calc(-11% * var(--fe-morph)) calc(11% * var(--fe-morph)); }
+	66% { translate: calc(-13% * var(--fe-morph)) calc(-7% * var(--fe-morph)); }
+	100% { translate: calc(9% * var(--fe-morph)) calc(-12% * var(--fe-morph)); }
+}
+@keyframes fe-k-sweep {
+	0% { translate: calc(-15% * var(--fe-morph)) calc(6% * var(--fe-morph)); }
+	100% { translate: calc(15% * var(--fe-morph)) calc(-6% * var(--fe-morph)); }
+}
+@keyframes fe-k-sway {
+	0% { rotate: calc(-20deg * var(--fe-morph)); scale: calc(1 + 0.16 * var(--fe-morph)) 1.03; }
+	100% { rotate: calc(20deg * var(--fe-morph)); scale: 1.03 calc(1 + 0.16 * var(--fe-morph)); }
+}
+@keyframes fe-k-hue {
+	0% { filter: blur(calc(var(--fe-blur) * 0.65)) hue-rotate(calc(-1 * var(--fe-hue))); }
+	100% { filter: blur(calc(var(--fe-blur) * 0.65)) hue-rotate(var(--fe-hue)); }
 }
 
 /* ---------- 2. Plugin UI ---------- */
