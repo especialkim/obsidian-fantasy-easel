@@ -89,7 +89,7 @@ for (const m of bgPart.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}@]+)\{([^
   const sel = m[1].trim();
   if (/^\d+%$/.test(sel) || /^(from|to)$/.test(sel)) continue;
   const decls = m[2].split(/;(?![^(]*\))/).map((d) => d.trim()).filter(Boolean);
-  const gated = /fantasy-easel-(bg-|motion|stage)|^@?(from|to|\d)/.test(sel);
+  const gated = /fantasy-easel-(bg-|motion|stage|skin-|gallery|tile)|^@?(from|to|\d)/.test(sel);
   const risky = decls.filter((d) => !d.startsWith("--fantasy-easel-") || d.startsWith("--background-url"));
   check(gated || risky.length === 0, `styles.css rule "${sel.slice(0, 60)}" affects the look without a background class`);
 }

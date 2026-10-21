@@ -3,7 +3,7 @@
   "name": "Fantasy Easel",
   "version": "0.1.0",
   "minAppVersion": "1.8.7",
-  "description": "Companion settings for the Fantasy theme: theme color, background (including CSS gradients), accent and card layout, with quick status bar controls.",
-  "author": "TeamHK",
+  "description": "Companion for the Fantasy theme: theme color, accent, card layout, CSS and media-art backgrounds (still or moving), your own pictures and plugin skins, with quick status bar controls.",
+  "author": "YongMin Kim",
   "isDesktopOnly": true
 }

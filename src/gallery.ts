@@ -18,6 +18,7 @@ const GROUPS: { title: string; desc: string; pick: (b: CssBackground) => boolean
  */
 export class GalleryModal extends Modal {
   private unsubscribe: (() => void) | null = null;
+  private lazy: IntersectionObserver | null = null;
 
   constructor(app: App, private store: Store, private managePictures?: () => void) {
     super(app);
@@ -28,6 +29,15 @@ export class GalleryModal extends Modal {
     this.setTitle("Backgrounds");
     this.unsubscribe = this.store.subscribe(() => this.markCurrent());
     const root = this.contentEl.createDiv({ cls: "fantasy-easel-gallery" });
+    this.lazy = new IntersectionObserver((entries) => {
+      // Only tiles near the view keep a stage: built on the way in, removed on the way out.
+      for (const e of entries) {
+        const tile = e.target as HTMLElement;
+        const stage = tile.querySelector(":scope > .fantasy-easel-stage");
+        if (e.isIntersecting && !stage) tile.prepend(buildStage(tile, tile.dataset.stage as "ambient" | "kinetic"));
+        else if (!e.isIntersecting && stage) stage.remove();
+      }
+    }, { root: this.modalEl, rootMargin: "150px 0px" });
     const { motion } = this.store.settings;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const moving = motion === "on" || (motion === "auto" && !reduced);
@@ -50,14 +60,11 @@ export class GalleryModal extends Modal {
         for (const side of ["day", "night"] as const) {
           const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
           const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
-          layer.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key})`);
-          if (b.motion) layer.style.setProperty("animation", motionCss(b.motion));
+          layer.setCssProps({ "--fe-tile-image": `var(--fantasy-easel-grad-${b.key})`, "--fe-tile-motion": b.motion ? motionCss(b.motion) : "none" });
           if (b.motion?.over) {
             // upper layer: blend var comes from the tile's day / night class
             const over = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
-            over.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key}-b)`);
-            over.style.setProperty("mix-blend-mode", `var(--fantasy-easel-blend-${b.key})`);
-            over.style.setProperty("animation", motionCss(b.motion.over));
+            over.setCssProps({ "--fe-tile-image": `var(--fantasy-easel-grad-${b.key}-b)`, "--fe-tile-blend": `var(--fantasy-easel-blend-${b.key})`, "--fe-tile-motion": motionCss(b.motion.over) });
           }
           const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
           card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
@@ -84,7 +91,9 @@ export class GalleryModal extends Modal {
         setIcon(check, "check");
         for (const side of ["day", "night"] as const) {
           const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side} fantasy-easel-bg-${s.key}`, attr: { "aria-label": `${s.name} (${side})`, role: "button", tabindex: "0" } });
-          buildStage(tile, s.family);
+          // built when scrolled into view (dozens of four-layer stages at once overrun the GPU)
+          tile.dataset.stage = s.family;
+          this.lazy?.observe(tile);
           const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
           card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
           card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
@@ -112,7 +121,7 @@ export class GalleryModal extends Modal {
       for (const side of ["day", "night"] as const) {
         const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
         const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
-        layer.style.setProperty("background-image", b.url!);
+        layer.setCssProps({ "--fe-tile-image": b.url! });
         const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
         card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
         card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
@@ -132,6 +141,8 @@ export class GalleryModal extends Modal {
   onClose() {
     this.unsubscribe?.();
     this.unsubscribe = null;
+    this.lazy?.disconnect();
+    this.lazy = null;
     this.contentEl.empty();
   }
 }

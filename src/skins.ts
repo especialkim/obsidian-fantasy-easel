@@ -1,41 +1,19 @@
-// Plugin skins: CSS that fits a plugin to the Fantasy glass. Moved out of the theme (2026-10-21)
-// so the theme stays core-only; each skin is a <style> added only while it is on.
-import type { App } from "obsidian";
-import dataviewCss from "../skins/dataview.css";
-import kanbanCss from "../skins/kanban.css";
+// Plugin skins: CSS that fits a plugin to the Fantasy glass. Moved out of the theme (2026-10-21).
+// Source: skins/<id>.css. scripts/build.js puts each into styles.css with every selector behind
+// `body.fantasy-easel-skin-<id>`; turning a skin on / off only toggles that body class.
 
 export interface Skin {
   id: string;
   name: string;
-  /** plugin id in Obsidian (installed = default on) */
-  plugin: string;
   desc: string;
-  css: string;
 }
 
 export const SKINS: Skin[] = [
-  { id: "dataview", name: "Dataview", plugin: "dataview", desc: "Query results (tables, lists, tasks) sit on the glass card with rounded corners and slightly smaller text.", css: dataviewCss },
-  { id: "kanban", name: "Kanban", plugin: "obsidian-kanban", desc: "Board, lanes and cards use the glass colors; lane headers follow the heading colors.", css: kanbanCss },
+  { id: "dataview", name: "Dataview", desc: "Query results (tables, lists, tasks) sit on the glass card with rounded corners and slightly smaller text." },
+  { id: "kanban", name: "Kanban", desc: "Board, lanes and cards use the glass colors; lane headers follow the heading colors." },
 ];
 
-type PluginsApi = { manifests: Record<string, unknown> };
-export const isInstalled = (app: App, plugin: string) => !!(app as unknown as { plugins: PluginsApi }).plugins.manifests[plugin];
+export const skinClass = (id: string) => `fantasy-easel-skin-${id}`;
 
-/** On = the user's choice, else on when the plugin is installed. */
-export const skinOn = (app: App, skins: Record<string, boolean>, s: Skin) => skins[s.id] ?? isInstalled(app, s.plugin);
-
-const ATTR = "data-fantasy-easel-skin";
-
-/** Keep one <style> per skin that is on; remove the others. */
-export function applySkins(app: App, skins: Record<string, boolean>) {
-  for (const s of SKINS) {
-    const el = document.head.querySelector(`style[${ATTR}="${s.id}"]`);
-    const on = skinOn(app, skins, s);
-    if (on && !el) document.head.createEl("style", { attr: { [ATTR]: s.id }, text: s.css });
-    else if (!on && el) el.remove();
-  }
-}
-
-export function removeSkins() {
-  document.head.querySelectorAll(`style[${ATTR}]`).forEach((el) => el.remove());
-}
+/** On unless the user turned it off. The CSS only matches that plugin's own elements. */
+export const skinOn = (skins: Record<string, boolean>, s: Skin) => skins[s.id] ?? true;

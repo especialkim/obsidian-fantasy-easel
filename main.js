@@ -23,7 +23,7 @@ __export(main_exports, {
   default: () => FantasyEaselPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian6 = require("obsidian");
+var import_obsidian7 = require("obsidian");
 
 // src/apply.ts
 var import_obsidian = require("obsidian");
@@ -1062,8 +1062,16 @@ var DEFAULT_BACKGROUND = "css-plasma";
 var colorByCls = (cls) => THEME_COLORS.find((c) => c.cls === cls);
 var backgroundById = (id, images = []) => allBackgrounds(images).find((b) => b.id === id);
 
+// src/skins.ts
+var SKINS = [
+  { id: "dataview", name: "Dataview", desc: "Query results (tables, lists, tasks) sit on the glass card with rounded corners and slightly smaller text." },
+  { id: "kanban", name: "Kanban", desc: "Board, lanes and cards use the glass colors; lane headers follow the heading colors." }
+];
+var skinClass = (id) => `fantasy-easel-skin-${id}`;
+var skinOn = (skins, s) => skins[s.id] ?? true;
+
 // src/apply.ts
-var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS]);
+var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...SKINS.map((s) => skinClass(s.id))]);
 var THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
 var URL_VAR = "--background-url";
 var OLD_VARS = ["--background-url1", "--background-url2", "--background-url3"];
@@ -1078,6 +1086,7 @@ function wantedClasses(s) {
   if (s.motion === "off") out.add(STILL_CLASS);
   if (s.motion === "on") out.add(FORCE_MOTION_CLASS);
   if (s.pauseUnfocused) out.add(PAUSE_UNFOCUSED_CLASS);
+  for (const sk of SKINS) if (s.skins[sk.id] ?? true) out.add(skinClass(sk.id));
   return out;
 }
 var Applier = class {
@@ -1112,15 +1121,12 @@ var Applier = class {
     }
     const value = backgroundById(s.look.background, s.look.images)?.url ?? "";
     const now = this.body.style.getPropertyValue(URL_VAR);
-    if (value && now !== value) {
-      this.body.style.setProperty(URL_VAR, value);
-      changed++;
-    } else if (!value && now) {
-      this.body.style.removeProperty(URL_VAR);
+    if (value !== now) {
+      this.body.setCssProps({ [URL_VAR]: value });
       changed++;
     }
     for (const v of OLD_VARS) if (this.body.style.getPropertyValue(v)) {
-      this.body.style.removeProperty(v);
+      this.body.setCssProps({ [v]: "" });
       changed++;
     }
     this.observer?.takeRecords();
@@ -1146,9 +1152,9 @@ var Applier = class {
     this.observer = null;
     const cl = this.body.classList;
     for (const b of CSS_BG) cl.remove(b.cls);
-    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS);
+    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...SKINS.map((s) => skinClass(s.id)));
     for (const c of THEME_GROUP) cl.remove(c);
-    for (const v of [URL_VAR, ...OLD_VARS]) this.body.style.removeProperty(v);
+    this.body.setCssProps(Object.fromEntries([URL_VAR, ...OLD_VARS].map((v) => [v, ""])));
   }
 };
 
@@ -1165,12 +1171,21 @@ var GalleryModal = class extends import_obsidian2.Modal {
     this.store = store;
     this.managePictures = managePictures;
     this.unsubscribe = null;
+    this.lazy = null;
   }
   onOpen() {
     this.modalEl.addClass("fantasy-easel-gallery-modal");
     this.setTitle("Backgrounds");
     this.unsubscribe = this.store.subscribe(() => this.markCurrent());
     const root = this.contentEl.createDiv({ cls: "fantasy-easel-gallery" });
+    this.lazy = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        const tile = e.target;
+        const stage = tile.querySelector(":scope > .fantasy-easel-stage");
+        if (e.isIntersecting && !stage) tile.prepend(buildStage(tile, tile.dataset.stage));
+        else if (!e.isIntersecting && stage) stage.remove();
+      }
+    }, { root: this.modalEl, rootMargin: "150px 0px" });
     const { motion } = this.store.settings;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const moving = motion === "on" || motion === "auto" && !reduced;
@@ -1191,13 +1206,10 @@ var GalleryModal = class extends import_obsidian2.Modal {
         for (const side of ["day", "night"]) {
           const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
           const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
-          layer.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key})`);
-          if (b.motion) layer.style.setProperty("animation", motionCss(b.motion));
+          layer.setCssProps({ "--fe-tile-image": `var(--fantasy-easel-grad-${b.key})`, "--fe-tile-motion": b.motion ? motionCss(b.motion) : "none" });
           if (b.motion?.over) {
             const over = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
-            over.style.setProperty("background-image", `var(--fantasy-easel-grad-${b.key}-b)`);
-            over.style.setProperty("mix-blend-mode", `var(--fantasy-easel-blend-${b.key})`);
-            over.style.setProperty("animation", motionCss(b.motion.over));
+            over.setCssProps({ "--fe-tile-image": `var(--fantasy-easel-grad-${b.key}-b)`, "--fe-tile-blend": `var(--fantasy-easel-blend-${b.key})`, "--fe-tile-motion": motionCss(b.motion.over) });
           }
           const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
           card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
@@ -1228,7 +1240,8 @@ var GalleryModal = class extends import_obsidian2.Modal {
         (0, import_obsidian2.setIcon)(check, "check");
         for (const side of ["day", "night"]) {
           const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side} fantasy-easel-bg-${s.key}`, attr: { "aria-label": `${s.name} (${side})`, role: "button", tabindex: "0" } });
-          buildStage(tile, s.family);
+          tile.dataset.stage = s.family;
+          this.lazy?.observe(tile);
           const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
           card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
           card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
@@ -1262,7 +1275,7 @@ var GalleryModal = class extends import_obsidian2.Modal {
       for (const side of ["day", "night"]) {
         const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
         const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
-        layer.style.setProperty("background-image", b.url);
+        layer.setCssProps({ "--fe-tile-image": b.url });
         const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
         card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
         card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
@@ -1285,6 +1298,8 @@ var GalleryModal = class extends import_obsidian2.Modal {
   onClose() {
     this.unsubscribe?.();
     this.unsubscribe = null;
+    this.lazy?.disconnect();
+    this.lazy = null;
     this.contentEl.empty();
   }
 };
@@ -1374,32 +1389,6 @@ function normalize(data) {
   };
 }
 
-// skins/dataview.css
-var dataview_default = '/* Fantasy Easel skin: Dataview. Moved from the Fantasy theme (2026-10-21). Uses theme variables only. */\n.block-language-dataview,\n.block-language-dataviewjs {\n	--dataview-radius: var(--blockquote-border-radius);\n	--p-spacing: 0;\n	--table-header-size: var(--table-text-size);\n}\n\n.block-language-dataviewjs h1,\n.block-language-dataviewjs h2,\n.block-language-dataviewjs h3,\n.block-language-dataviewjs h4,\n.block-language-dataviewjs h6 {\n	--p-spacing: var(--p-spacing-Orin);\n	margin-top: calc(var(--p-spacing) * 4);\n	margin-bottom: calc(var(--p-spacing) * 2);\n}\n\n.block-language-dataviewjs.node-insert-event table {\n	width: 100%\n}\n\n.table-view-table>thead>tr>th {\n	font-size: var(--table-header-size);\n}\n\n.block-language-dataviewjs.node-insert-event h4,\n.block-language-dataviewjs.node-insert-event .result-group,\n.block-language-dataviewjs.node-insert-event tbody,\n.block-language-dataview.node-insert-event tbody,\n.block-language-dataview.node-insert-event,\nul.dataview.list-view-ul,\n.block-language-dataviewjs.node-insert-event ul.contains-task-list,\n.block-language-dataviewjs.node-insert-event p ul li a.internal-link {\n	font-size: 0.92rem;\n}\n\n.block-language-dataview.node-insert-event .dataview.dataview-container,\n.markdown-source-view .block-language-dataviewjs.node-insert-event .dataview.result-group,\n.block-language-dataviewjs.node-insert-event table,\n.block-language-dataviewjs.node-insert-event ul[dir="auto"],\nul.dataview.list-view-ul {\n	background-color: var(--background-primary);\n	border-radius: var(--dataview-radius);\n}\n\n.block-language-dataviewjs.node-insert-event .task-list-item ul[dir="auto"] {\n	background-color: transparent;\n}\n\n.block-language-dataviewjs.node-insert-event h4 {\n	padding: 25px 0px 10px 0px !important;\n	color: var(--h2-color);\n	font-size: var(--h4-size);\n}\n\n.block-language-dataviewjs.node-insert-event ul,\nul.dataview.list-view-ul {\n	padding: 0.5rem;\n}\n\n.block-language-dataviewjs.node-insert-event div>ul {\n	margin-block-start: 0;\n}\n\n.block-language-dataviewjs.node-insert-event tbody td {\n	font-size: inherit;\n}\n\n.is-live-preview .block-language-dataviewjs>p,\n.is-live-preview .block-language-dataviewjs>span {\n	line-height: 1.4;\n}\n\n.block-language-dataviewjs.node-insert-event>p:not(ul) {\n	background-color: var(--background-primary);\n}\n\n.markdown-source-view li.dataview.task-list-basic-item {\n	margin-inline-start: calc(var(--list-indent) * 2.2);\n}\n\n.markdown-preview-view .dataview.dataview-container>ul.contains-task-list {\n	padding-left: 0.5rem;\n}\n\n.markdown-source-view .dataview.result-group>ul.contains-task-list,\n.dataview.result-group {\n	padding: 0;\n}\n\n.markdown-source-view .dataview.result-group>ul.contains-task-list>li.dataview.task-list-item,\n.markdown-source-view .dataview.dataview-container>ul.contains-task-list>li.dataview.task-list-item {\n	margin-inline-start: 0;\n}\n';
-
-// skins/kanban.css
-var kanban_default = '/* Fantasy Easel skin: Kanban. Moved from the Fantasy theme (2026-10-21). Uses theme variables only. */\n.kanban-plugin,\n.kanban-plugin__drag-container {\n	--background-modifier-border: var(--kanban-line-border);\n	--background-primary: transparent;\n	--background-secondary: rgba(var(--fantasy-background-color-rgb), 0.4);\n	--kanban-header-wrapper-bg-accent: hsla(var(--accent-h), calc(var(--accent-s) + 20%), calc(var(--accent-l) - 10%), 0.4);\n	--kanban-header-wrapper-bg: rgba(var(--fantasy-background-color-rgb), 0.8);\n	--kanban-h3-color: var(--h2-color);\n	--kanban-h4-color: var(--h3-color);\n	--kanban-h5-color: var(--h4-color);\n	--kanban-h3-size: 1.2em;\n	--kanban-h4-size: 1em;\n	--kanban-h5-size: 1em;\n	--kanban-line-border: var(--color-base-30);\n	--kanban-line-border-hover: var(--color-base-60);\n	--kanban-line-min-height: 2.3rem;\n	--background-modifier-form-field: transparent;\n	--h-margin: 0;\n	--p-spacing: 0;\n	--text-faint: var(--color-base-80);\n	--lane-width: 320px;\n	--hr-color: var(--color-base-50);\n}\n\n.kanban-plugin__board>div {\n	flex-wrap: wrap;\n	gap: 20px 5px;\n	overflow: auto;\n}\n\n.kanban-plugin__lane {\n	max-height: 35vh;\n	border-radius: 6px;\n}\n\n.kanban-plugin__lane-header-wrapper {\n	background-color: var(--kanban-header-wrapper-bg);\n	height: calc(var(--kanban-line-min-height) + 0.7rem);\n	border-radius: 6px 6px 0px 0px;\n}\n\n.kanban-plugin__lane-header-wrapper p {\n	font-size: 1.1em;\n	color: var(--text-faint);\n}\n\n.kanban-plugin__lane-wrapper:first-child .kanban-plugin__lane-header-wrapper,\n.kanban-plugin__lane-wrapper:nth-last-child(2) .kanban-plugin__lane-header-wrapper {\n	background-color: var(--kanban-header-wrapper-bg-accent);\n}\n\n.kanban-plugin__lane-wrapper:first-child .kanban-plugin__lane-header-wrapper a.kanban-plugin__lane-settings-button.clickable-icon,\n.kanban-plugin__lane-wrapper:nth-last-child(2) .kanban-plugin__lane-header-wrapper a.kanban-plugin__lane-settings-button.clickable-icon {\n	border-color: transparent;\n}\n\n.kanban-plugin__item-title-wrapper {\n	min-height: var(--kanban-line-min-height);\n}\n\n.kanban-plugin__markdown-preview-view h3 {\n	color: var(--kanban-h3-color);\n}\n\n.kanban-plugin__markdown-preview-view h4 {\n	color: var(--kanban-h4-color);\n	font-size: var(--kanban-h4-size);\n}\n\n.kanban-plugin__markdown-preview-view h5 {\n	color: var(--kanban-h5-color);\n	font-size: var(--kanban-h5-size);\n}\n\n.kanban-plugin__board mark[data-markjs="true"] {\n	font-size: 1.5rem;\n}\n\n.kanban-plugin__item:hover {\n	border-color: var(--kanban-line-border-hover);\n}\n\n.kanban-plugin__item-button-wrapper {\n	padding: 0;\n}\n\nbutton.kanban-plugin__new-item-button {\n	height: 3.5em;\n	box-shadow: none;\n}\n\na.kanban-plugin__lane-settings-button.clickable-icon {\n	border: 1px solid var(--background-secondary);\n}\n\na.kanban-plugin__lane-settings-button.clickable-icon:hover,\na.kanban-plugin__item-postfix-button.clickable-icon:hover,\nbutton.kanban-plugin__new-item-button:hover {\n	background-color: var(--background-primary-alt);\n	border: 1px solid var(--kanban-line-border);\n	cursor: pointer;\n	color: var(--color-base-100);\n}\n\na.kanban-plugin__item-postfix-button.is-enabled.clickable-icon svg {\n	--icon-stroke: 4px;\n	color: red;\n}\n';
-
-// src/skins.ts
-var SKINS = [
-  { id: "dataview", name: "Dataview", plugin: "dataview", desc: "Query results (tables, lists, tasks) sit on the glass card with rounded corners and slightly smaller text.", css: dataview_default },
-  { id: "kanban", name: "Kanban", plugin: "obsidian-kanban", desc: "Board, lanes and cards use the glass colors; lane headers follow the heading colors.", css: kanban_default }
-];
-var isInstalled = (app, plugin) => !!app.plugins.manifests[plugin];
-var skinOn = (app, skins, s) => skins[s.id] ?? isInstalled(app, s.plugin);
-var ATTR = "data-fantasy-easel-skin";
-function applySkins(app, skins) {
-  for (const s of SKINS) {
-    const el = document.head.querySelector(`style[${ATTR}="${s.id}"]`);
-    const on = skinOn(app, skins, s);
-    if (on && !el) document.head.createEl("style", { attr: { [ATTR]: s.id }, text: s.css });
-    else if (!on && el) el.remove();
-  }
-}
-function removeSkins() {
-  document.head.querySelectorAll(`style[${ATTR}]`).forEach((el) => el.remove());
-}
-
 // src/settings-tab.ts
 var import_obsidian4 = require("obsidian");
 var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
@@ -1441,7 +1430,7 @@ var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
     new import_obsidian4.Setting(containerEl).setName("Card layout").setDesc("Sidebars and notes as floating glass cards.").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
     heading("Background");
     const bg = backgroundById(look.background, look.images);
-    new import_obsidian4.Setting(containerEl).setName("Background").setDesc(bg ? `${bg.name} (${bg.kind === "image" ? "your picture" : `CSS \xB7 ${bg.kind}`})` : look.background).addButton((b) => b.setButtonText("Gallery").onClick(() => new GalleryModal(this.app, store).open())).addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
+    new import_obsidian4.Setting(containerEl).setName("Background").setDesc(bg ? `${bg.name} (${bg.kind === "image" ? "your picture" : `CSS \xB7 ${bg.kind}`})` : look.background).addButton((b) => b.setButtonText("Gallery").onClick(() => this.plugin.openGallery())).addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
     new import_obsidian4.Setting(containerEl).setName("Motion").setDesc(`For moving backgrounds. Auto follows the OS "reduce motion" setting${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? " (on here, so motion is paused)" : ""}. On moves anyway. `).addButton((b) => b.setButtonText(motion === "auto" ? "Auto" : motion === "on" ? "On" : "Off").onClick((ev) => {
       const menu = new import_obsidian4.Menu();
       for (const m of MOTIONS) menu.addItem((i) => i.setTitle(m === "auto" ? "Auto" : m === "on" ? "On" : "Off").setChecked(m === motion).onClick(() => store.set({ motion: m })));
@@ -1478,13 +1467,12 @@ var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
         store.setLook(store.settings.look.background === id ? { images, background: DEFAULT_BACKGROUND } : { images });
       }));
     });
-    heading("Plugin skins", "Extra CSS that fits a plugin to the Fantasy glass. Default: on when the plugin is installed.");
+    heading("Plugin skins", "Extra CSS that fits a plugin to the Fantasy glass. It only touches that plugin's own elements.");
     for (const s of SKINS) {
-      const installed = isInstalled(this.app, s.plugin);
-      new import_obsidian4.Setting(containerEl).setName(installed ? s.name : `${s.name} (not installed)`).setDesc(s.desc).addToggle((t) => t.setValue(skinOn(this.app, skins, s)).onChange((v) => store.set({ skins: { ...store.settings.skins, [s.id]: v } })));
+      new import_obsidian4.Setting(containerEl).setName(s.name).setDesc(s.desc).addToggle((t) => t.setValue(skinOn(skins, s)).onChange((v) => store.set({ skins: { ...store.settings.skins, [s.id]: v } })));
     }
     heading("Controls");
-    new import_obsidian4.Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls: theme color, background, gallery, accent, cards, motion, dark / light.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
+    new import_obsidian4.Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls: theme color, background, gallery, accent, cards, motion.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
   }
   hide() {
     this.unsubscribe?.();
@@ -1492,8 +1480,41 @@ var FantasyEaselSettingTab = class extends import_obsidian4.PluginSettingTab {
   }
 };
 
-// src/statusbar.ts
+// src/picture-modal.ts
 var import_obsidian5 = require("obsidian");
+var AddPictureModal = class extends import_obsidian5.Modal {
+  constructor(app, store) {
+    super(app);
+    this.store = store;
+    this.src = "";
+  }
+  onOpen() {
+    this.setTitle("Add picture");
+    const add = () => {
+      if (!toCssUrl(this.src)) return;
+      const img = { id: newImageId(), src: this.src.trim() };
+      this.store.setLook({ images: [...this.store.settings.look.images, img], background: `img-${img.id}` });
+      this.close();
+    };
+    new import_obsidian5.Setting(this.contentEl).setName("Picture").setDesc('A picture URL (https://\u2026) or a CSS value like url("\u2026").').addText((t) => {
+      t.setPlaceholder("https://\u2026").onChange((v) => this.src = v);
+      t.inputEl.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          add();
+        }
+      });
+      window.setTimeout(() => t.inputEl.focus(), 0);
+    });
+    new import_obsidian5.Setting(this.contentEl).addButton((b) => b.setButtonText("Cancel").onClick(() => this.close())).addButton((b) => b.setButtonText("Add and use").setCta().onClick(add));
+  }
+  onClose() {
+    this.contentEl.empty();
+  }
+};
+
+// src/statusbar.ts
+var import_obsidian6 = require("obsidian");
 var TIP = { delay: 100, placement: "top" };
 var StatusBar = class {
   constructor(app, plugin, store, managePictures) {
@@ -1510,7 +1531,7 @@ var StatusBar = class {
       const el = this.plugin.addStatusBarItem();
       el.addClass("mod-clickable", "fantasy-easel-sb", cls);
       el.setAttr("aria-label", label);
-      (0, import_obsidian5.setTooltip)(el, label, TIP);
+      (0, import_obsidian6.setTooltip)(el, label, TIP);
       this.plugin.registerDomEvent(el, "click", onClick);
       this.items.push(el);
       return el;
@@ -1519,21 +1540,21 @@ var StatusBar = class {
     const color = add("fantasy-easel-sb-color", "Theme color", (ev) => menuAt(ev, () => colorMenu(this.store)));
     this.swatch = color.createSpan({ cls: "fantasy-easel-swatch" });
     this.colorName = color.createSpan({ cls: "fantasy-easel-sb-text" });
-    (0, import_obsidian5.setIcon)(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left");
+    (0, import_obsidian6.setIcon)(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left");
     const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store, this.managePictures)));
     this.bgKind = bg.createSpan({ cls: "fantasy-easel-sb-kind" });
     this.bgName = bg.createSpan({ cls: "fantasy-easel-sb-text fantasy-easel-sb-bgname" });
-    (0, import_obsidian5.setIcon)(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right");
-    (0, import_obsidian5.setIcon)(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store, this.managePictures).open()), "layout-grid");
+    (0, import_obsidian6.setIcon)(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right");
+    (0, import_obsidian6.setIcon)(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store, this.managePictures).open()), "layout-grid");
     this.accent = add("fantasy-easel-sb-toggle", "Theme accent on / off", () => this.store.setLook({ accent: !this.store.settings.look.accent }));
-    (0, import_obsidian5.setIcon)(this.accent, "droplet");
+    (0, import_obsidian6.setIcon)(this.accent, "droplet");
     this.card = add("fantasy-easel-sb-toggle", "Card layout on / off", () => this.store.setLook({ card: !this.store.settings.look.card }));
-    (0, import_obsidian5.setIcon)(this.card, "layout-dashboard");
+    (0, import_obsidian6.setIcon)(this.card, "layout-dashboard");
     this.still = add("fantasy-easel-sb-toggle", "Motion", () => {
       const order = MOTIONS;
       this.store.set({ motion: order[(order.indexOf(this.store.settings.motion) + 1) % order.length] });
     });
-    (0, import_obsidian5.setIcon)(
+    (0, import_obsidian6.setIcon)(
       add("fantasy-easel-sb-mode", "Dark / light", () => this.app.commands.executeCommandById("theme:toggle-light-dark")),
       "sun-moon"
     );
@@ -1553,14 +1574,14 @@ var StatusBar = class {
     this.colorName.setText(color?.name ?? look.color);
     const bg = backgroundById(look.background, look.images);
     this.bgName.setText(bg?.name ?? look.background);
-    (0, import_obsidian5.setIcon)(this.bgKind, bg?.kind === "motion" ? "wind" : bg?.kind === "static" ? "palette" : "image");
+    (0, import_obsidian6.setIcon)(this.bgKind, bg?.kind === "motion" ? "wind" : bg?.kind === "static" ? "palette" : "image");
     this.accent.toggleClass("is-on", look.accent);
     this.card.toggleClass("is-on", look.card);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    (0, import_obsidian5.setIcon)(this.still, motion === "off" ? "pause" : motion === "on" ? "play" : "circle-play");
+    (0, import_obsidian6.setIcon)(this.still, motion === "off" ? "pause" : motion === "on" ? "play" : "circle-play");
     const tip = motion === "auto" ? `Motion: auto (follows OS reduced motion${reduced ? " \u2014 now paused" : ""}). Click: on` : motion === "on" ? "Motion: on (moves even with OS reduced motion). Click: off" : "Motion: off. Click: auto";
     this.still.setAttr("aria-label", tip);
-    (0, import_obsidian5.setTooltip)(this.still, tip, TIP);
+    (0, import_obsidian6.setTooltip)(this.still, tip, TIP);
     this.still.toggleClass("is-on", motion === "on");
     this.still.toggleClass("is-idle", bg?.kind !== "motion");
   }
@@ -1597,12 +1618,12 @@ var Store = class {
 };
 
 // src/main.ts
-var FantasyEaselPlugin = class extends import_obsidian6.Plugin {
+var FantasyEaselPlugin = class extends import_obsidian7.Plugin {
   constructor() {
     super(...arguments);
     this.stage = new StageHost();
     /** Menu builders, also for CLI checks (a Menu closes at once when the window has no focus). */
-    this.menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.openSettings()) };
+    this.menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.addPicture()) };
   }
   syncStage() {
     const { look } = this.store.settings;
@@ -1613,28 +1634,27 @@ var FantasyEaselPlugin = class extends import_obsidian6.Plugin {
     const settings = normalize(saved ?? DEFAULT_SETTINGS);
     this.store = new Store(settings, (s) => this.saveData(s));
     if (!saved) await this.saveData(settings);
-    document.body.style.setProperty("--fantasy-easel-delay", `-${Math.round(Math.random() * 600)}s`);
-    this.register(() => document.body.style.removeProperty("--fantasy-easel-delay"));
+    document.body.setCssProps({ "--fantasy-easel-delay": `-${Math.round(Math.random() * 600)}s` });
+    this.register(() => document.body.setCssProps({ "--fantasy-easel-delay": "" }));
     this.applier = new Applier(document.body, () => this.store.settings);
     this.applier.attach();
-    applySkins(this.app, settings.skins);
     this.syncStage();
-    this.statusBar = new StatusBar(this.app, this, this.store, () => this.openSettings());
+    this.statusBar = new StatusBar(this.app, this, this.store, () => this.addPicture());
     if (settings.statusBar) this.statusBar.show();
     this.register(
       this.store.subscribe(() => {
         this.applier.reconcile();
-        applySkins(this.app, this.store.settings.skins);
         this.syncStage();
         if (this.store.settings.statusBar) this.statusBar.show();
         else this.statusBar.hide();
       })
     );
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
-    this.registerObsidianProtocolHandler("fantasy-easel", () => this.openSettings());
+    this.registerObsidianProtocolHandler("fantasy-easel", () => this.openGallery());
     this.addCommand({ id: "next-background", name: "Next background", callback: () => stepBackground(this.store, 1) });
     this.addCommand({ id: "previous-background", name: "Previous background", callback: () => stepBackground(this.store, -1) });
-    this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => new GalleryModal(this.app, this.store, () => this.openSettings()).open() });
+    this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => this.openGallery() });
+    this.addCommand({ id: "add-picture", name: "Add picture", callback: () => this.addPicture() });
     this.app.workspace.onLayoutReady(() => {
       this.applier.reconcile();
       this.syncStage();
@@ -1644,13 +1664,12 @@ var FantasyEaselPlugin = class extends import_obsidian6.Plugin {
     this.store.flush();
     this.statusBar.hide();
     this.applier.detach();
-    removeSkins();
     this.stage.remove();
   }
-  /** Open this plugin's settings tab (to add pictures). */
-  openSettings() {
-    const setting = this.app.setting;
-    setting.open();
-    setting.openTabById(this.manifest.id);
+  openGallery() {
+    new GalleryModal(this.app, this.store, () => this.addPicture()).open();
+  }
+  addPicture() {
+    new AddPictureModal(this.app, this.store).open();
   }
 };

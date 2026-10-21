@@ -4,7 +4,7 @@ import type FantasyEaselPlugin from "./main";
 import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu } from "./menus";
 import { MOTIONS } from "./settings";
-import { isInstalled, skinOn, SKINS } from "./skins";
+import { skinOn, SKINS } from "./skins";
 
 /** Sections: Look · Background · Your pictures · Plugin skins · Controls. Lists open as Obsidian Menus (same as the status bar). */
 export class FantasyEaselSettingTab extends PluginSettingTab {
@@ -62,7 +62,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Background")
       .setDesc(bg ? `${bg.name} (${bg.kind === "image" ? "your picture" : `CSS · ${bg.kind}`})` : look.background)
-      .addButton((b) => b.setButtonText("Gallery").onClick(() => new GalleryModal(this.app, store).open()))
+      .addButton((b) => b.setButtonText("Gallery").onClick(() => this.plugin.openGallery()))
       .addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
     new Setting(containerEl)
       .setName("Motion")
@@ -116,18 +116,17 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     });
 
     // ---------- Plugin skins ----------
-    heading("Plugin skins", "Extra CSS that fits a plugin to the Fantasy glass. Default: on when the plugin is installed.");
+    heading("Plugin skins", "Extra CSS that fits a plugin to the Fantasy glass. It only touches that plugin's own elements.");
     for (const s of SKINS) {
-      const installed = isInstalled(this.app, s.plugin);
       new Setting(containerEl)
-        .setName(installed ? s.name : `${s.name} (not installed)`)
+        .setName(s.name)
         .setDesc(s.desc)
-        .addToggle((t) => t.setValue(skinOn(this.app, skins, s)).onChange((v) => store.set({ skins: { ...store.settings.skins, [s.id]: v } })));
+        .addToggle((t) => t.setValue(skinOn(skins, s)).onChange((v) => store.set({ skins: { ...store.settings.skins, [s.id]: v } })));
     }
 
     // ---------- Controls ----------
     heading("Controls");
-    new Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls: theme color, background, gallery, accent, cards, motion, dark / light.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
+    new Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls: theme color, background, gallery, accent, cards, motion.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
   }
 
   hide() {

@@ -57,6 +57,7 @@ export class StatusBar {
       const order = MOTIONS;
       this.store.set({ motion: order[(order.indexOf(this.store.settings.motion) + 1) % order.length] });
     });
+    // Exception to "public API only": Obsidian has no public call to switch dark / light.
     setIcon(
       add("fantasy-easel-sb-mode", "Dark / light", () => (this.app as unknown as { commands: { executeCommandById(id: string): boolean } }).commands.executeCommandById("theme:toggle-light-dark")),
       "sun-moon",

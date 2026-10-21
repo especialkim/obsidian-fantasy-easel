@@ -67,13 +67,36 @@ function backgroundCss() {
   ].join("\n");
 }
 
+/** Plugin skins: skins/<id>.css with every selector behind body.fantasy-easel-skin-<id>. */
+const SKIN_BEGIN = "/* BEGIN generated: plugin skins (skins/*.css, scripts/build.js). Do not edit. */";
+const SKIN_END = "/* END generated: plugin skins */";
+function skinCss() {
+  const dir = path.join(root, "skins");
+  const out = [SKIN_BEGIN];
+  for (const f of fs.readdirSync(dir).filter((f) => f.endsWith(".css")).sort()) {
+    const id = f.replace(/\.css$/, "");
+    const css = fs.readFileSync(path.join(dir, f), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    if (/@/.test(css)) throw new Error(`skins/${f}: at-rules are not supported by the skin wrapper`);
+    out.push(`/* ${id} */`);
+    for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const sel = m[1].split(",").map((s) => `body.fantasy-easel-skin-${id} ${s.trim()}`).join(",\n");
+      out.push(`${sel} {${m[2].replace(/\s+$/, "")}\n}`);
+    }
+  }
+  out.push(SKIN_END);
+  return out.join("\n");
+}
+
 const stylesPath = path.join(root, "styles.css");
 const styles = fs.readFileSync(stylesPath, "utf8");
 const a = styles.indexOf(BEGIN), b = styles.indexOf(END);
 if (a < 0 || b < 0) { console.error("styles.css: generated block markers not found"); process.exit(1); }
-const next = styles.slice(0, a) + backgroundCss() + styles.slice(b + END.length);
+let next = styles.slice(0, a) + backgroundCss() + styles.slice(b + END.length);
+const sa = next.indexOf(SKIN_BEGIN), sb = next.indexOf(SKIN_END);
+if (sa < 0 || sb < 0) { console.error("styles.css: skin block markers not found"); process.exit(1); }
+next = next.slice(0, sa) + skinCss() + next.slice(sb + SKIN_END.length);
 if (next !== styles) fs.writeFileSync(stylesPath, next);
 
 esbuild
-  .build({ absWorkingDir: root, entryPoints: ["src/main.ts"], outfile: "main.js", bundle: true, platform: "node", format: "cjs", target: "es2020", external: ["obsidian", "electron"], loader: { ".css": "text" }, logLevel: "info" })
+  .build({ absWorkingDir: root, entryPoints: ["src/main.ts"], outfile: "main.js", bundle: true, platform: "node", format: "cjs", target: "es2020", external: ["obsidian", "electron"], logLevel: "info" })
   .catch(() => process.exit(1));
