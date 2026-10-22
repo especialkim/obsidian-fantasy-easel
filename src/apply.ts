@@ -43,6 +43,8 @@ export class Applier {
   constructor(private body: HTMLElement, private get: () => FantasyEaselSettings) {}
 
   attach() {
+    // never two observers: a second one would fight the first with older settings
+    this.observer?.disconnect();
     this.observer = new MutationObserver(() => this.onMutation());
     this.observer.observe(this.body, { attributes: true, attributeFilter: ["class"], subtree: false });
     this.reconcile();

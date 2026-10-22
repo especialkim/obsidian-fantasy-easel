@@ -1100,6 +1100,7 @@ var Applier = class {
     this.runs = 0;
   }
   attach() {
+    this.observer?.disconnect();
     this.observer = new MutationObserver(() => this.onMutation());
     this.observer.observe(this.body, { attributes: true, attributeFilter: ["class"], subtree: false });
     this.reconcile();
@@ -1767,7 +1768,7 @@ var FantasyEaselPlugin = class extends import_obsidian8.Plugin {
   onunload() {
     this.store.flush();
     this.statusBar.hide();
-    if (this.active) this.applier.detach();
+    this.applier.detach();
     this.stage.remove();
   }
   openGallery() {

@@ -79,7 +79,8 @@ export default class FantasyEaselPlugin extends Plugin {
   onunload() {
     this.store.flush();
     this.statusBar.hide();
-    if (this.active) this.applier.detach();
+    // always: an observer left running after unload keeps old settings and fights the next load
+    this.applier.detach();
     this.stage.remove();
   }
 
