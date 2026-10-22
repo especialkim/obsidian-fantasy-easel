@@ -57,13 +57,8 @@ check(new Set(CSS_BG.map((b) => b.id)).size === CSS_BG.length, "background ids a
 check(toCssUrl("https://a.b/c.png") === 'url("https://a.b/c.png")', "toCssUrl wraps a plain URL");
 check(toCssUrl('url("x")') === 'url("x")' && toCssUrl("  ") === "", "toCssUrl keeps url() and drops empty");
 check(allBackgrounds([{ id: "a", src: "" }, { id: "b", src: "https://x" }]).filter((b) => b.kind === "image").map((b) => b.id).join() === "img-b", "empty pictures are not backgrounds");
-// no Style Settings section: settings live in this plugin
-{
-  // Style Settings: a notice only (info-text), no options
-  const ss = theme.slice(theme.indexOf("/* @settings"), theme.indexOf("*/", theme.indexOf("/* @settings")));
-  check(ss.includes("type: info-text"), "theme.css has no Style Settings notice pointing to Fantasy Easel");
-  check(!/type: (class-|variable-|color)/.test(ss), "theme.css Style Settings block has options (settings belong in Fantasy Easel)");
-}
+// no Style Settings block at all: settings live in this plugin (not mentioned in the theme until published)
+check(!theme.includes("@settings"), "theme.css has a Style Settings block");
 check(/\nbody \{\n\t--fantasy-background-color-rgb: [^;]+;\n\t--fantasy-hue: \d+;/.test(theme), "theme.css has no default color on body (works without a class)");
 // every color class in the theme is in the catalog (no orphans)
 for (const m of theme.matchAll(/\n\.(fantasy-theme-[A-Za-z]+) \{/g)) check(THEME_COLORS.some((c) => c.cls === m[1]), `theme.css .${m[1]} not in catalog`);
