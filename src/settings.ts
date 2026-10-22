@@ -25,6 +25,8 @@ export interface FantasyEaselSettings {
   statusBar: boolean;
   /** plugin skins the user turned on / off. Missing = on when that plugin is installed. */
   skins: Record<string, boolean>;
+  /** Excalidraw settings before Easel changed them (Restore puts them back); null = untouched */
+  excalidrawBackup: Record<string, unknown> | null;
 }
 
 export const DEFAULT_LOOK: Look = {
@@ -35,7 +37,7 @@ export const DEFAULT_LOOK: Look = {
   images: [],
 };
 
-export const DEFAULT_SETTINGS: FantasyEaselSettings = { look: DEFAULT_LOOK, motion: "auto", pauseUnfocused: false, statusBar: true, skins: {} };
+export const DEFAULT_SETTINGS: FantasyEaselSettings = { look: DEFAULT_LOOK, motion: "auto", pauseUnfocused: false, statusBar: true, skins: {}, excalidrawBackup: null };
 
 /**
  * Old 3 fixed URL slots (data.json before 2026-10-21) → pictures. `chosen` is the old
@@ -81,5 +83,6 @@ export function normalize(data: Partial<FantasyEaselSettings> | null | undefined
     pauseUnfocused: data?.pauseUnfocused === true,
     statusBar: data?.statusBar !== false,
     skins,
+    excalidrawBackup: data?.excalidrawBackup && typeof data.excalidrawBackup === "object" ? { ...data.excalidrawBackup } : null,
   };
 }

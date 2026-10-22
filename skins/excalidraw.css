@@ -1,0 +1,54 @@
+/* Fantasy Easel skin: Excalidraw. Moved from the Fantasy theme (2026-10-22). Uses theme variables only.
+   Pair with the Excalidraw settings Easel offers to set (Settings → Fantasy Easel → Plugin skins). */
+/* Excalidraw dark paints `.excalidraw.excalidraw-container.theme--dark` (0,3,0); match it so the wallpaper shows in both modes. */
+.excalidraw-wrapper,
+.excalidraw,
+.excalidraw.excalidraw-container.theme--dark {
+	background-color: transparent;
+}
+
+/* !important: Excalidraw writes its embed colors in its own <style> with !important */
+.excalidraw .excalidraw__embeddable__outer .theme-dark {
+	--background-primary: rgba(var(--fantasy-background-color-rgb), var(--background-opacity)) !important;
+}
+
+.excalidraw .canvas-node-container {
+	background-color: var(--background-primary);
+}
+
+.excalidraw .canvas-node-content.markdown-embed>.markdown-embed-content>.markdown-preview-view {
+	padding: var(--size-4-3) var(--size-4-6);
+}
+
+/* Embedded notes: tinted glass card, no properties block. */
+.excalidraw .canvas-node-content.markdown-embed.is-loaded {
+	background: var(--background-modifier-active-hover);
+}
+
+.excalidraw .canvas-node-content .metadata-container {
+	display: none;
+}
+
+.excalidraw .layer-ui__wrapper__top-right.zen-mode-transition {
+	gap: 2px;
+}
+
+.excalidraw .sidebar-trigger__label-element {
+	display: flex;
+	align-items: center;
+	align-self: stretch;
+}
+
+.excalidraw .layer-ui__wrapper__top-right {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.excalidraw .mod-header .inline-title {
+	text-align: center;
+}
+
+.excalidraw kbd,
+.excalidraw .HintViewer kbd {
+	font-size: 0.8rem;
+}

@@ -9,6 +9,7 @@ export interface Skin {
 }
 
 export const SKINS: Skin[] = [
+  { id: "excalidraw", name: "Excalidraw", desc: "Drawings show the Fantasy wallpaper behind the canvas; embedded notes sit on tinted glass cards without their properties block." },
   { id: "dataview", name: "Dataview", desc: "Query results (tables, lists, tasks) sit on the glass card with rounded corners and slightly smaller text." },
   { id: "kanban", name: "Kanban", desc: "Board, lanes and cards use the glass colors; lane headers follow the heading colors." },
 ];

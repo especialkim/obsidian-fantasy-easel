@@ -1,6 +1,7 @@
 import { Menu, PluginSettingTab, Setting, type App } from "obsidian";
 import { backgroundById, colorByCls, DEFAULT_BACKGROUND, newImageId, toCssUrl } from "./catalog";
 import type FantasyEaselPlugin from "./main";
+import { excalidrawAvailable, excalidrawDiff, ExcalidrawSettingsModal, restoreExcalidraw } from "./excalidraw";
 import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu } from "./menus";
 import { MOTIONS } from "./settings";
@@ -126,10 +127,19 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     // ---------- Plugin skins ----------
     heading("Plugin skins", "Extra CSS that fits a plugin to the Fantasy glass. It only touches that plugin's own elements.");
     for (const s of SKINS) {
-      new Setting(containerEl)
+      const row = new Setting(containerEl)
         .setName(s.name)
         .setDesc(s.desc)
-        .addToggle((t) => t.setValue(skinOn(skins, s)).onChange((v) => store.set({ skins: { ...store.settings.skins, [s.id]: v } })));
+        .addToggle((t) => t.setValue(skinOn(skins, s)).onChange((v) => {
+          store.set({ skins: { ...store.settings.skins, [s.id]: v } });
+          // turning the Excalidraw skin on: offer the Excalidraw settings it needs
+          if (s.id === "excalidraw" && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
+        }));
+      if (s.id !== "excalidraw" || !excalidrawAvailable(this.app)) continue;
+      const diff = excalidrawDiff(this.app).length;
+      row.descEl.createDiv({ text: diff ? `${diff} Excalidraw setting(s) differ from what this skin needs.` : "Excalidraw settings match this skin." });
+      if (diff) row.addButton((b) => b.setButtonText("Match settings…").onClick(() => new ExcalidrawSettingsModal(this.app, store).open()));
+      if (store.settings.excalidrawBackup) row.addButton((b) => b.setButtonText("Restore").setTooltip("Put back the Excalidraw settings from before Fantasy Easel changed them").onClick(() => void restoreExcalidraw(this.app, store)));
     }
 
     // ---------- Controls ----------

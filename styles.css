@@ -1043,6 +1043,46 @@ body.fantasy-easel-skin-dataview .markdown-source-view .dataview.result-group>ul
 body.fantasy-easel-skin-dataview .markdown-source-view .dataview.dataview-container>ul.contains-task-list>li.dataview.task-list-item {
 	margin-inline-start: 0;
 }
+/* excalidraw */
+body.fantasy-easel-skin-excalidraw .excalidraw-wrapper,
+body.fantasy-easel-skin-excalidraw .excalidraw,
+body.fantasy-easel-skin-excalidraw .excalidraw.excalidraw-container.theme--dark {
+	background-color: transparent;
+}
+body.fantasy-easel-skin-excalidraw .excalidraw .excalidraw__embeddable__outer .theme-dark {
+	--background-primary: rgba(var(--fantasy-background-color-rgb), var(--background-opacity)) !important;
+}
+body.fantasy-easel-skin-excalidraw .excalidraw .canvas-node-container {
+	background-color: var(--background-primary);
+}
+body.fantasy-easel-skin-excalidraw .excalidraw .canvas-node-content.markdown-embed>.markdown-embed-content>.markdown-preview-view {
+	padding: var(--size-4-3) var(--size-4-6);
+}
+body.fantasy-easel-skin-excalidraw .excalidraw .canvas-node-content.markdown-embed.is-loaded {
+	background: var(--background-modifier-active-hover);
+}
+body.fantasy-easel-skin-excalidraw .excalidraw .canvas-node-content .metadata-container {
+	display: none;
+}
+body.fantasy-easel-skin-excalidraw .excalidraw .layer-ui__wrapper__top-right.zen-mode-transition {
+	gap: 2px;
+}
+body.fantasy-easel-skin-excalidraw .excalidraw .sidebar-trigger__label-element {
+	display: flex;
+	align-items: center;
+	align-self: stretch;
+}
+body.fantasy-easel-skin-excalidraw .excalidraw .layer-ui__wrapper__top-right {
+	display: flex;
+	flex-wrap: wrap;
+}
+body.fantasy-easel-skin-excalidraw .excalidraw .mod-header .inline-title {
+	text-align: center;
+}
+body.fantasy-easel-skin-excalidraw .excalidraw kbd,
+body.fantasy-easel-skin-excalidraw .excalidraw .HintViewer kbd {
+	font-size: 0.8rem;
+}
 /* kanban */
 body.fantasy-easel-skin-kanban .kanban-plugin,
 body.fantasy-easel-skin-kanban .kanban-plugin__drag-container {
@@ -1136,6 +1176,24 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 	color: red;
 }
 /* END generated: plugin skins */
+
+/* ---------- 1-6. Theme accent (body.fantasy-theme-accent, moved from the theme 2026-10-22) ----------
+   Light uses the theme color (--fantasy-hue / --fantasy-light-l from theme.css color classes),
+   dark uses gold. !important: Obsidian's accent color setting must not win while this is on. */
+.theme-light.fantasy-theme-accent {
+	/* Lightness per theme color: text contrast >= 4.5:1 over the light glass (p5 background, measured at opacity 0.67) */
+	--accent-hsl: var(--fantasy-hue, 230), 70%, var(--fantasy-light-l, 35%) !important;
+	--accent-h: var(--fantasy-hue, 230) !important;
+	--accent-s: 70% !important;
+	--accent-l: var(--fantasy-light-l, 35%) !important;
+}
+
+.theme-dark.fantasy-theme-accent {
+	--accent-hsl: 44, 77%, 50% !important;
+	--accent-h: 44 !important;
+	--accent-s: 77% !important;
+	--accent-l: 50% !important;
+}
 
 /* ---------- 2. Plugin UI ---------- */
 .fantasy-easel-sb {

@@ -3,7 +3,7 @@
 // 1. catalog classes exist where they must (theme.css or generated styles.css); @settings covered;
 //    theme has no network resources and shows Plasma still (same picture as src/backgrounds.ts)
 // 2. plugin UI CSS and src/ (except picture data in backgrounds.ts) have no color literals (UI rule 1-1)
-// 3. the marker class alone changes nothing
+// 3. the marker class alone changes nothing (accent: gated by its own class)
 // 4. Store: re-subscribing listener does not loop
 // 5. text contrast through the theme glass, every CSS background x day/night x theme color
 //    (`--contrast` prints the worst ratio per background)
@@ -67,8 +67,11 @@ check(allBackgrounds([{ id: "a", src: "" }, { id: "b", src: "https://x" }]).filt
 check(/\nbody \{\n\t--fantasy-background-color-rgb: [^;]+;\n\t--fantasy-hue: \d+;/.test(theme), "theme.css has no default color on body (works without a class)");
 // every color class in the theme is in the catalog (no orphans)
 for (const m of theme.matchAll(/\n\.(fantasy-theme-[A-Za-z]+) \{/g)) check(THEME_COLORS.some((c) => c.cls === m[1]), `theme.css .${m[1]} not in catalog`);
+// accent lives in Easel (2026-10-22): the theme leaves Obsidian's accent alone
+check(!/\.fantasy-theme-accent \{/.test(theme), "theme.css still sets the accent (moved to styles.css 1-6)");
+check(styles.includes(".theme-dark.fantasy-theme-accent {"), "styles.css has no theme accent (1-6)");
 // skins: CSS files exist, no theme leftovers
-for (const f of ["dataview", "kanban"]) {
+for (const f of ["dataview", "excalidraw", "kanban"]) {
   const css = fs.readFileSync(path.join(root, "skins", `${f}.css`), "utf8");
   check(css.length > 200, `skins/${f}.css is empty`);
   check(!theme.includes(`/* Plugin - ${f[0].toUpperCase() + f.slice(1)} */`), `theme.css still has the ${f} section`);
@@ -89,7 +92,7 @@ for (const m of bgPart.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}@]+)\{([^
   const sel = m[1].trim();
   if (/^\d+%$/.test(sel) || /^(from|to)$/.test(sel)) continue;
   const decls = m[2].split(/;(?![^(]*\))/).map((d) => d.trim()).filter(Boolean);
-  const gated = /fantasy-easel-(bg-|motion|stage|skin-|gallery|tile)|^@?(from|to|\d)/.test(sel);
+  const gated = /fantasy-easel-(bg-|motion|stage|skin-|gallery|tile)|fantasy-theme-accent|^@?(from|to|\d)/.test(sel);
   const risky = decls.filter((d) => !d.startsWith("--fantasy-easel-") || d.startsWith("--background-url"));
   check(gated || risky.length === 0, `styles.css rule "${sel.slice(0, 60)}" affects the look without a background class`);
 }
