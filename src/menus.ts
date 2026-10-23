@@ -40,6 +40,12 @@ export function backgroundMenu(store: Store, managePictures?: () => void): Menu 
   return menu;
 }
 
+/** Next / previous palette (wraps). */
+export function stepColor(store: Store, dir: 1 | -1) {
+  const i = THEME_COLORS.findIndex((c) => c.cls === store.settings.look.color);
+  store.setLook({ color: THEME_COLORS[(i + dir + THEME_COLORS.length) % THEME_COLORS.length].cls });
+}
+
 /** Next / previous background in menu order (wraps). */
 export function stepBackground(store: Store, dir: 1 | -1) {
   const all = allBackgrounds(store.settings.look.images);

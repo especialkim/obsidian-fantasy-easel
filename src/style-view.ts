@@ -1,7 +1,7 @@
 import { ItemView, Setting, SettingGroup, setTooltip, type WorkspaceLeaf } from "obsidian";
 import { renderGallery } from "./gallery";
 import type FantasyEaselPlugin from "./main";
-import { stepBackground } from "./menus";
+import { stepBackground, stepColor } from "./menus";
 import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_OPTIONS, paletteDesc } from "./options";
 import { DEFAULT_LOOK, DEFAULT_SETTINGS, type Motion } from "./settings";
 import { toggleDarkLight } from "./statusbar";
@@ -136,10 +136,21 @@ export class StyleView extends ItemView {
       t.onChange((v) => { if (!this.syncing && v !== (this.mode() === "dark")) toggleDarkLight(this.app); });
       this.syncs.push(() => t.setValue(this.mode() === "dark"));
     }));
-    row(lookG, "Palette", paletteDesc(), () => look().color === DEFAULT_LOOK.color, () => store.setLook({ color: DEFAULT_LOOK.color }), (s) => s.addDropdown((d) => {
-      d.addOptions(colorOptions()).onChange((v) => this.syncing || store.setLook({ color: v }));
-      this.syncs.push(() => d.setValue(look().color));
-    }));
+    /** Name, then ‹ dropdown › (step without opening the list), then the reset. */
+    const picker = (g: SettingGroup, name: string, desc: string, options: Record<string, string>, get: () => string, set: (v: string) => void, step: (dir: 1 | -1) => void, def: string) =>
+      row(g, name, desc, () => get() === def, () => set(def), (s) => {
+        s.setClass("fantasy-easel-panel-picker");
+        s.addExtraButton((b) => b.setIcon("chevron-left").setTooltip(`Previous ${name.toLowerCase()}`).onClick(() => step(-1)));
+        s.addDropdown((d) => {
+          d.addOptions(options).onChange((v) => this.syncing || set(v));
+          this.syncs.push(() => {
+            d.setValue(get());
+            setTooltip(d.selectEl, options[get()] ?? "");
+          });
+        });
+        s.addExtraButton((b) => b.setIcon("chevron-right").setTooltip(`Next ${name.toLowerCase()}`).onClick(() => step(1)));
+      });
+    picker(lookG, "Palette", paletteDesc(), colorOptions(), () => look().color, (v) => store.setLook({ color: v }), (dir) => stepColor(store, dir), DEFAULT_LOOK.color);
     row(lookG, "Theme accent", ACCENT_DESC, () => look().accent === DEFAULT_LOOK.accent, () => store.setLook({ accent: DEFAULT_LOOK.accent }), (s) => s.addToggle((t) => {
       t.onChange((v) => this.syncing || store.setLook({ accent: v }));
       this.syncs.push(() => t.setValue(look().accent));
@@ -188,24 +199,7 @@ export class StyleView extends ItemView {
         store.set({ look: { ...look(), background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused });
       },
     });
-    bgG.addSetting((s) => {
-      s.setClass("fantasy-easel-panel-row").setClass("fantasy-easel-panel-picker");
-      s.addExtraButton((b) => b.setIcon("chevron-left").setTooltip("Previous background").onClick(() => stepBackground(store, -1)));
-      s.addDropdown((d) => {
-        d.addOptions(backgroundOptions(look().images)).onChange((v) => this.syncing || store.setLook({ background: v }));
-        this.syncs.push(() => d.setValue(look().background));
-      });
-      s.addExtraButton((b) => b.setIcon("chevron-right").setTooltip("Next background").onClick(() => stepBackground(store, 1)));
-      s.addExtraButton((b) => {
-        b.setIcon("rotate-ccw").setTooltip("Reset to default").onClick(() => store.setLook({ background: DEFAULT_LOOK.background }));
-        this.syncs.push(() => {
-          const same = look().background === DEFAULT_LOOK.background;
-          b.setDisabled(same);
-          b.extraSettingsEl.toggleClass("is-hidden", same);
-          s.settingEl.toggleClass("is-changed", !same);
-        });
-      });
-    });
+    picker(bgG, "Background", "CSS, motion, stage or one of your pictures.", backgroundOptions(look().images), () => look().background, (v) => store.setLook({ background: v }), (dir) => stepBackground(store, dir), DEFAULT_LOOK.background);
     row(bgG, "Motion", "Moving backgrounds. Auto follows the OS reduce-motion setting.", () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion }), (s) => s.addDropdown((d) => {
       d.addOptions(MOTION_OPTIONS).onChange((v) => this.syncing || store.set({ motion: v as Motion }));
       this.syncs.push(() => d.setValue(store.settings.motion));

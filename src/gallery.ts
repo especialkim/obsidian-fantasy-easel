@@ -5,8 +5,8 @@ import { buildStage, STAGES } from "./stages";
 import type { Store } from "./store";
 
 const GROUPS: { title: string; desc: string; pick: (b: CssBackground) => boolean }[] = [
-  { title: "Theme color", desc: "Follows the theme color.", pick: (b) => b.kind === "static" && b.palette === "theme" },
-  { title: "Fixed palette", desc: "Same colors with any theme color.", pick: (b) => b.kind === "static" && b.palette === "fixed" },
+  { title: "Palette", desc: "Follows the palette.", pick: (b) => b.kind === "static" && b.palette === "theme" },
+  { title: "Fixed colors", desc: "Same colors with any palette.", pick: (b) => b.kind === "static" && b.palette === "fixed" },
   { title: "Motion", desc: "Moves slowly.", pick: (b) => b.kind === "motion" },
 ];
 

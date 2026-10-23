@@ -1220,8 +1220,8 @@ var Applier = class {
 // src/gallery.ts
 var import_obsidian2 = require("obsidian");
 var GROUPS = [
-  { title: "Theme color", desc: "Follows the theme color.", pick: (b) => b.kind === "static" && b.palette === "theme" },
-  { title: "Fixed palette", desc: "Same colors with any theme color.", pick: (b) => b.kind === "static" && b.palette === "fixed" },
+  { title: "Palette", desc: "Follows the palette.", pick: (b) => b.kind === "static" && b.palette === "theme" },
+  { title: "Fixed colors", desc: "Same colors with any palette.", pick: (b) => b.kind === "static" && b.palette === "fixed" },
   { title: "Motion", desc: "Moves slowly.", pick: (b) => b.kind === "motion" }
 ];
 function renderGallery(root, store, opts) {
@@ -1401,6 +1401,10 @@ function backgroundMenu(store, managePictures) {
     if (kind === "image" && managePictures) menu.addItem((item) => item.setTitle("Add picture\u2026").setIcon("plus").onClick(managePictures));
   }
   return menu;
+}
+function stepColor(store, dir) {
+  const i = THEME_COLORS.findIndex((c) => c.cls === store.settings.look.color);
+  store.setLook({ color: THEME_COLORS[(i + dir + THEME_COLORS.length) % THEME_COLORS.length].cls });
 }
 function stepBackground(store, dir) {
   const all = allBackgrounds(store.settings.look.images);
@@ -2026,10 +2030,19 @@ var StyleView = class extends import_obsidian9.ItemView {
       });
       this.syncs.push(() => t.setValue(this.mode() === "dark"));
     }));
-    row(lookG, "Palette", paletteDesc(), () => look().color === DEFAULT_LOOK.color, () => store.setLook({ color: DEFAULT_LOOK.color }), (s) => s.addDropdown((d) => {
-      d.addOptions(colorOptions()).onChange((v) => this.syncing || store.setLook({ color: v }));
-      this.syncs.push(() => d.setValue(look().color));
-    }));
+    const picker = (g, name, desc, options, get, set, step, def) => row(g, name, desc, () => get() === def, () => set(def), (s) => {
+      s.setClass("fantasy-easel-panel-picker");
+      s.addExtraButton((b) => b.setIcon("chevron-left").setTooltip(`Previous ${name.toLowerCase()}`).onClick(() => step(-1)));
+      s.addDropdown((d) => {
+        d.addOptions(options).onChange((v) => this.syncing || set(v));
+        this.syncs.push(() => {
+          d.setValue(get());
+          (0, import_obsidian9.setTooltip)(d.selectEl, options[get()] ?? "");
+        });
+      });
+      s.addExtraButton((b) => b.setIcon("chevron-right").setTooltip(`Next ${name.toLowerCase()}`).onClick(() => step(1)));
+    });
+    picker(lookG, "Palette", paletteDesc(), colorOptions(), () => look().color, (v) => store.setLook({ color: v }), (dir) => stepColor(store, dir), DEFAULT_LOOK.color);
     row(lookG, "Theme accent", ACCENT_DESC, () => look().accent === DEFAULT_LOOK.accent, () => store.setLook({ accent: DEFAULT_LOOK.accent }), (s) => s.addToggle((t) => {
       t.onChange((v) => this.syncing || store.setLook({ accent: v }));
       this.syncs.push(() => t.setValue(look().accent));
@@ -2073,24 +2086,7 @@ var StyleView = class extends import_obsidian9.ItemView {
         store.set({ look: { ...look(), background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused });
       }
     });
-    bgG.addSetting((s) => {
-      s.setClass("fantasy-easel-panel-row").setClass("fantasy-easel-panel-picker");
-      s.addExtraButton((b) => b.setIcon("chevron-left").setTooltip("Previous background").onClick(() => stepBackground(store, -1)));
-      s.addDropdown((d) => {
-        d.addOptions(backgroundOptions(look().images)).onChange((v) => this.syncing || store.setLook({ background: v }));
-        this.syncs.push(() => d.setValue(look().background));
-      });
-      s.addExtraButton((b) => b.setIcon("chevron-right").setTooltip("Next background").onClick(() => stepBackground(store, 1)));
-      s.addExtraButton((b) => {
-        b.setIcon("rotate-ccw").setTooltip("Reset to default").onClick(() => store.setLook({ background: DEFAULT_LOOK.background }));
-        this.syncs.push(() => {
-          const same = look().background === DEFAULT_LOOK.background;
-          b.setDisabled(same);
-          b.extraSettingsEl.toggleClass("is-hidden", same);
-          s.settingEl.toggleClass("is-changed", !same);
-        });
-      });
-    });
+    picker(bgG, "Background", "CSS, motion, stage or one of your pictures.", backgroundOptions(look().images), () => look().background, (v) => store.setLook({ background: v }), (dir) => stepBackground(store, dir), DEFAULT_LOOK.background);
     row(bgG, "Motion", "Moving backgrounds. Auto follows the OS reduce-motion setting.", () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion }), (s) => s.addDropdown((d) => {
       d.addOptions(MOTION_OPTIONS).onChange((v) => this.syncing || store.set({ motion: v }));
       this.syncs.push(() => d.setValue(store.settings.motion));

@@ -1427,9 +1427,16 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 	min-width: 0;
 }
 
-.fantasy-easel-panel .fantasy-easel-panel-row.is-changed .setting-item-name::before {
+/* changed-from-default dot: in the row's left padding, so names stay in one column */
+.fantasy-easel-panel .fantasy-easel-panel-row {
+	position: relative;
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-row.is-changed::before {
 	content: "";
-	flex: none;
+	position: absolute;
+	left: calc(var(--setting-items-padding-x, var(--size-4-3)) / 2 - 3px);
+	top: calc(50% - 3px);
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
@@ -1449,19 +1456,20 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 	opacity: 0.5;
 }
 
-/* background picker: ‹ dropdown › and reset, no name (the group says it) */
+/* pickers (palette, background): name, then ‹ dropdown › filling the rest; long names end in … */
 .fantasy-easel-panel .fantasy-easel-panel-picker .setting-item-info {
-	display: none;
+	flex: 0 0 auto;
 }
 
 .fantasy-easel-panel .fantasy-easel-panel-picker .setting-item-control {
 	flex: 1 1 auto;
-	justify-content: stretch;
+	justify-content: flex-end;
 }
 
 .fantasy-easel-panel .fantasy-easel-panel-picker select {
-	flex: 1;
+	flex: 0 1 15em;
 	min-width: 0;
+	text-overflow: ellipsis;
 }
 
 .fantasy-easel-panel .fantasy-easel-panel-resetall {
@@ -1469,7 +1477,17 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 	margin-bottom: var(--size-4-6);
 }
 
-/* Gallery in the sidebar: the current mode only, the name above one full-width tile */
+/* Gallery in the sidebar: the current mode only, two backgrounds per line (name above its tile) */
+.fantasy-easel-panel-gallery .fantasy-easel-gallery.is-single .fantasy-easel-gallery-group {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	column-gap: var(--size-4-3);
+}
+
+.fantasy-easel-panel-gallery .fantasy-easel-gallery.is-single :is(.fantasy-easel-gallery-title, .fantasy-easel-gallery-desc) {
+	grid-column: 1 / -1;
+}
+
 .fantasy-easel-panel-gallery .fantasy-easel-gallery.is-single .fantasy-easel-gallery-row {
 	grid-template-columns: minmax(0, 1fr);
 	gap: var(--size-2-2);
