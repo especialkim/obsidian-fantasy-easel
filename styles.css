@@ -1435,8 +1435,8 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 .fantasy-easel-panel .fantasy-easel-panel-row.is-changed::before {
 	content: "";
 	position: absolute;
-	left: calc(var(--setting-items-padding-x, var(--size-4-3)) / 2 - 3px);
-	top: calc(50% - 3px);
+	left: calc(var(--setting-items-padding-x, var(--size-4-3)) / 2);
+	top: calc(50% - 4px);
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;

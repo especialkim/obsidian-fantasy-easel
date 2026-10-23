@@ -66,8 +66,16 @@ export const tuningByKey = (key: string) => TUNINGS.find((t) => t.key === key);
 /** Storage key: per-mode tunings keep one value per mode. */
 export const storeKey = (t: Tuning, mode: Mode) => (t.perMode ? `${t.key}.${mode}` : t.key);
 
-/** Every storage key that may be saved. */
-export const STORE_KEYS: string[] = TUNINGS.flatMap((t) => (t.perMode ? [`${t.key}.dark`, `${t.key}.light`] : [t.key]));
+/** Back at the theme's value (within half a step): saved as "not set", so it is not marked changed. */
+export const isDefaultValue = (t: Tuning, mode: Mode, v: number) => Math.abs(v - t.def[mode]) < t.step / 2;
+
+/** Storage key → its tuning and mode (null for unknown keys). */
+export function parseStoreKey(k: string): { t: Tuning; mode: Mode | null } | null {
+  const [name, m] = k.split(".");
+  const t = tuningByKey(name);
+  if (!t || (t.perMode ? m !== "dark" && m !== "light" : m !== undefined)) return null;
+  return { t, mode: t.perMode ? (m as Mode) : null };
+}
 
 const clamp = (t: Tuning, v: unknown) => (typeof v === "number" && Number.isFinite(v) ? Math.min(t.max, Math.max(t.min, v)) : null);
 

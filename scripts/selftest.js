@@ -90,6 +90,9 @@ for (const v of TUNING_VARS) check(theme.includes(`var(${v}`) || styles.includes
 for (const t of TUNINGS) check(t.def.dark >= t.min && t.def.dark <= t.max && t.def.light >= t.min && t.def.light <= t.max, `tuning ${t.key}: default outside its range`);
 check(!("--cardview-gap" in tuningVars({ cardGap: 8 }, false, "dark")), "card tuning applied with the card layout off");
 check(tuningVars({ "opacity.dark": 5 }, true, "dark")["--background-opacity"] === "0.95", "tuning values are not clamped");
+const { normalize } = loadTs("src/settings.ts");
+const nt = normalize({ tuning: { "opacity.light": 0.67, stageSpeed: 1, "blur.dark": 9, opacity: 0.5, bogus: 3 } }).tuning;
+check(JSON.stringify(nt) === JSON.stringify({ "blur.dark": 9, "opacity.dark": 0.5, "opacity.light": 0.5 }), `normalize tuning: defaults dropped, old single glass value copied per mode (got ${JSON.stringify(nt)})`);
 check(!("--background-opacity" in tuningVars({ "opacity.dark": 0.5 }, true, "light")), "a dark-mode glass value applied in light mode");
 check(tuningVars({ "opacity.light": 0.5 }, true, "dark")["--fantasy-easel-g-opacity-light"] === "0.5", "gallery tiles miss the other mode's glass");
 

@@ -1,4 +1,4 @@
-import { STORE_KEYS, tuningByKey } from "./tuning";
+import { isDefaultValue, parseStoreKey, tuningByKey } from "./tuning";
 import { backgroundById, colorByCls, DEFAULT_BACKGROUND, newImageId, THEME_DEFAULTS, type UserImage } from "./catalog";
 
 /** What the theme shows. */
@@ -93,7 +93,9 @@ export function normalize(data: Partial<FantasyEaselSettings> | null | undefined
   const tuning: Record<string, number> = {};
   for (const [k, v] of Object.entries(data?.tuning ?? {})) {
     if (typeof v !== "number" || !Number.isFinite(v)) continue;
-    if (STORE_KEYS.includes(k)) tuning[k] = v;
+    const parsed = parseStoreKey(k);
+    // a value equal to the theme's is "not set" (older versions saved it after a drag back)
+    if (parsed) { if (!isDefaultValue(parsed.t, parsed.mode ?? "dark", v)) tuning[k] = v; }
     // before per-mode glass (2026-10-23): one value for both modes
     else if (tuningByKey(k)?.perMode) for (const m of ["dark", "light"]) tuning[`${k}.${m}`] ??= v;
   }

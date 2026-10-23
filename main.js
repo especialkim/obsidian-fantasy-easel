@@ -1105,7 +1105,13 @@ var TUNING_VARS = [.../* @__PURE__ */ new Set([
 ])];
 var tuningByKey = (key) => TUNINGS.find((t) => t.key === key);
 var storeKey = (t, mode) => t.perMode ? `${t.key}.${mode}` : t.key;
-var STORE_KEYS = TUNINGS.flatMap((t) => t.perMode ? [`${t.key}.dark`, `${t.key}.light`] : [t.key]);
+var isDefaultValue = (t, mode, v) => Math.abs(v - t.def[mode]) < t.step / 2;
+function parseStoreKey(k) {
+  const [name, m] = k.split(".");
+  const t = tuningByKey(name);
+  if (!t || (t.perMode ? m !== "dark" && m !== "light" : m !== void 0)) return null;
+  return { t, mode: t.perMode ? m : null };
+}
 var clamp = (t, v) => typeof v === "number" && Number.isFinite(v) ? Math.min(t.max, Math.max(t.min, v)) : null;
 function tuningVars(values, card, mode) {
   const out = {};
@@ -1457,8 +1463,10 @@ function normalize(data) {
   const tuning = {};
   for (const [k, v] of Object.entries(data?.tuning ?? {})) {
     if (typeof v !== "number" || !Number.isFinite(v)) continue;
-    if (STORE_KEYS.includes(k)) tuning[k] = v;
-    else if (tuningByKey(k)?.perMode) for (const m of ["dark", "light"]) tuning[_a = `${k}.${m}`] ?? (tuning[_a] = v);
+    const parsed = parseStoreKey(k);
+    if (parsed) {
+      if (!isDefaultValue(parsed.t, parsed.mode ?? "dark", v)) tuning[k] = v;
+    } else if (tuningByKey(k)?.perMode) for (const m of ["dark", "light"]) tuning[_a = `${k}.${m}`] ?? (tuning[_a] = v);
   }
   const skins = {};
   for (const [k, v] of Object.entries(data?.skins ?? {})) if (typeof v === "boolean") skins[k] = v;
@@ -2065,7 +2073,7 @@ var StyleView = class extends import_obsidian9.ItemView {
     const sliders = (g, id) => {
       for (const t of TUNINGS.filter((x) => x.group === id)) {
         row(g, t.name, t.desc, () => !(key(t) in store.settings.tuning), () => setTuning([key(t)], null), (s) => s.addSlider((sl) => {
-          sl.setLimits(t.min, t.max, t.step).setInstant(true).setDisplayFormat((v) => show2(t, v)).onChange((v) => this.syncing || setTuning([key(t)], v));
+          sl.setLimits(t.min, t.max, t.step).setInstant(true).setDisplayFormat((v) => show2(t, v)).onChange((v) => this.syncing || setTuning([key(t)], isDefaultValue(t, mode, v) ? null : v));
           this.syncs.push(() => {
             const v = value(t);
             if (sl.getValue() !== v) sl.setValue(v);

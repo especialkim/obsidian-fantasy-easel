@@ -5,7 +5,7 @@ import { stepBackground, stepColor } from "./menus";
 import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_OPTIONS, paletteDesc } from "./options";
 import { DEFAULT_LOOK, DEFAULT_SETTINGS, type Motion } from "./settings";
 import { toggleDarkLight } from "./statusbar";
-import { storeKey, TUNING_GROUPS, TUNINGS, type Mode, type Tuning, type TuningGroup } from "./tuning";
+import { isDefaultValue, storeKey, TUNING_GROUPS, TUNINGS, type Mode, type Tuning, type TuningGroup } from "./tuning";
 
 export const STYLE_VIEW = "fantasy-easel-style";
 
@@ -175,7 +175,7 @@ export class StyleView extends ItemView {
     const sliders = (g: SettingGroup, id: TuningGroup) => {
       for (const t of TUNINGS.filter((x) => x.group === id)) {
         row(g, t.name, t.desc, () => !(key(t) in store.settings.tuning), () => setTuning([key(t)], null), (s) => s.addSlider((sl) => {
-          sl.setLimits(t.min, t.max, t.step).setInstant(true).setDisplayFormat((v) => show(t, v)).onChange((v) => this.syncing || setTuning([key(t)], v));
+          sl.setLimits(t.min, t.max, t.step).setInstant(true).setDisplayFormat((v) => show(t, v)).onChange((v) => this.syncing || setTuning([key(t)], isDefaultValue(t, mode, v) ? null : v));
           this.syncs.push(() => {
             const v = value(t);
             // setValue during a drag would fight the pointer: only when it differs
