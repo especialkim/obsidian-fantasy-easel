@@ -56,6 +56,10 @@ check(new Set(CSS_BG.map((b) => b.id)).size === CSS_BG.length, "background ids a
 // your pictures: URL → CSS value, empty ones left out
 check(toCssUrl("https://a.b/c.png") === 'url("https://a.b/c.png")', "toCssUrl wraps a plain URL");
 check(toCssUrl('url("x")') === 'url("x")' && toCssUrl("  ") === "", "toCssUrl keeps url() and drops empty");
+// local pictures need the app (main.ts sets the resolver); without it they are not usable
+check(toCssUrl("Assets/sky.png") === "" && toCssUrl("file:///Users/a/b.png") === "", "local picture used without a resolver");
+const { setPictureResolver, pictureKind } = loadTs("src/catalog.ts");
+check(pictureKind("https://a/b.png") === "web" && pictureKind('url("x")') === "css" && pictureKind("Assets/a.png") === "local" && pictureKind("file:///a.png") === "local", "pictureKind");
 check(allBackgrounds([{ id: "a", src: "" }, { id: "b", src: "https://x" }]).filter((b) => b.kind === "image").map((b) => b.id).join() === "img-b", "empty pictures are not backgrounds");
 // no Style Settings block at all: settings live in this plugin (not mentioned in the theme until published)
 check(!theme.includes("@settings"), "theme.css has a Style Settings block");
@@ -72,13 +76,22 @@ for (const f of ["dataview", "excalidraw", "kanban"]) {
   check(!theme.includes(`/* Plugin - ${f[0].toUpperCase() + f.slice(1)} */`), `theme.css still has the ${f} section`);
 }
 
+// theme works without Easel: every var(--x) it reads without a fallback is defined by the theme
+// itself or by Obsidian (scripts/obsidian-vars.txt). --accent-hsl was Easel-only: accent off lost
+// the active file color in the file explorer (2026-10-23).
+const obsidianVars = new Set(fs.readFileSync(path.join(root, "scripts/obsidian-vars.txt"), "utf8").split("\n").filter((l) => l.startsWith("--")));
+const themeDefs = new Set([...theme.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]));
+for (const m of theme.matchAll(/var\((--[\w-]+)\s*\)/g)) check(themeDefs.has(m[1]) || obsidianVars.has(m[1]), `theme.css reads ${m[1]}, defined by neither the theme nor Obsidian`);
+
 // style panel: every variable a tuning writes is read by theme.css / styles.css, or set by theme.css
 // (then Obsidian's app.css reads it, e.g. --file-line-width)
 const { TUNINGS, TUNING_VARS, tuningVars } = loadTs("src/tuning.ts");
 for (const v of TUNING_VARS) check(theme.includes(`var(${v}`) || styles.includes(`var(${v}`) || theme.includes(`${v}:`), `tuning variable ${v} is not in theme.css or styles.css`);
 for (const t of TUNINGS) check(t.def.dark >= t.min && t.def.dark <= t.max && t.def.light >= t.min && t.def.light <= t.max, `tuning ${t.key}: default outside its range`);
-check(!("--cardview-gap" in tuningVars({ cardGap: 8 }, false)), "card tuning applied with the card layout off");
-check(tuningVars({ opacity: 5 }, true)["--background-opacity"] === "0.95", "tuning values are not clamped");
+check(!("--cardview-gap" in tuningVars({ cardGap: 8 }, false, "dark")), "card tuning applied with the card layout off");
+check(tuningVars({ "opacity.dark": 5 }, true, "dark")["--background-opacity"] === "0.95", "tuning values are not clamped");
+check(!("--background-opacity" in tuningVars({ "opacity.dark": 0.5 }, true, "light")), "a dark-mode glass value applied in light mode");
+check(tuningVars({ "opacity.light": 0.5 }, true, "dark")["--fantasy-easel-g-opacity-light"] === "0.5", "gallery tiles miss the other mode's glass");
 
 // ---------- 2. color literals ----------
 const lit = /#[0-9a-fA-F]{3,8}\b|\brgba?\(/;

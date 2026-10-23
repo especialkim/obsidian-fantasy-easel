@@ -1376,15 +1376,55 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 }
 
 .fantasy-easel-picture input.fantasy-easel-picture-name {
-	min-width: 8em;
-	width: 10em;
+	min-width: 6em;
+	width: 8em;
 }
 
-/* Style panel (sidebar): changed rows get a dot, a reset button shows only there */
+/* the name on the left: one line, cut with … (the full name is in the field and the tooltip) */
+.fantasy-easel-picture .setting-item-info {
+	flex: 0 0 7em;
+	min-width: 0;
+}
+
+.fantasy-easel-picture .setting-item-name {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+/* Style panel (sidebar): Obsidian setting groups, one line per row (descriptions are tooltips),
+   changed rows get a dot and a reset button that shows only there */
+.fantasy-easel-panel .fantasy-easel-panel-group {
+	margin-bottom: var(--size-4-6);
+}
+
+/* denser than the settings window (Obsidian's group row padding variable): a sidebar shows many rows */
+.fantasy-easel-panel {
+	--setting-items-padding-y: var(--size-4-2);
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-row {
+	gap: var(--size-4-2);
+	align-items: center;
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-row .setting-item-info {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
 .fantasy-easel-panel .fantasy-easel-panel-row .setting-item-name {
 	display: flex;
-	align-items: baseline;
+	align-items: center;
 	gap: var(--size-2-2);
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-row .setting-item-control {
+	flex: 0 1 auto;
+	min-width: 0;
 }
 
 .fantasy-easel-panel .fantasy-easel-panel-row.is-changed .setting-item-name::before {
@@ -1394,7 +1434,11 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 	height: 6px;
 	border-radius: 50%;
 	background-color: var(--interactive-accent);
-	transform: translateY(-1px);
+}
+
+/* sliders: the same width in every row, so the groups line up */
+.fantasy-easel-panel .fantasy-easel-panel-row input[type="range"] {
+	width: 9em;
 }
 
 .fantasy-easel-panel .clickable-icon.is-hidden {
@@ -1405,39 +1449,37 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 	opacity: 0.5;
 }
 
-/* narrow sidebar: the control goes under the name */
-.fantasy-easel-panel .fantasy-easel-panel-wide {
-	flex-wrap: wrap;
+/* background picker: ‹ dropdown › and reset, no name (the group says it) */
+.fantasy-easel-panel .fantasy-easel-panel-picker .setting-item-info {
+	display: none;
 }
 
-.fantasy-easel-panel .fantasy-easel-panel-wide .setting-item-control {
-	flex-basis: 100%;
-	justify-content: flex-start;
+.fantasy-easel-panel .fantasy-easel-panel-picker .setting-item-control {
+	flex: 1 1 auto;
+	justify-content: stretch;
 }
 
-.fantasy-easel-panel .fantasy-easel-panel-wide select,
-.fantasy-easel-panel .fantasy-easel-panel-wide input[type="range"] {
+.fantasy-easel-panel .fantasy-easel-panel-picker select {
 	flex: 1;
 	min-width: 0;
 }
 
-/* Gallery in the sidebar: the name above the two tiles */
-.fantasy-easel-panel-gallery .fantasy-easel-gallery-head,
-.fantasy-easel-panel-gallery .fantasy-easel-gallery-row {
-	grid-template-columns: 1fr 1fr;
-	gap: var(--size-2-3);
+.fantasy-easel-panel .fantasy-easel-panel-resetall {
+	border-top: none;
+	margin-bottom: var(--size-4-6);
+}
+
+/* Gallery in the sidebar: the current mode only, the name above one full-width tile */
+.fantasy-easel-panel-gallery .fantasy-easel-gallery.is-single .fantasy-easel-gallery-row {
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--size-2-2);
 }
 
 .fantasy-easel-panel-gallery .fantasy-easel-gallery-name {
-	grid-column: 1 / -1;
-}
-
-.fantasy-easel-panel-gallery .fantasy-easel-gallery-head span:first-child {
-	grid-column: 1;
-}
-
-.fantasy-easel-panel-gallery .fantasy-easel-gallery-head {
-	background: var(--background-secondary);
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .fantasy-easel-gallery-row {
@@ -1504,14 +1546,15 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 }
 
 .fantasy-easel-tile.fantasy-easel-night .fantasy-easel-tile-card {
-	background: hsl(var(--fantasy-hue, 230) 35% 8% / 0.6);
-	backdrop-filter: brightness(0.8) blur(8px);
+	/* the style panel's glass values for this mode (src/tuning.ts tile variables); not set = the theme's */
+	background: hsl(var(--fantasy-hue, 230) 35% 8% / var(--fantasy-easel-g-opacity-dark, 0.6));
+	backdrop-filter: brightness(var(--fantasy-easel-g-brightness-dark, 0.8)) blur(calc(var(--fantasy-easel-g-blur-dark, 8) * 1px));
 	color: hsl(0 0% 71%);
 }
 
 .fantasy-easel-tile.fantasy-easel-day .fantasy-easel-tile-card {
-	background: hsl(240 33% 99% / 0.67);
-	backdrop-filter: brightness(1.05) saturate(1.1) blur(12px);
+	background: hsl(240 33% 99% / var(--fantasy-easel-g-opacity-light, 0.67));
+	backdrop-filter: brightness(var(--fantasy-easel-g-brightness-light, 1.05)) saturate(1.1) blur(calc(var(--fantasy-easel-g-blur-light, 12) * 1px));
 	color: hsl(0 0% 31%);
 }
 

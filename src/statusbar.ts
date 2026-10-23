@@ -49,7 +49,7 @@ export class StatusBar {
 
     const build: Record<StatusId, () => void> = {
       color: () => {
-        const color = add("fantasy-easel-sb-color", "Theme color", (ev) => menuAt(ev, () => colorMenu(this.store)));
+        const color = add("fantasy-easel-sb-color", "Palette", (ev) => menuAt(ev, () => colorMenu(this.store)));
         this.swatch = color.createSpan({ cls: "fantasy-easel-swatch" });
         this.colorName = color.createSpan({ cls: "fantasy-easel-sb-text" });
       },

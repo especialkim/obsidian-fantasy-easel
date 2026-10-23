@@ -17,7 +17,7 @@ const GROUPS: { title: string; desc: string; pick: (b: CssBackground) => boolean
  * Click a tile to use that background. Used by the gallery Modal and the style panel.
  * Returns the cleanup (stops the lazy stage builder, unsubscribes).
  */
-export function renderGallery(root: HTMLElement, store: Store, opts: { scrollRoot: HTMLElement; addPicture?: () => void; still?: boolean }): () => void {
+export function renderGallery(root: HTMLElement, store: Store, opts: { scrollRoot: HTMLElement; addPicture?: () => void; still?: boolean; sides?: ("day" | "night")[] }): () => void {
   root.addClass("fantasy-easel-gallery");
   const lazy = new IntersectionObserver((entries) => {
     // Only tiles near the view keep a stage: built on the way in, removed on the way out.
@@ -33,9 +33,14 @@ export function renderGallery(root: HTMLElement, store: Store, opts: { scrollRoo
   const moving = !opts.still && (motion === "on" || (motion === "auto" && !reduced));
   root.toggleClass("is-still", !moving);
 
-  const head = root.createDiv({ cls: "fantasy-easel-gallery-head" });
-  head.createSpan({ text: "Day" });
-  head.createSpan({ text: "Night" });
+  // both modes side by side (Modal), or only the current one (style panel: one tile per row)
+  const sides = opts.sides ?? (["day", "night"] as const);
+  root.toggleClass("is-single", sides.length === 1);
+  if (sides.length > 1) {
+    const head = root.createDiv({ cls: "fantasy-easel-gallery-head" });
+    head.createSpan({ text: "Day" });
+    head.createSpan({ text: "Night" });
+  }
 
   for (const g of GROUPS) {
     const section = root.createDiv({ cls: "fantasy-easel-gallery-group" });
@@ -47,7 +52,7 @@ export function renderGallery(root: HTMLElement, store: Store, opts: { scrollRoo
       label.createSpan({ text: b.name });
       const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
       setIcon(check, "check");
-      for (const side of ["day", "night"] as const) {
+      for (const side of sides) {
         const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
         const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
         layer.setCssProps({ "--fe-tile-image": `var(--fantasy-easel-grad-${b.key})`, "--fe-tile-motion": b.motion ? motionCss(b.motion) : "none" });
@@ -79,7 +84,7 @@ export function renderGallery(root: HTMLElement, store: Store, opts: { scrollRoo
       label.createSpan({ text: s.name });
       const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
       setIcon(check, "check");
-      for (const side of ["day", "night"] as const) {
+      for (const side of sides) {
         const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side} fantasy-easel-bg-${s.key}`, attr: { "aria-label": `${s.name} (${side})`, role: "button", tabindex: "0" } });
         // built when scrolled into view (dozens of four-layer stages at once overrun the GPU)
         tile.dataset.stage = s.family;
@@ -108,7 +113,7 @@ export function renderGallery(root: HTMLElement, store: Store, opts: { scrollRoo
     label.createSpan({ text: b.name });
     const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
     setIcon(check, "check");
-    for (const side of ["day", "night"] as const) {
+    for (const side of sides) {
       const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
       const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
       layer.setCssProps({ "--fe-tile-image": b.url! });

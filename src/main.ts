@@ -4,7 +4,8 @@ import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu, stepBackground } from "./menus";
 import { DEFAULT_SETTINGS, normalize, type FantasyEaselSettings } from "./settings";
 import { StageHost } from "./stages";
-import { backgroundById } from "./catalog";
+import { backgroundById, setPictureResolver } from "./catalog";
+import { resolvePicture } from "./pictures";
 import { FantasyEaselSettingTab } from "./settings-tab";
 import { AddPictureModal } from "./picture-modal";
 import { StatusBar } from "./statusbar";
@@ -53,6 +54,9 @@ export default class FantasyEaselPlugin extends Plugin {
   async onload() {
     const saved = (await this.loadData()) as Partial<FantasyEaselSettings> | null;
     const settings = normalize(saved ?? DEFAULT_SETTINGS);
+    // local pictures (vault path, file://, absolute path) need the app to become an address
+    setPictureResolver((src) => resolvePicture(this.app, src));
+    this.register(() => setPictureResolver(null));
     this.store = new Store(settings, (s) => this.saveData(s));
     if (!saved) await this.saveData(settings);
 
@@ -77,7 +81,16 @@ export default class FantasyEaselPlugin extends Plugin {
     // no default hotkey (plugin guidelines)
     this.addCommand({ id: "open-style-panel", name: "Open style panel", callback: () => void this.openStylePanel() });
     this.addCommand({ id: "add-picture", name: "Add picture", callback: () => this.addPicture() });
-    this.app.workspace.onLayoutReady(() => this.refresh());
+    // a vault picture that is renamed or moved keeps working
+    this.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
+      const images = this.store.settings.look.images;
+      if (images.some((x) => x.src.trim() === oldPath)) this.store.setLook({ images: images.map((x) => (x.src.trim() === oldPath ? { ...x, src: file.path } : x)) });
+    }));
+    // the vault index is ready only after layout: vault pictures resolve from then on
+    this.app.workspace.onLayoutReady(() => {
+      this.applier.reconcile();
+      this.refresh();
+    });
   }
 
   onunload() {

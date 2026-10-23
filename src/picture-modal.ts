@@ -1,5 +1,6 @@
 import { Modal, Setting, type App } from "obsidian";
 import { newImageId, toCssUrl } from "./catalog";
+import { PictureSuggest } from "./pictures";
 import type { Store } from "./store";
 
 /** Add one picture and use it as the background (Obsidian Modal; no detour through settings). */
@@ -20,9 +21,10 @@ export class AddPictureModal extends Modal {
     };
     new Setting(this.contentEl)
       .setName("Picture")
-      .setDesc('A picture URL (https://…) or a CSS value like url("…").')
+      .setDesc("A vault picture (type to search), https://… or a file on this computer (file://…, only here).")
       .addText((t) => {
-        t.setPlaceholder("https://…").onChange((v) => (this.src = v));
+        t.setPlaceholder("Vault path, https://… or file://…").onChange((v) => (this.src = v));
+        new PictureSuggest(this.app, t.inputEl, (path) => (this.src = path));
         t.inputEl.addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); add(); } });
         window.setTimeout(() => t.inputEl.focus(), 0);
       });

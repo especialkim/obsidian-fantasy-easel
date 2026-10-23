@@ -1,4 +1,4 @@
-import { tuningByKey } from "./tuning";
+import { STORE_KEYS, tuningByKey } from "./tuning";
 import { backgroundById, colorByCls, DEFAULT_BACKGROUND, newImageId, THEME_DEFAULTS, type UserImage } from "./catalog";
 
 /** What the theme shows. */
@@ -91,14 +91,20 @@ export function normalize(data: Partial<FantasyEaselSettings> | null | undefined
   }
   for (const id of STATUS_IDS) if (!seen.has(id)) statusItems.push({ id, on: true });
   const tuning: Record<string, number> = {};
-  for (const [k, v] of Object.entries(data?.tuning ?? {})) if (tuningByKey(k) && typeof v === "number" && Number.isFinite(v)) tuning[k] = v;
+  for (const [k, v] of Object.entries(data?.tuning ?? {})) {
+    if (typeof v !== "number" || !Number.isFinite(v)) continue;
+    if (STORE_KEYS.includes(k)) tuning[k] = v;
+    // before per-mode glass (2026-10-23): one value for both modes
+    else if (tuningByKey(k)?.perMode) for (const m of ["dark", "light"]) tuning[`${k}.${m}`] ??= v;
+  }
   const skins: Record<string, boolean> = {};
   for (const [k, v] of Object.entries(data?.skins ?? {})) if (typeof v === "boolean") skins[k] = v;
   return {
     look: {
       // a color dropped from the list falls back to Dark
       color: typeof look.color === "string" && colorByCls(look.color) ? look.color : DEFAULT_LOOK.color,
-      background: backgroundById(background, images) ? background : DEFAULT_LOOK.background,
+      // a vault picture may not resolve yet (vault index not ready at load): keep it if the entry exists
+      background: backgroundById(background, images) || images.some((x) => `img-${x.id}` === background && x.src.trim()) ? background : DEFAULT_LOOK.background,
       accent: look.accent === true,
       card: look.card !== false,
       images,

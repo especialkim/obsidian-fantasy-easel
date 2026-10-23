@@ -66,7 +66,7 @@ export class Applier {
     const now = this.body.style.getPropertyValue(URL_VAR);
     if (value !== now) { this.body.setCssProps({ [URL_VAR]: value }); changed++; }
     // style panel values: body inline variables; a value not set leaves the theme's own
-    const tuned = tuningVars(s.tuning, s.look.card);
+    const tuned = tuningVars(s.tuning, s.look.card, this.body.hasClass("theme-dark") ? "dark" : "light");
     for (const v of TUNING_VARS) {
       const want = tuned[v] ?? "";
       if (this.body.style.getPropertyValue(v) !== want) { this.body.setCssProps({ [v]: want }); changed++; }

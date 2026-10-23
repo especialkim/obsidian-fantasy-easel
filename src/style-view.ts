@@ -1,11 +1,11 @@
-import { ItemView, Setting, type WorkspaceLeaf } from "obsidian";
+import { ItemView, Setting, SettingGroup, setTooltip, type WorkspaceLeaf } from "obsidian";
 import { renderGallery } from "./gallery";
 import type FantasyEaselPlugin from "./main";
 import { stepBackground } from "./menus";
-import { backgroundOptions, colorOptions, MOTION_OPTIONS } from "./options";
+import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_OPTIONS, paletteDesc } from "./options";
 import { DEFAULT_LOOK, DEFAULT_SETTINGS, type Motion } from "./settings";
 import { toggleDarkLight } from "./statusbar";
-import { TUNING_GROUPS, TUNINGS, type Tuning } from "./tuning";
+import { storeKey, TUNING_GROUPS, TUNINGS, type Mode, type Tuning, type TuningGroup } from "./tuning";
 
 export const STYLE_VIEW = "fantasy-easel-style";
 
@@ -59,7 +59,7 @@ export class StyleView extends ItemView {
 
   private shape() {
     const { images } = this.plugin.store.settings.look;
-    return `${this.plugin.active}|${images.map((i) => `${i.id}:${i.name ?? ""}:${i.src ? 1 : 0}`).join(",")}`;
+    return `${this.plugin.active}|${this.mode()}|${images.map((i) => `${i.id}:${i.name ?? ""}:${i.src ? 1 : 0}`).join(",")}`;
   }
 
   private refresh() {
@@ -89,13 +89,31 @@ export class StyleView extends ItemView {
       return;
     }
     const store = this.plugin.store;
-    const dark = () => document.body.hasClass("theme-dark");
+    const mode = this.mode();
+    const look = () => store.settings.look;
 
-    /** A row with a reset button that is enabled (and the row marked) only when the value differs. */
-    const row = (parent: HTMLElement, name: string, desc: string, isDefault: () => boolean, reset: (() => void) | null) => {
-      const s = new Setting(parent).setName(name).setDesc(desc).setClass("fantasy-easel-panel-row");
-      if (reset) {
-        s.addExtraButton((b) => {
+    /** Obsidian's setting group box with a heading and, when given, a reset for the whole group. */
+    const group = (name: string, reset?: { isDefault: () => boolean; run: () => void }) => {
+      const g = new SettingGroup(root).setHeading(name).addClass("fantasy-easel-panel-group");
+      if (reset) g.addExtraButton((b) => {
+        b.setIcon("rotate-ccw").setTooltip(`Reset ${name.split(" ·")[0].toLowerCase()}`).onClick(reset.run);
+        this.syncs.push(() => b.setDisabled(reset.isDefault()));
+      });
+      return g;
+    };
+    /** One line: the name (description as its tooltip), the control, and a reset shown only when changed. */
+    const row = (g: SettingGroup, name: string, desc: string, isDefault: (() => boolean) | null, reset: (() => void) | null, add: (s: Setting) => void) => {
+      g.addSetting((s) => {
+        s.setName(name).setClass("fantasy-easel-panel-row");
+        if (desc) setTooltip(s.nameEl, desc, { placement: "left" });
+        add(s);
+        // no default of ours: an empty reset slot keeps the controls in one column
+        if (!isDefault || !reset) s.addExtraButton((b) => {
+          b.setIcon("rotate-ccw").setDisabled(true);
+          b.extraSettingsEl.addClass("is-hidden");
+          b.extraSettingsEl.setAttr("aria-hidden", "true");
+        });
+        else s.addExtraButton((b) => {
           b.setIcon("rotate-ccw").setTooltip("Reset to default").onClick(reset);
           this.syncs.push(() => {
             const same = isDefault();
@@ -104,64 +122,36 @@ export class StyleView extends ItemView {
             s.settingEl.toggleClass("is-changed", !same);
           });
         });
-      }
-      return s;
-    };
-    const heading = (name: string, reset?: { isDefault: () => boolean; run: () => void; tip: string }) => {
-      const h = new Setting(root).setName(name).setHeading();
-      if (reset) h.addExtraButton((b) => {
-        b.setIcon("rotate-ccw").setTooltip(reset.tip).onClick(reset.run);
-        this.syncs.push(() => b.setDisabled(reset.isDefault()));
       });
-      return h;
     };
 
-    // ---------- Look: the big switches ----------
-    const look = () => store.settings.look;
-    const lookDefault = () =>
-      look().color === DEFAULT_LOOK.color && look().accent === DEFAULT_LOOK.accent && look().card === DEFAULT_LOOK.card && look().background === DEFAULT_LOOK.background && store.settings.motion === DEFAULT_SETTINGS.motion && store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused;
-    heading("Look", {
-      tip: "Reset the look (color, accent, cards, background, motion)",
-      isDefault: lookDefault,
-      run: () => store.set({ look: { ...look(), color: DEFAULT_LOOK.color, accent: DEFAULT_LOOK.accent, card: DEFAULT_LOOK.card, background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused }),
+    // ---------- Look ----------
+    const lookKeys = ["color", "accent", "card"] as const;
+    const lookG = group("Look", {
+      isDefault: () => lookKeys.every((k) => look()[k] === DEFAULT_LOOK[k]),
+      run: () => store.setLook({ color: DEFAULT_LOOK.color, accent: DEFAULT_LOOK.accent, card: DEFAULT_LOOK.card }),
     });
-
-    // Obsidian's own setting (no default of ours to reset to)
-    row(root, "Dark mode", "Obsidian's dark / light mode.", () => true, null).addToggle((t) => {
-      t.onChange((v) => { if (!this.syncing && v !== dark()) toggleDarkLight(this.app); });
-      this.syncs.push(() => t.setValue(dark()));
-    });
-    row(root, "Theme color", "Background tint, and the accent when theme accent is on.", () => look().color === DEFAULT_LOOK.color, () => store.setLook({ color: DEFAULT_LOOK.color })).setClass("fantasy-easel-panel-wide").addDropdown((d) => {
+    // Obsidian's own setting: no default of ours to reset to
+    row(lookG, "Dark mode", "Obsidian's dark / light mode. Glass values are kept per mode.", null, null, (s) => s.addToggle((t) => {
+      t.onChange((v) => { if (!this.syncing && v !== (this.mode() === "dark")) toggleDarkLight(this.app); });
+      this.syncs.push(() => t.setValue(this.mode() === "dark"));
+    }));
+    row(lookG, "Palette", paletteDesc(), () => look().color === DEFAULT_LOOK.color, () => store.setLook({ color: DEFAULT_LOOK.color }), (s) => s.addDropdown((d) => {
       d.addOptions(colorOptions()).onChange((v) => this.syncing || store.setLook({ color: v }));
       this.syncs.push(() => d.setValue(look().color));
-    });
-    row(root, "Theme accent", "Accent follows the theme color (gold in dark mode). Off = Obsidian's accent.", () => look().accent === DEFAULT_LOOK.accent, () => store.setLook({ accent: DEFAULT_LOOK.accent })).addToggle((t) => {
+    }));
+    row(lookG, "Theme accent", ACCENT_DESC, () => look().accent === DEFAULT_LOOK.accent, () => store.setLook({ accent: DEFAULT_LOOK.accent }), (s) => s.addToggle((t) => {
       t.onChange((v) => this.syncing || store.setLook({ accent: v }));
       this.syncs.push(() => t.setValue(look().accent));
-    });
-    row(root, "Card layout", "Sidebars and notes as floating glass cards.", () => look().card === DEFAULT_LOOK.card, () => store.setLook({ card: DEFAULT_LOOK.card })).addToggle((t) => {
+    }));
+    row(lookG, "Card layout", "Sidebars and notes as floating glass cards.", () => look().card === DEFAULT_LOOK.card, () => store.setLook({ card: DEFAULT_LOOK.card }), (s) => s.addToggle((t) => {
       t.onChange((v) => this.syncing || store.setLook({ card: v }));
       this.syncs.push(() => t.setValue(look().card));
-    });
-    const bgRow = row(root, "Background", "", () => look().background === DEFAULT_LOOK.background, () => store.setLook({ background: DEFAULT_LOOK.background }));
-    bgRow.settingEl.addClass("fantasy-easel-panel-wide");
-    bgRow.addExtraButton((b) => b.setIcon("chevron-left").setTooltip("Previous background").onClick(() => stepBackground(store, -1)));
-    bgRow.addDropdown((d) => {
-      d.addOptions(backgroundOptions(look().images)).onChange((v) => this.syncing || store.setLook({ background: v }));
-      this.syncs.push(() => d.setValue(look().background));
-    });
-    bgRow.addExtraButton((b) => b.setIcon("chevron-right").setTooltip("Next background").onClick(() => stepBackground(store, 1)));
-    row(root, "Motion", "Moving backgrounds. Auto follows the OS reduce-motion setting.", () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion })).addDropdown((d) => {
-      d.addOptions(MOTION_OPTIONS).onChange((v) => this.syncing || store.set({ motion: v as Motion }));
-      this.syncs.push(() => d.setValue(store.settings.motion));
-    });
-    row(root, "Pause when unfocused", "Stop moving backgrounds while you work in another app.", () => store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused, () => store.set({ pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused })).addToggle((t) => {
-      t.onChange((v) => this.syncing || store.set({ pauseUnfocused: v }));
-      this.syncs.push(() => t.setValue(store.settings.pauseUnfocused));
-    });
+    }));
 
-    // ---------- Style tuning ----------
-    const value = (t: Tuning) => store.settings.tuning[t.key] ?? (dark() ? t.def.dark : t.def.light);
+    // ---------- tuning (sliders) ----------
+    const key = (t: Tuning) => storeKey(t, mode);
+    const value = (t: Tuning) => store.settings.tuning[key(t)] ?? t.def[mode];
     const setTuning = (keys: string[], v: number | null) => {
       const tuning = { ...store.settings.tuning };
       for (const k of keys) {
@@ -171,49 +161,93 @@ export class StyleView extends ItemView {
       store.set({ tuning });
     };
     const show = (t: Tuning, v: number) => `${Math.round(v * 100) / 100}${t.unit}`;
-    for (const g of TUNING_GROUPS) {
-      const list = TUNINGS.filter((t) => t.group === g.id);
-      const keys = list.map((t) => t.key);
-      heading(g.name, { tip: `Reset ${g.name.toLowerCase()}`, isDefault: () => keys.every((k) => !(k in store.settings.tuning)), run: () => setTuning(keys, null) });
-      for (const t of list) {
-        const r = row(root, t.name, t.desc, () => !(t.key in store.settings.tuning), () => setTuning([t.key], null));
-        // narrow sidebar: slider under the name; Obsidian's slider shows its own value
-        r.settingEl.addClass("fantasy-easel-panel-wide");
-        r.addSlider((sl) => {
-          sl.setLimits(t.min, t.max, t.step).setInstant(true).setDisplayFormat((v) => show(t, v)).onChange((v) => this.syncing || setTuning([t.key], v));
+    const sliders = (g: SettingGroup, id: TuningGroup) => {
+      for (const t of TUNINGS.filter((x) => x.group === id)) {
+        row(g, t.name, t.desc, () => !(key(t) in store.settings.tuning), () => setTuning([key(t)], null), (s) => s.addSlider((sl) => {
+          sl.setLimits(t.min, t.max, t.step).setInstant(true).setDisplayFormat((v) => show(t, v)).onChange((v) => this.syncing || setTuning([key(t)], v));
           this.syncs.push(() => {
             const v = value(t);
             // setValue during a drag would fight the pointer: only when it differs
             if (sl.getValue() !== v) sl.setValue(v);
             const off = !!t.cardOnly && !look().card;
             sl.setDisabled(off);
-            r.settingEl.toggleClass("is-disabled", off);
+            s.settingEl.toggleClass("is-disabled", off);
           });
-        });
+        }));
       }
+    };
+    const keysOf = (id: TuningGroup) => TUNINGS.filter((t) => t.group === id).map(key);
+    const tuned = (id: TuningGroup) => () => keysOf(id).every((k) => !(k in store.settings.tuning));
+
+    // ---------- Background: picture, motion, stage speed ----------
+    const bgDefault = () => look().background === DEFAULT_LOOK.background && store.settings.motion === DEFAULT_SETTINGS.motion && store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused && tuned("background")();
+    const bgG = group("Background", {
+      isDefault: bgDefault,
+      run: () => {
+        setTuning(keysOf("background"), null);
+        store.set({ look: { ...look(), background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused });
+      },
+    });
+    bgG.addSetting((s) => {
+      s.setClass("fantasy-easel-panel-row").setClass("fantasy-easel-panel-picker");
+      s.addExtraButton((b) => b.setIcon("chevron-left").setTooltip("Previous background").onClick(() => stepBackground(store, -1)));
+      s.addDropdown((d) => {
+        d.addOptions(backgroundOptions(look().images)).onChange((v) => this.syncing || store.setLook({ background: v }));
+        this.syncs.push(() => d.setValue(look().background));
+      });
+      s.addExtraButton((b) => b.setIcon("chevron-right").setTooltip("Next background").onClick(() => stepBackground(store, 1)));
+      s.addExtraButton((b) => {
+        b.setIcon("rotate-ccw").setTooltip("Reset to default").onClick(() => store.setLook({ background: DEFAULT_LOOK.background }));
+        this.syncs.push(() => {
+          const same = look().background === DEFAULT_LOOK.background;
+          b.setDisabled(same);
+          b.extraSettingsEl.toggleClass("is-hidden", same);
+          s.settingEl.toggleClass("is-changed", !same);
+        });
+      });
+    });
+    row(bgG, "Motion", "Moving backgrounds. Auto follows the OS reduce-motion setting.", () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion }), (s) => s.addDropdown((d) => {
+      d.addOptions(MOTION_OPTIONS).onChange((v) => this.syncing || store.set({ motion: v as Motion }));
+      this.syncs.push(() => d.setValue(store.settings.motion));
+    }));
+    row(bgG, "Pause when unfocused", "Stop moving backgrounds while you work in another app.", () => store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused, () => store.set({ pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused }), (s) => s.addToggle((t) => {
+      t.onChange((v) => this.syncing || store.set({ pauseUnfocused: v }));
+      this.syncs.push(() => t.setValue(store.settings.pauseUnfocused));
+    }));
+    sliders(bgG, "background");
+
+    // ---------- Glass (per mode) · Cards · Editor ----------
+    for (const g of TUNING_GROUPS.filter((x) => x.id !== "background")) {
+      const perMode = TUNINGS.some((t) => t.group === g.id && t.perMode);
+      const box = group(perMode ? `${g.name} · ${mode} mode` : g.name, { isDefault: tuned(g.id), run: () => setTuning(keysOf(g.id), null) });
+      sliders(box, g.id);
     }
-    new Setting(root).setClass("fantasy-easel-panel-row").addButton((b) => {
-      b.setButtonText("Reset all styles").onClick(() => store.set({ tuning: {} }));
+    new Setting(root).setClass("fantasy-easel-panel-resetall").addButton((b) => {
+      b.setButtonText("Reset all styles").setTooltip("Every slider, both modes").onClick(() => store.set({ tuning: {} }));
       this.syncs.push(() => b.setDisabled(!Object.keys(store.settings.tuning).length));
     });
 
     // ---------- Gallery (folded: dozens of tiles cost GPU) ----------
-    const gHead = new Setting(root).setName("Gallery").setDesc("Every background, day and night. Click one to use it.").setHeading();
+    const galleryG = new SettingGroup(root).setHeading("Gallery").addClass("fantasy-easel-panel-group");
     const gBody = root.createDiv({ cls: "fantasy-easel-panel-gallery" });
     const setGallery = (open: boolean) => {
       this.galleryOpen = open;
       this.galleryCleanup?.();
       this.galleryCleanup = null;
       gBody.empty();
-      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { scrollRoot: this.contentEl, addPicture: () => this.plugin.addPicture(), still: true });
+      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { scrollRoot: this.contentEl, addPicture: () => this.plugin.addPicture(), still: true, sides: [mode === "dark" ? "night" : "day"] });
     };
-    gHead.addExtraButton((b) => {
-      const draw = () => b.setIcon(this.galleryOpen ? "chevron-up" : "chevron-down").setTooltip(this.galleryOpen ? "Hide gallery" : "Show gallery");
+    galleryG.addExtraButton((b) => {
+      const draw = () => b.setIcon(this.galleryOpen ? "chevron-up" : "chevron-down").setTooltip(this.galleryOpen ? "Hide gallery" : `Show gallery (${mode} mode)`);
       b.onClick(() => { setGallery(!this.galleryOpen); draw(); });
       draw();
     });
     setGallery(this.galleryOpen);
 
     this.sync();
+  }
+
+  private mode(): Mode {
+    return document.body.hasClass("theme-dark") ? "dark" : "light";
   }
 }

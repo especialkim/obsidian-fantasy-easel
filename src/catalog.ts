@@ -12,12 +12,12 @@ export interface ThemeColor {
 /** Theme colors that sit well with the accent (dark accent = gold 44°): cool and purple tones.
  *  Warm browns / reds / orange (0–30°) and Forest (next to Emerald) were dropped 2026-10-21. */
 export const THEME_COLORS: ThemeColor[] = [
-  { cls: "fantasy-theme-Black", name: "Dark" },
-  { cls: "fantasy-theme-SkyBlue", name: "Sky Blue" },
-  { cls: "fantasy-theme-OceanTeal", name: "Ocean Teal" },
-  { cls: "fantasy-theme-EmeraldGreen", name: "Emerald Green" },
-  { cls: "fantasy-theme-MysticPurple", name: "Mystic Purple" },
-  { cls: "fantasy-theme-OrchidMagenta", name: "Orchid Magenta" },
+  { cls: "fantasy-theme-Black", name: "Graphite" },
+  { cls: "fantasy-theme-SkyBlue", name: "Sky" },
+  { cls: "fantasy-theme-OceanTeal", name: "Ocean" },
+  { cls: "fantasy-theme-EmeraldGreen", name: "Emerald" },
+  { cls: "fantasy-theme-MysticPurple", name: "Mystic" },
+  { cls: "fantasy-theme-OrchidMagenta", name: "Orchid" },
 ];
 
 export type BackgroundKind = "static" | "motion" | "image";
@@ -52,12 +52,23 @@ export interface UserImage {
   name?: string;
 }
 
-/** `https://…` → `url("https://…")`; a value that already is `url(…)` stays. "" = not usable. */
+/** Local pictures (vault path, file://, absolute path) → an address Obsidian can show. Set by
+ *  main.ts (needs the app); "" = not found. Without it (selftest) local pictures are not usable. */
+let resolveLocal: ((src: string) => string) | null = null;
+export const setPictureResolver = (f: ((src: string) => string) | null) => (resolveLocal = f);
+
+/** What a picture entry is: a web address, a CSS value typed by hand (older entries), or a local file. */
+export const pictureKind = (src: string): "web" | "css" | "local" =>
+  /^url\(/i.test(src.trim()) ? "css" : /^(https?|data):/i.test(src.trim()) ? "web" : "local";
+
+/** Picture entry → CSS `url(…)`. "" = not usable (empty, or a local file that is not there). */
 export function toCssUrl(src: string): string {
   const s = src.trim();
   if (!s) return "";
-  if (/^url\(/i.test(s)) return s;
-  return `url("${s.replace(/["\\]/g, "\\$&")}")`;
+  const kind = pictureKind(s);
+  if (kind === "css") return s;
+  const href = kind === "web" ? s : resolveLocal?.(s) ?? "";
+  return href ? `url("${href.replace(/["\\]/g, "\\$&")}")` : "";
 }
 
 /** Your pictures as backgrounds (empty entries left out). */

@@ -1,8 +1,9 @@
-import { PluginSettingTab, type App, type SettingDefinitionItem } from "obsidian";
+import { PluginSettingTab, setTooltip, type App, type SettingDefinitionItem } from "obsidian";
 import { DEFAULT_BACKGROUND, newImageId, toCssUrl, type UserImage } from "./catalog";
 import type FantasyEaselPlugin from "./main";
 import { excalidrawAvailable, excalidrawDiff, ExcalidrawSettingsModal, restoreExcalidraw } from "./excalidraw";
-import { backgroundOptions, colorOptions, MOTION_OPTIONS } from "./options";
+import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_OPTIONS, paletteDesc } from "./options";
+import { PictureSuggest } from "./pictures";
 import { skinOn, SKINS } from "./skins";
 import type { StatusId } from "./settings";
 
@@ -10,7 +11,7 @@ import type { StatusId } from "./settings";
 const FANTASY_URL = "https://github.com/especialkim/obsidian-theme-fantasy";
 
 const STATUS_LABEL: Record<StatusId, string> = {
-  color: "Theme color",
+  color: "Palette",
   prev: "Previous background",
   background: "Background name",
   next: "Next background",
@@ -35,6 +36,8 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     this.icon = "palette";
     // Changes from the status bar, the style panel or commands: re-read the definitions once.
     plugin.register(plugin.store.subscribe(() => this.queueUpdate()));
+    // dark / light switched: the palette description changes
+    plugin.registerEvent(app.workspace.on("css-change", () => this.queueUpdate()));
   }
 
   private queueUpdate() {
@@ -78,8 +81,8 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
 
     return [
       // general rows: no heading (one-section rule)
-      { name: "Theme color", desc: "Background tint, and the accent when theme accent is on.", control: { type: "dropdown", key: "look.color", options: colorOptions() } },
-      { name: "Theme accent", desc: "Accent follows the theme color (gold in dark mode). Off = Obsidian's accent color.", control: { type: "toggle", key: "look.accent" } },
+      { name: "Palette", desc: paletteDesc(), control: { type: "dropdown", key: "look.color", options: colorOptions() } },
+      { name: "Theme accent", desc: ACCENT_DESC, control: { type: "toggle", key: "look.accent" } },
       { name: "Open style panel", desc: "Sidebar tab with the main switches and style tuning (glass, cards, text, motion), each with a reset.", action: () => void this.plugin.openStylePanel() },
       {
         type: "group",
@@ -99,7 +102,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
       {
         type: "list",
         heading: "Your pictures",
-        emptyState: "No pictures yet. Add one with +.",
+        emptyState: "No pictures yet. Add one with +: a vault picture (type to search), https://… or file://… (this computer only).",
         addItem: { name: "Add picture", action: () => store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] }) },
         onDelete: (i) => setImages(store.settings.look.images.filter((_, j) => j !== i)),
         onReorder: (from, to) => setImages(move(store.settings.look.images, from, to)),
@@ -107,6 +110,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
           name: img.name?.trim() || `Picture ${i + 1}`,
           render: (setting) => {
             setting.settingEl.addClass("fantasy-easel-picture");
+            setTooltip(setting.nameEl, img.name?.trim() || `Picture ${i + 1}`);
             const id = `img-${img.id}`;
             // saved on change (blur / Enter), so a redraw never steals focus while typing
             setting.addText((t) => {
@@ -115,8 +119,9 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
               t.inputEl.addEventListener("change", () => patchImage(img.id, { name: t.getValue().trim() }));
             });
             setting.addText((t) => {
-              t.setPlaceholder('https://… or url("…")').setValue(img.src);
+              t.setPlaceholder("Vault path, https://… or file://…").setValue(img.src);
               t.inputEl.addEventListener("change", () => patchImage(img.id, { src: t.getValue().trim() }));
+              new PictureSuggest(this.app, t.inputEl, (path) => patchImage(img.id, { src: path }));
             });
             setting.addButton((b) => {
               const using = look.background === id;
@@ -174,7 +179,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     return [
       {
         name: "Fantasy theme is not in use",
-        desc: "Fantasy Easel is the companion of the Fantasy theme: theme color, accent, card layout, CSS and media-art backgrounds, your own pictures and plugin skins. Install Fantasy, then choose it in Settings → Appearance → Themes.",
+        desc: "Fantasy Easel is the companion of the Fantasy theme: palette, accent, card layout, CSS and media-art backgrounds, your own pictures and plugin skins. Install Fantasy, then choose it in Settings → Appearance → Themes.",
         render: (setting) => {
           setting.addButton((b) => b.setButtonText("Get Fantasy").setCta().onClick(() => window.open(FANTASY_URL)));
         },
