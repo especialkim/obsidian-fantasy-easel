@@ -1063,7 +1063,7 @@ var MOTION_CLASS = "fantasy-easel-motion";
 var THEME_DEFAULTS = {
   color: "fantasy-theme-Black"
 };
-var DEFAULT_BACKGROUND = "css-plasma";
+var DEFAULT_BACKGROUND = "css-silk";
 var colorByCls = (cls) => THEME_COLORS.find((c) => c.cls === cls);
 var backgroundById = (id, images = []) => allBackgrounds(images).find((b) => b.id === id);
 
@@ -1083,19 +1083,19 @@ var TUNING_GROUPS = [
   { id: "cards", name: "Cards" },
   { id: "editor", name: "Editor" }
 ];
-var HEADINGS = [1.3, 1.2, 1.15, 1.1, 1.05];
+var HEADINGS = [1.42, 1.28, 1.21, 1.14, 1.07];
 var round = (n) => Math.round(n * 1e3) / 1e3;
 var TUNINGS = [
-  { key: "opacity", name: "Panel opacity", desc: "How solid the glass panels are.", group: "glass", perMode: true, min: 0.2, max: 0.95, step: 0.01, unit: "", def: { dark: 0.6, light: 0.67 }, vars: (v) => ({ "--background-opacity": `${v}` }) },
+  { key: "opacity", name: "Panel opacity", desc: "How solid the glass panels are.", group: "glass", perMode: true, min: 0.2, max: 0.95, step: 0.01, unit: "", def: { dark: 0.67, light: 0.6 }, vars: (v) => ({ "--background-opacity": `${v}` }) },
   { key: "blur", name: "Glass blur", desc: "Blur of the background behind the panels.", group: "glass", perMode: true, min: 0, max: 24, step: 1, unit: "px", def: { dark: 8, light: 12 }, vars: (v) => ({ "--fantasy-glass-blur": `${v}px` }) },
-  { key: "brightness", name: "Background brightness", desc: "Brightness of the background behind the panels.", group: "glass", perMode: true, min: 0.5, max: 1.3, step: 0.01, unit: "", def: { dark: 0.8, light: 1.05 }, vars: (v) => ({ "--fantasy-glass-brightness": `${v}` }) },
+  { key: "brightness", name: "Background brightness", desc: "Brightness of the background behind the panels.", group: "glass", perMode: true, min: 0.5, max: 1.3, step: 0.01, unit: "", def: { dark: 0.95, light: 0.85 }, vars: (v) => ({ "--fantasy-glass-brightness": `${v}` }) },
   { key: "cardGap", name: "Card gap", desc: "Space around and between the cards (also the window edge).", group: "cards", min: 1, max: 24, step: 1, unit: "px", def: { dark: 8, light: 8 }, vars: (v) => ({ "--cardview-gap": `${v}px` }), cardOnly: true },
   { key: "cardRadius", name: "Card corners", desc: "Corner radius of the cards.", group: "cards", min: 0, max: 32, step: 1, unit: "px", def: { dark: 20, light: 20 }, vars: (v) => ({ "--cardview-radius": `${v}px` }), cardOnly: true },
   { key: "cardPadding", name: "Card padding", desc: "Space inside the cards (top and bottom; sides get half).", group: "cards", min: 0, max: 24, step: 1, unit: "px", def: { dark: 10, light: 10 }, vars: (v) => ({ "--cardview-padding": `${v}px ${v / 2}px` }), cardOnly: true },
-  { key: "lineWidth", name: "Note width", desc: "Readable line length.", group: "editor", min: 600, max: 1600, step: 10, unit: "px", def: { dark: 850, light: 850 }, vars: (v) => ({ "--file-line-width": `${v}px` }) },
+  { key: "lineWidth", name: "Note width", desc: "Readable line length.", group: "editor", min: 600, max: 1600, step: 10, unit: "px", def: { dark: 1050, light: 1050 }, vars: (v) => ({ "--file-line-width": `${v}px` }) },
   { key: "headingScale", name: "Heading size", desc: "How much larger headings are than body text (1 = theme).", group: "editor", min: 0, max: 2, step: 0.05, unit: "\xD7", def: { dark: 1, light: 1 }, vars: (v) => Object.fromEntries(HEADINGS.map((h, i) => [`--h${i + 1}-size`, `${round(1 + (h - 1) * v)}em`])) },
-  { key: "paragraph", name: "Paragraph spacing", desc: "Space between paragraphs.", group: "editor", min: 0, max: 1.5, step: 0.05, unit: "rem", def: { dark: 0.5, light: 0.5 }, vars: (v) => ({ "--p-spacing": `${v}rem` }) },
-  { key: "propertiesRadius", name: "Properties corners", desc: "Corner radius of the properties tray.", group: "editor", min: 0, max: 24, step: 1, unit: "px", def: { dark: 14, light: 14 }, vars: (v) => ({ "--metadata-border-radius": `${v}px` }) },
+  { key: "paragraph", name: "Paragraph spacing", desc: "Space between paragraphs.", group: "editor", min: 0, max: 1.5, step: 0.05, unit: "rem", def: { dark: 1, light: 1 }, vars: (v) => ({ "--p-spacing": `${v}rem` }) },
+  { key: "propertiesRadius", name: "Properties corners", desc: "Corner radius of the properties tray.", group: "editor", min: 0, max: 24, step: 1, unit: "px", def: { dark: 8, light: 8 }, vars: (v) => ({ "--metadata-border-radius": `${v}px` }) },
   { key: "stageSpeed", name: "Stage speed", desc: "Speed of the stage backgrounds (four moving layers).", group: "background", min: 0.25, max: 2, step: 0.05, unit: "\xD7", def: { dark: 1, light: 1 }, vars: (v) => ({ "--fantasy-easel-speed": `${v}` }) }
 ];
 var tileVar = (t, m) => `--fantasy-easel-g-${t.key}-${m}`;
@@ -1425,11 +1425,11 @@ var MOTIONS = ["auto", "on", "off"];
 var DEFAULT_LOOK = {
   color: THEME_DEFAULTS.color,
   background: DEFAULT_BACKGROUND,
-  accent: false,
+  accent: true,
   card: true,
   images: []
 };
-var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "auto", pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
+var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "on", pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
 function fromOldUrls(urls, chosen) {
   const images = [];
   let background;
@@ -2109,9 +2109,11 @@ var StyleView = class extends import_obsidian9.ItemView {
       const box = group(perMode ? `${g.name} \xB7 ${mode} mode` : g.name, { isDefault: tuned(g.id), run: () => setTuning(keysOf(g.id), null) });
       sliders(box, g.id);
     }
-    new import_obsidian9.Setting(root).setClass("fantasy-easel-panel-resetall").addButton((b) => {
-      b.setButtonText("Reset all styles").setTooltip("Every slider, both modes").onClick(() => store.set({ tuning: {} }));
-      this.syncs.push(() => b.setDisabled(!Object.keys(store.settings.tuning).length));
+    new import_obsidian9.SettingGroup(root).addClass("fantasy-easel-panel-group").addSetting((s) => {
+      s.setClass("fantasy-easel-panel-resetall").addButton((b) => {
+        b.setButtonText("Reset all styles").setTooltip("Every slider, both modes").onClick(() => store.set({ tuning: {} }));
+        this.syncs.push(() => b.setDisabled(!Object.keys(store.settings.tuning).length));
+      });
     });
     const galleryG = new import_obsidian9.SettingGroup(root).setHeading("Gallery").addClass("fantasy-easel-panel-group");
     const gBody = root.createDiv({ cls: "fantasy-easel-panel-gallery" });

@@ -91,7 +91,7 @@ for (const t of TUNINGS) check(t.def.dark >= t.min && t.def.dark <= t.max && t.d
 check(!("--cardview-gap" in tuningVars({ cardGap: 8 }, false, "dark")), "card tuning applied with the card layout off");
 check(tuningVars({ "opacity.dark": 5 }, true, "dark")["--background-opacity"] === "0.95", "tuning values are not clamped");
 const { normalize } = loadTs("src/settings.ts");
-const nt = normalize({ tuning: { "opacity.light": 0.67, stageSpeed: 1, "blur.dark": 9, opacity: 0.5, bogus: 3 } }).tuning;
+const nt = normalize({ tuning: { "opacity.light": 0.6, stageSpeed: 1, "blur.dark": 9, opacity: 0.5, bogus: 3 } }).tuning;
 check(JSON.stringify(nt) === JSON.stringify({ "blur.dark": 9, "opacity.dark": 0.5, "opacity.light": 0.5 }), `normalize tuning: defaults dropped, old single glass value copied per mode (got ${JSON.stringify(nt)})`);
 check(!("--background-opacity" in tuningVars({ "opacity.dark": 0.5 }, true, "light")), "a dark-mode glass value applied in light mode");
 check(tuningVars({ "opacity.light": 0.5 }, true, "dark")["--fantasy-easel-g-opacity-light"] === "0.5", "gallery tiles miss the other mode's glass");
@@ -130,8 +130,8 @@ for (const m of bgPart.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}@]+)\{([^
 
 // ---------- 5. contrast through the glass ----------
 // Worst case: text over glass over the brightest / darkest color the picture uses (blur only
-// averages, so real values sit between these). Glass from theme.css: dark = theme color rgb at 0.6
-// over the backdrop at brightness(0.8); light = (251,251,253) at 0.67 over brightness(1.05).
+// averages, so real values sit between these). Glass from theme.css: dark = theme color rgb at 0.67
+// over the backdrop at brightness(0.95); light = (251,251,253) at 0.6 over brightness(0.85).
 const TEXT = { night: [181, 181, 181], day: [80, 80, 80] }; // --text-normal measured in Obsidian
 const hsl2rgb = (h, s, l) => { h = ((h % 360) + 360) % 360; s /= 100; l /= 100; const k = (n) => (n + h / 30) % 12; const a = s * Math.min(l, 1 - l); const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return [f(0) * 255, f(8) * 255, f(4) * 255]; };
 const parseColors = (layer, hue) => {
@@ -171,7 +171,7 @@ for (const b of CSS_BACKGROUNDS) {
       // darkest base color (opaque, before the glass): night pictures need a floor so card edges show
       if (side === "night") for (const bs of bases) darkest = Math.min(darkest, lum(bs));
       for (const bg of cands) {
-        const eff = side === "night" ? mix(themeRgb(c.cls), 0.6, bg.map((v) => v * 0.8)) : mix([251, 251, 253], 0.67, bg.map((v) => Math.min(255, v * 1.05)));
+        const eff = side === "night" ? mix(themeRgb(c.cls), 0.67, bg.map((v) => v * 0.95)) : mix([251, 251, 253], 0.6, bg.map((v) => Math.min(255, v * 0.85)));
         const r = ratio(TEXT[side], eff);
         if (r < worst) { worst = r; at = c.name; }
       }

@@ -45,12 +45,12 @@ export interface FantasyEaselSettings {
 export const DEFAULT_LOOK: Look = {
   color: THEME_DEFAULTS.color,
   background: DEFAULT_BACKGROUND,
-  accent: false,
+  accent: true,
   card: true,
   images: [],
 };
 
-export const DEFAULT_SETTINGS: FantasyEaselSettings = { look: DEFAULT_LOOK, motion: "auto", pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
+export const DEFAULT_SETTINGS: FantasyEaselSettings = { look: DEFAULT_LOOK, motion: "on", pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
 
 /**
  * Old 3 fixed URL slots (data.json before 2026-10-21) → pictures. `chosen` is the old

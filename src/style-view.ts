@@ -216,9 +216,12 @@ export class StyleView extends ItemView {
       const box = group(perMode ? `${g.name} · ${mode} mode` : g.name, { isDefault: tuned(g.id), run: () => setTuning(keysOf(g.id), null) });
       sliders(box, g.id);
     }
-    new Setting(root).setClass("fantasy-easel-panel-resetall").addButton((b) => {
-      b.setButtonText("Reset all styles").setTooltip("Every slider, both modes").onClick(() => store.set({ tuning: {} }));
-      this.syncs.push(() => b.setDisabled(!Object.keys(store.settings.tuning).length));
+    // in a group box like the others (same width)
+    new SettingGroup(root).addClass("fantasy-easel-panel-group").addSetting((s) => {
+      s.setClass("fantasy-easel-panel-resetall").addButton((b) => {
+        b.setButtonText("Reset all styles").setTooltip("Every slider, both modes").onClick(() => store.set({ tuning: {} }));
+        this.syncs.push(() => b.setDisabled(!Object.keys(store.settings.tuning).length));
+      });
     });
 
     // ---------- Gallery (folded: dozens of tiles cost GPU) ----------

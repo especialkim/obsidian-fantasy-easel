@@ -104,7 +104,7 @@ export const THEME_DEFAULTS = {
 };
 
 /** Plasma: the theme's own background (still); Easel adds its motion. */
-export const DEFAULT_BACKGROUND = "css-plasma";
+export const DEFAULT_BACKGROUND = "css-silk";
 
 export const colorByCls = (cls: string) => THEME_COLORS.find((c) => c.cls === cls);
 export const backgroundById = (id: string, images: UserImage[] = []) => allBackgrounds(images).find((b) => b.id === id);

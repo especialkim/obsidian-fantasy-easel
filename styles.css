@@ -718,11 +718,11 @@ body.mod-windows.fantasy-easel.fantasy-easel-motion .app-container::after {
 
 /* the theme's backdrop tone (`.app-container>.horizontal-main-container`), without the blur */
 body.mod-windows.fantasy-easel {
-	--fantasy-easel-win-tone: brightness(var(--fantasy-glass-brightness, 0.8));
+	--fantasy-easel-win-tone: brightness(var(--fantasy-glass-brightness, 0.95));
 }
 
 body.mod-windows.fantasy-easel.theme-light {
-	--fantasy-easel-win-tone: brightness(var(--fantasy-glass-brightness, 1.05)) saturate(1.1);
+	--fantasy-easel-win-tone: brightness(var(--fantasy-glass-brightness, 0.85)) saturate(1.1);
 }
 
 /* (0,5,1): beats theme `body.theme-light .app-container>.horizontal-main-container` (0,2,1) */
@@ -1427,16 +1427,11 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 	min-width: 0;
 }
 
-/* changed-from-default dot: in the row's left padding, so names stay in one column */
-.fantasy-easel-panel .fantasy-easel-panel-row {
-	position: relative;
-}
-
-.fantasy-easel-panel .fantasy-easel-panel-row.is-changed::before {
+/* changed-from-default dot: right after the name (the row's ::before is Obsidian's divider line,
+   which hid the dot on the first row of each group) */
+.fantasy-easel-panel .fantasy-easel-panel-row.is-changed .setting-item-name::after {
 	content: "";
-	position: absolute;
-	left: calc(var(--setting-items-padding-x, var(--size-4-3)) / 2);
-	top: calc(50% - 4px);
+	flex: none;
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
@@ -1472,9 +1467,8 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 	text-overflow: ellipsis;
 }
 
-.fantasy-easel-panel .fantasy-easel-panel-resetall {
-	border-top: none;
-	margin-bottom: var(--size-4-6);
+.fantasy-easel-panel .fantasy-easel-panel-resetall .setting-item-info {
+	display: none;
 }
 
 /* Gallery in the sidebar: the current mode only, two backgrounds per line (name above its tile) */
@@ -1565,14 +1559,14 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 
 .fantasy-easel-tile.fantasy-easel-night .fantasy-easel-tile-card {
 	/* the style panel's glass values for this mode (src/tuning.ts tile variables); not set = the theme's */
-	background: hsl(var(--fantasy-hue, 230) 35% 8% / var(--fantasy-easel-g-opacity-dark, 0.6));
-	backdrop-filter: brightness(var(--fantasy-easel-g-brightness-dark, 0.8)) blur(calc(var(--fantasy-easel-g-blur-dark, 8) * 1px));
+	background: hsl(var(--fantasy-hue, 230) 35% 8% / var(--fantasy-easel-g-opacity-dark, 0.67));
+	backdrop-filter: brightness(var(--fantasy-easel-g-brightness-dark, 0.95)) blur(calc(var(--fantasy-easel-g-blur-dark, 8) * 1px));
 	color: hsl(0 0% 71%);
 }
 
 .fantasy-easel-tile.fantasy-easel-day .fantasy-easel-tile-card {
-	background: hsl(240 33% 99% / var(--fantasy-easel-g-opacity-light, 0.67));
-	backdrop-filter: brightness(var(--fantasy-easel-g-brightness-light, 1.05)) saturate(1.1) blur(calc(var(--fantasy-easel-g-blur-light, 12) * 1px));
+	background: hsl(240 33% 99% / var(--fantasy-easel-g-opacity-light, 0.6));
+	backdrop-filter: brightness(var(--fantasy-easel-g-brightness-light, 0.85)) saturate(1.1) blur(calc(var(--fantasy-easel-g-blur-light, 12) * 1px));
 	color: hsl(0 0% 31%);
 }
 
