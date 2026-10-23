@@ -58,11 +58,18 @@ export const KEYFRAMES = {
   pulseB: "0% { scale: 1.2 1.06; } 100% { scale: 1.06 1.22; }",
   hue: "0% { filter: hue-rotate(-25deg); } 100% { filter: hue-rotate(35deg); }",
   hueFull: "0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); }",
+  /** Windows only (motionCssWin): the hue swing as an opacity breath, no animated filter */
+  hueWin: "0% { opacity: 0.72; } 50% { opacity: 0.98; } 100% { opacity: 0.76; }",
 };
 
 /** CSS `animation` value for a layer (used by the build and the gallery). */
 export const motionCss = (layer: MotionLayer) =>
   layer.parts.map((p) => `fantasy-easel-${p.frames} ${p.seconds}s ${p.loop ? "linear" : "ease-in-out"} infinite${p.loop ? "" : " alternate"}`).join(", ");
+
+/** Windows (2026-10-23): Direct3D compositing stutters on an animated filter, so hue / hueFull
+ *  become the opacity breath hueWin. Same timing otherwise; macOS keeps motionCss. */
+export const motionCssWin = (layer: MotionLayer) =>
+  motionCss({ ...layer, parts: layer.parts.map((p) => (p.frames === "hue" || p.frames === "hueFull" ? { ...p, frames: "hueWin", loop: false } : p)) });
 
 export const CSS_BACKGROUNDS: CssBackground[] = [
   // ---------- theme color ----------

@@ -32,7 +32,7 @@ function stageCss() {
 }
 
 function backgroundCss() {
-  const { CSS_BACKGROUNDS, KEYFRAMES, resolveHue, motionCss } = loadTs("src/backgrounds.ts");
+  const { CSS_BACKGROUNDS, KEYFRAMES, resolveHue, motionCss, motionCssWin } = loadTs("src/backgrounds.ts");
   const list = (layers) => layers.map((l) => `\n\t\t${resolveHue(l)}`).join(",");
   const vars = (side) => CSS_BACKGROUNDS.map((b) => {
     const lines = [`\t--fantasy-easel-grad-${b.key}:${list(b[side])};`];
@@ -42,11 +42,12 @@ function backgroundCss() {
   }).join("\n");
   const pick = CSS_BACKGROUNDS.map((b) => {
     let extra = "";
-    if (b.motion) extra += ` --fantasy-easel-motion: ${motionCss(b.motion)};`;
-    if (b.motion && b.motion.over) extra += ` --fantasy-easel-motion-b: ${motionCss(b.motion.over)}; --fantasy-easel-layer-b: var(--fantasy-easel-grad-${b.key}-b); --fantasy-easel-blend-b: var(--fantasy-easel-blend-${b.key});`;
+    if (b.motion) extra += ` --fantasy-easel-motion: ${motionCss(b.motion)}; --fantasy-easel-motion-win: ${motionCssWin(b.motion)};`;
+    if (b.motion && b.motion.over) extra += ` --fantasy-easel-motion-b: ${motionCss(b.motion.over)}; --fantasy-easel-motion-b-win: ${motionCssWin(b.motion.over)}; --fantasy-easel-layer-b: var(--fantasy-easel-grad-${b.key}-b); --fantasy-easel-blend-b: var(--fantasy-easel-blend-${b.key});`;
     return `body.fantasy-easel.fantasy-easel-bg-${b.key} { --background-url: var(--fantasy-easel-grad-${b.key});${extra} }`;
   }).join("\n");
   const used = [...new Set(CSS_BACKGROUNDS.filter((b) => b.motion).flatMap((b) => [...b.motion.parts, ...(b.motion.over ? b.motion.over.parts : [])].map((p) => p.frames)))];
+  if (used.includes("hue") || used.includes("hueFull")) used.push("hueWin");
   const frames = used.map((k) => `@keyframes fantasy-easel-${k} { ${KEYFRAMES[k]} }`).join("\n");
   return [
     BEGIN,
