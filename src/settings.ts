@@ -111,7 +111,7 @@ export function normalize(data: Partial<FantasyEaselSettings> | null | undefined
       card: look.card !== false,
       images,
     },
-    motion: MOTIONS.includes(data?.motion as Motion) ? (data!.motion as Motion) : "auto",
+    motion: MOTIONS.includes(data?.motion as Motion) ? (data!.motion as Motion) : DEFAULT_SETTINGS.motion,
     pauseUnfocused: data?.pauseUnfocused === true,
     statusBar: data?.statusBar !== false,
     statusItems,

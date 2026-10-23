@@ -11,7 +11,7 @@ The theme has no Style Settings options; everything is set here.
 - **Gallery**: every background under a glass card that follows your glass settings: day and night side by side (command "Background gallery"), or the current mode in two columns in the style panel
 - **Status bar**: palette, previous / next background, gallery, accent, cards, motion, dark / light. Choose the buttons and their order in settings
 
-Defaults: Graphite palette, theme accent on, Silk background, card layout, 8px card gap. Without this plugin the theme shows the Graphite palette, the Silk background (still) and card layout.
+Defaults: Graphite palette, theme accent on, Silk background, card layout, 12px card gap. Without this plugin the theme shows the Graphite palette, the Silk background (still) and card layout.
 
 With any other theme the plugin stays idle (no classes, no background, no status bar) and its settings only point to the Fantasy theme. It switches on by itself when Fantasy becomes the current theme.
 
