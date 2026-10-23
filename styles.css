@@ -205,12 +205,19 @@ body.fantasy-easel.fantasy-easel-bg-plasma { --background-url: var(--fantasy-eas
 body.fantasy-easel.fantasy-easel-bg-lava { --background-url: var(--fantasy-easel-grad-lava); --fantasy-easel-motion: fantasy-easel-swellY 18s ease-in-out infinite alternate, fantasy-easel-pulseB 13s ease-in-out infinite alternate, fantasy-easel-sway 27s ease-in-out infinite alternate; --fantasy-easel-motion-b: fantasy-easel-wanderB 23s ease-in-out infinite alternate, fantasy-easel-pulse 16s ease-in-out infinite alternate, fantasy-easel-hue 33s ease-in-out infinite alternate; --fantasy-easel-layer-b: var(--fantasy-easel-grad-lava-b); --fantasy-easel-blend-b: var(--fantasy-easel-blend-lava); }
 
 @keyframes fantasy-easel-tideX { 0% { translate: -13% 2%; } 100% { translate: 13% -3%; } }
-@keyframes fantasy-easel-pulseB { 0% { scale: 1.2 1.06; } 100% { scale: 1.06 1.22; } }
-@keyframes fantasy-easel-hue { 0% { filter: hue-rotate(-25deg); } 100% { filter: hue-rotate(35deg); } }
+@keyframes fantasy-easel-pulseB { 0% { scale: 1.15 1.05; } 100% { scale: 1.05 1.18; } }
+@keyframes fantasy-easel-hue {
+	0% { opacity: 0.72; }
+	50% { opacity: 0.98; }
+	100% { opacity: 0.76; }
+}
 @keyframes fantasy-easel-swellY { 0% { translate: 2% -11%; } 100% { translate: -3% 11%; } }
 @keyframes fantasy-easel-wanderC { 0% { translate: 0% -10%; } 26% { translate: 11% 2%; } 47% { translate: -4% 11%; } 71% { translate: -12% -3%; } 100% { translate: 6% -7%; } }
-@keyframes fantasy-easel-pulse { 0% { scale: 1.05; } 100% { scale: 1.22; } }
-@keyframes fantasy-easel-hueFull { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+@keyframes fantasy-easel-pulse { 0% { scale: 1.04; } 100% { scale: 1.18; } }
+@keyframes fantasy-easel-hueFull {
+	from { rotate: 0deg; }
+	to { rotate: 360deg; }
+}
 @keyframes fantasy-easel-wanderA { 0% { translate: -12% -6%; } 21% { translate: 7% -11%; } 43% { translate: 12% 5%; } 62% { translate: -2% 12%; } 81% { translate: -11% 3%; } 100% { translate: -6% -9%; } }
 @keyframes fantasy-easel-sway { 0% { rotate: -7deg; } 100% { rotate: 6deg; } }
 @keyframes fantasy-easel-wanderB { 0% { translate: 10% 8%; } 18% { translate: -6% 11%; } 39% { translate: -12% -4%; } 58% { translate: 3% -12%; } 79% { translate: 12% -2%; } 100% { translate: 5% 10%; } }
@@ -670,12 +677,19 @@ body.fantasy-easel.fantasy-easel-motion .app-container::before,
 body.fantasy-easel.fantasy-easel-motion .app-container::after {
 	content: "";
 	position: fixed;
-	/* room for movement: keyframes move up to ~13% of the layer (layer = 150% of the window) */
-	inset: -25%;
+	/* optimized inset: 12% margin covers movement without overdrawing huge offscreen area */
+	inset: -12%;
 	z-index: -1;
 	pointer-events: none;
 	background-size: cover;
-	will-change: translate, rotate, scale, filter;
+	transform: translateZ(0);
+	backface-visibility: hidden;
+	contain: strict;
+	will-change: translate, rotate, scale, opacity;
+}
+
+body.fantasy-easel.fantasy-easel-motion .app-container > .horizontal-main-container {
+	backdrop-filter: none;
 }
 
 body.fantasy-easel.fantasy-easel-motion .app-container::before {
@@ -731,8 +745,16 @@ body.fantasy-easel.fantasy-easel-stage-on .app-container {
 body.fantasy-easel.fantasy-easel-stage-on .app-container > .fantasy-easel-stage {
 	display: block;
 	position: fixed;
-	inset: 0;
+	/* extend past edges so single blur does not fade viewport boundary */
+	inset: -35px;
 	z-index: -1;
+	filter: blur(calc(var(--fe-blur, 36px) * 0.7));
+	transform: translateZ(0);
+	backface-visibility: hidden;
+}
+
+body.fantasy-easel.fantasy-easel-stage-on .app-container > .horizontal-main-container {
+	backdrop-filter: none;
 }
 
 .fantasy-easel-tile > .fantasy-easel-stage {
@@ -766,13 +788,16 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 .fantasy-easel-stage > div {
 	position: absolute;
 	pointer-events: none;
-	will-change: translate, rotate, scale, filter;
+	filter: none !important;
+	transform: translateZ(0);
 	backface-visibility: hidden;
+	contain: strict;
+	will-change: translate, rotate, scale, opacity;
 }
 
 /* Ambient family (몽환·자연): layers built from four colors + a texture */
 .fantasy-easel-stage.fe-ambient > .fe-l1 {
-	inset: -45%;
+	inset: -24%;
 	background:
 		radial-gradient(ellipse 44% 36% at 28% 32%, var(--fe-1), transparent 70%),
 		radial-gradient(ellipse 40% 48% at 74% 68%, var(--fe-2), transparent 70%),
@@ -787,7 +812,7 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 }
 
 .fantasy-easel-stage.fe-ambient > .fe-l2 {
-	inset: -45%;
+	inset: -24%;
 	background:
 		radial-gradient(ellipse 50% 34% at 72% 28%, var(--fe-3), transparent 68%),
 		radial-gradient(ellipse 36% 52% at 26% 74%, var(--fe-4), transparent 68%),
@@ -804,7 +829,7 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 }
 
 .fantasy-easel-stage.fe-ambient > .fe-l3 {
-	inset: -50%;
+	inset: -26%;
 	background: var(--fe-wave);
 	mix-blend-mode: var(--fe-b3, soft-light);
 	opacity: 0.78;
@@ -816,7 +841,7 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 }
 
 .fantasy-easel-stage.fe-ambient > .fe-l4 {
-	inset: -35%;
+	inset: -20%;
 	background:
 		radial-gradient(ellipse 35% 35% at 36% 38%, var(--fe-4), transparent 62%),
 		radial-gradient(ellipse 38% 34% at 66% 64%, var(--fe-2), transparent 62%);
@@ -832,7 +857,7 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 
 /* Kinetic family (결·파동): four layer pictures */
 .fantasy-easel-stage.fe-kinetic > .fe-l1 {
-	inset: -48%;
+	inset: -24%;
 	background: var(--fe-1);
 	opacity: 0.9;
 	filter: blur(calc(var(--fe-b) * var(--fe-bm1, 0.75)));
@@ -844,7 +869,7 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 }
 
 .fantasy-easel-stage.fe-kinetic > .fe-l2 {
-	inset: -48%;
+	inset: -24%;
 	background: var(--fe-2);
 	mix-blend-mode: var(--fe-b2, screen);
 	opacity: 0.85;
@@ -858,7 +883,7 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 }
 
 .fantasy-easel-stage.fe-kinetic > .fe-l3 {
-	inset: -52%;
+	inset: -26%;
 	background: var(--fe-3);
 	mix-blend-mode: var(--fe-b3, soft-light);
 	opacity: 0.84;
@@ -870,7 +895,7 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 }
 
 .fantasy-easel-stage.fe-kinetic > .fe-l4 {
-	inset: -38%;
+	inset: -20%;
 	background: var(--fe-4);
 	mix-blend-mode: var(--fe-b2, screen);
 	opacity: 0.76;
@@ -934,8 +959,9 @@ body.fantasy-easel.fantasy-easel-stage-on.fantasy-easel-still .fantasy-easel-sta
 	100% { rotate: calc(18deg * var(--fe-morph)); scale: 1.04 calc(1 + 0.15 * var(--fe-morph)); }
 }
 @keyframes fe-a-hue {
-	0% { filter: blur(var(--fe-b)) hue-rotate(calc(-1 * var(--fe-hue))); }
-	100% { filter: blur(var(--fe-b)) hue-rotate(var(--fe-hue)); }
+	0% { opacity: 0.58; }
+	50% { opacity: 0.92; }
+	100% { opacity: 0.65; }
 }
 @keyframes fe-k-driftA {
 	0% { translate: calc(-13% * var(--fe-morph)) calc(-8% * var(--fe-morph)); }
@@ -958,8 +984,9 @@ body.fantasy-easel.fantasy-easel-stage-on.fantasy-easel-still .fantasy-easel-sta
 	100% { rotate: calc(20deg * var(--fe-morph)); scale: 1.03 calc(1 + 0.16 * var(--fe-morph)); }
 }
 @keyframes fe-k-hue {
-	0% { filter: blur(calc(var(--fe-b) * 0.65)) hue-rotate(calc(-1 * var(--fe-hue))); }
-	100% { filter: blur(calc(var(--fe-b) * 0.65)) hue-rotate(var(--fe-hue)); }
+	0% { opacity: 0.62; }
+	50% { opacity: 0.96; }
+	100% { opacity: 0.68; }
 }
 
 /* ---------- 1-5. Plugin skins (on/off = body.fantasy-easel-skin-<id>) ---------- */
