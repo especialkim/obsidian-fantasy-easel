@@ -180,7 +180,11 @@ for (const b of CSS_BACKGROUNDS) {
     // Night: this model puts the brightest color right behind the glass with no blur, so it reads
     // ~1.5 lower than Obsidian. Measured 2026-10-22 (dark, cards, Orchid / Dark): real text contrast
     // 5.05~7.1 where this model says 3.6~4.4. So night uses 3.5 here; day keeps 4.5.
-    const min = side === "night" ? 3.5 : 4.5;
+    // Day with the 2026-10-24 light glass (0.6, brightness 0.85): Tide, Liquid, Plasma and Lava model
+    // 3.7~4.5 at their worst moment. Accepted by the user (the palette is a personal choice); the
+    // floor stays 4.5 for every other background so new ones are still drawn to it.
+    const DAY_ACCEPTED = { tide: 4.1, liquid: 3.7, plasma: 3.9, lava: 4.4 };
+    const min = side === "night" ? 3.5 : DAY_ACCEPTED[b.key] ?? 4.5;
     check(worst >= min, `contrast ${b.key} ${side}: ${worst.toFixed(2)} < ${min} (worst with ${at})`);
     // Card edges in dark card view: the gap shows the picture, the card darkens it. A near-black
     // base makes both the same (user review 2026-10-22).
@@ -189,5 +193,5 @@ for (const b of CSS_BACKGROUNDS) {
 }
 if (process.argv.includes("--contrast")) console.log(report.join("  "));
 
-console.log(fail ? `${fail} failed` : `ok: ${THEME_COLORS.length} colors, ${CSS_BACKGROUNDS.length} CSS backgrounds (theme: ${DEFAULT_BACKGROUND}), contrast day >= 4.5, night >= 3.5 (model), night floor >= 0.015`);
+console.log(fail ? `${fail} failed` : `ok: ${THEME_COLORS.length} colors, ${CSS_BACKGROUNDS.length} CSS backgrounds (theme: ${DEFAULT_BACKGROUND}), contrast day >= 4.5 (4 accepted lower), night >= 3.5 (model), night floor >= 0.015`);
 process.exit(fail ? 1 : 0);
