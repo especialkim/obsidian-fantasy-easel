@@ -40,11 +40,24 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     plugin.registerEvent(app.workspace.on("css-change", () => this.queueUpdate()));
   }
 
+  /** recent update() times: a redraw that keeps causing redraws is stopped (2026-10-24: one froze Obsidian) */
+  private updates: number[] = [];
+
+  /** Re-read the definitions once, on the next frame, and only while the tab is on screen. A
+   *  microtask here could chain forever and freeze the window; a frame always lets it breathe. */
   private queueUpdate() {
-    if (this.queued) return;
+    if (this.queued || !this.containerEl.isConnected) return;
     this.queued = true;
-    queueMicrotask(() => {
+    window.requestAnimationFrame(() => {
       this.queued = false;
+      if (!this.containerEl.isConnected) return;
+      const now = Date.now();
+      this.updates = this.updates.filter((t) => now - t < 1000);
+      if (this.updates.length >= 10) {
+        console.warn("[fantasy-easel] settings tab redraws keep repeating; stopped until it is reopened");
+        return;
+      }
+      this.updates.push(now);
       this.update();
     });
   }
@@ -56,6 +69,8 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
   }
 
   setControlValue(key: string, value: unknown) {
+    // the same value again (a control set while rendering): nothing to save, nothing to redraw
+    if (this.getControlValue(key) === value) return;
     const store = this.plugin.store;
     if (key.startsWith("look.")) store.setLook({ [key.slice(5)]: value });
     else store.set({ [key]: value });

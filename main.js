@@ -1659,15 +1659,27 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
     super(app, plugin);
     this.plugin = plugin;
     this.queued = false;
+    /** recent update() times: a redraw that keeps causing redraws is stopped (2026-10-24: one froze Obsidian) */
+    this.updates = [];
     this.icon = "palette";
     plugin.register(plugin.store.subscribe(() => this.queueUpdate()));
     plugin.registerEvent(app.workspace.on("css-change", () => this.queueUpdate()));
   }
+  /** Re-read the definitions once, on the next frame, and only while the tab is on screen. A
+   *  microtask here could chain forever and freeze the window; a frame always lets it breathe. */
   queueUpdate() {
-    if (this.queued) return;
+    if (this.queued || !this.containerEl.isConnected) return;
     this.queued = true;
-    queueMicrotask(() => {
+    window.requestAnimationFrame(() => {
       this.queued = false;
+      if (!this.containerEl.isConnected) return;
+      const now = Date.now();
+      this.updates = this.updates.filter((t) => now - t < 1e3);
+      if (this.updates.length >= 10) {
+        console.warn("[fantasy-easel] settings tab redraws keep repeating; stopped until it is reopened");
+        return;
+      }
+      this.updates.push(now);
       this.update();
     });
   }
@@ -1677,6 +1689,7 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
     return s[key];
   }
   setControlValue(key, value) {
+    if (this.getControlValue(key) === value) return;
     const store = this.plugin.store;
     if (key.startsWith("look.")) store.setLook({ [key.slice(5)]: value });
     else store.set({ [key]: value });
