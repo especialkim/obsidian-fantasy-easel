@@ -2,6 +2,7 @@ import { Notice } from "obsidian";
 import { ACCENT_CLASS, backgroundById, CARD_OFF_CLASS, CSS_BG, FORCE_MOTION_CLASS, MARKER_CLASS, MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, STAGE_CLASS, STILL_CLASS, THEME_COLORS, LEGACY_CARD_CLASS } from "./catalog";
 import type { FantasyEaselSettings } from "./settings";
 import { SKINS, skinClass } from "./skins";
+import { TUNING_VARS, tuningVars } from "./tuning";
 
 /** Every body class Fantasy Easel may add or remove. Other body classes are never touched. */
 const MANAGED = new Set<string>([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls!), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...SKINS.map((s) => skinClass(s.id))]);
@@ -64,6 +65,12 @@ export class Applier {
     const value = backgroundById(s.look.background, s.look.images)?.url ?? "";
     const now = this.body.style.getPropertyValue(URL_VAR);
     if (value !== now) { this.body.setCssProps({ [URL_VAR]: value }); changed++; }
+    // style panel values: body inline variables; a value not set leaves the theme's own
+    const tuned = tuningVars(s.tuning, s.look.card);
+    for (const v of TUNING_VARS) {
+      const want = tuned[v] ?? "";
+      if (this.body.style.getPropertyValue(v) !== want) { this.body.setCssProps({ [v]: want }); changed++; }
+    }
     for (const v of OLD_VARS) if (this.body.style.getPropertyValue(v)) { this.body.setCssProps({ [v]: "" }); changed++; }
     this.observer?.takeRecords();
     if (changed) this.runs++;
@@ -93,6 +100,6 @@ export class Applier {
     for (const b of CSS_BG) cl.remove(b.cls!);
     cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...SKINS.map((s) => skinClass(s.id)));
     for (const c of THEME_GROUP) cl.remove(c);
-    this.body.setCssProps(Object.fromEntries([URL_VAR, ...OLD_VARS].map((v) => [v, ""])));
+    this.body.setCssProps(Object.fromEntries([URL_VAR, ...OLD_VARS, ...TUNING_VARS].map((v) => [v, ""])));
   }
 }

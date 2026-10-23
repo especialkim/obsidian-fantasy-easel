@@ -718,11 +718,11 @@ body.mod-windows.fantasy-easel.fantasy-easel-motion .app-container::after {
 
 /* the theme's backdrop tone (`.app-container>.horizontal-main-container`), without the blur */
 body.mod-windows.fantasy-easel {
-	--fantasy-easel-win-tone: brightness(0.8);
+	--fantasy-easel-win-tone: brightness(var(--fantasy-glass-brightness, 0.8));
 }
 
 body.mod-windows.fantasy-easel.theme-light {
-	--fantasy-easel-win-tone: brightness(1.05) saturate(1.1);
+	--fantasy-easel-win-tone: brightness(var(--fantasy-glass-brightness, 1.05)) saturate(1.1);
 }
 
 /* (0,5,1): beats theme `body.theme-light .app-container>.horizontal-main-container` (0,2,1) */
@@ -753,6 +753,8 @@ body.fantasy-easel.fantasy-easel-motion.fantasy-easel-still .app-container::afte
    above. The element exists only while the plugin shows a stage (body) or in gallery tiles. */
 .fantasy-easel-stage {
 	--fe-seed: var(--fantasy-easel-delay, -7s);
+	/* the background's own speed × the style panel's "Stage speed" */
+	--fe-speed-x: calc(var(--fe-speed) * var(--fantasy-easel-speed, 1));
 	--fe-b: var(--fe-blur);
 	display: none;
 	overflow: hidden;
@@ -818,9 +820,9 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 	opacity: 0.88;
 	filter: blur(var(--fe-b));
 	animation:
-		fe-a-wanderA calc(11s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-spin calc(26s / var(--fe-speed)) linear infinite,
-		fe-a-stretchA calc(8.5s / var(--fe-speed)) ease-in-out infinite alternate;
+		fe-a-wanderA calc(11s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-spin calc(26s / var(--fe-speed-x)) linear infinite,
+		fe-a-stretchA calc(8.5s / var(--fe-speed-x)) ease-in-out infinite alternate;
 	animation-delay: var(--fe-seed);
 }
 
@@ -834,10 +836,10 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 	opacity: 0.82;
 	filter: blur(var(--fe-b));
 	animation:
-		fe-a-wanderB calc(13s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-spin-back calc(31s / var(--fe-speed)) linear infinite,
-		fe-a-stretchB calc(9.5s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-a-hue calc(17s / var(--fe-speed)) ease-in-out infinite alternate;
+		fe-a-wanderB calc(13s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-spin-back calc(31s / var(--fe-speed-x)) linear infinite,
+		fe-a-stretchB calc(9.5s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-a-hue calc(17s / var(--fe-speed-x)) ease-in-out infinite alternate;
 	animation-delay: calc(var(--fe-seed) * 1.37);
 }
 
@@ -848,8 +850,8 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 	opacity: 0.78;
 	filter: blur(calc(var(--fe-b) * 0.45));
 	animation:
-		fe-a-ribbon calc(9s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-a-sway calc(14s / var(--fe-speed)) ease-in-out infinite alternate;
+		fe-a-ribbon calc(9s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-a-sway calc(14s / var(--fe-speed-x)) ease-in-out infinite alternate;
 	animation-delay: calc(var(--fe-seed) * 0.73);
 }
 
@@ -862,9 +864,9 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 	opacity: 0.72;
 	filter: blur(calc(var(--fe-b) * 0.85));
 	animation:
-		fe-a-wanderC calc(8s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-a-breath calc(6.5s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-a-hue calc(14s / var(--fe-speed)) ease-in-out infinite alternate-reverse;
+		fe-a-wanderC calc(8s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-a-breath calc(6.5s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-a-hue calc(14s / var(--fe-speed-x)) ease-in-out infinite alternate-reverse;
 	animation-delay: calc(var(--fe-seed) * 1.85);
 }
 
@@ -875,9 +877,9 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 	opacity: 0.9;
 	filter: blur(calc(var(--fe-b) * var(--fe-bm1, 0.75)));
 	animation:
-		fe-k-driftA calc(10s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-spin calc(24s / var(--fe-speed)) linear infinite,
-		fe-a-stretchA calc(7.8s / var(--fe-speed)) ease-in-out infinite alternate;
+		fe-k-driftA calc(10s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-spin calc(24s / var(--fe-speed-x)) linear infinite,
+		fe-a-stretchA calc(7.8s / var(--fe-speed-x)) ease-in-out infinite alternate;
 	animation-delay: var(--fe-seed);
 }
 
@@ -888,10 +890,10 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 	opacity: 0.85;
 	filter: blur(calc(var(--fe-b) * var(--fe-bm2, 0.65)));
 	animation:
-		fe-k-driftB calc(12s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-spin-back calc(28s / var(--fe-speed)) linear infinite,
-		fe-a-stretchB calc(8.9s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-k-hue calc(15s / var(--fe-speed)) ease-in-out infinite alternate;
+		fe-k-driftB calc(12s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-spin-back calc(28s / var(--fe-speed-x)) linear infinite,
+		fe-a-stretchB calc(8.9s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-k-hue calc(15s / var(--fe-speed-x)) ease-in-out infinite alternate;
 	animation-delay: calc(var(--fe-seed) * 1.41);
 }
 
@@ -902,8 +904,8 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 	opacity: 0.84;
 	filter: blur(calc(var(--fe-b) * var(--fe-bm3, 0.4)));
 	animation:
-		fe-k-sweep calc(8.5s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-k-sway calc(11.5s / var(--fe-speed)) ease-in-out infinite alternate;
+		fe-k-sweep calc(8.5s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-k-sway calc(11.5s / var(--fe-speed-x)) ease-in-out infinite alternate;
 	animation-delay: calc(var(--fe-seed) * 0.77);
 }
 
@@ -914,8 +916,8 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 	opacity: 0.76;
 	filter: blur(calc(var(--fe-b) * 1.1));
 	animation:
-		fe-a-wanderC calc(7.4s / var(--fe-speed)) ease-in-out infinite alternate,
-		fe-a-breath calc(6.2s / var(--fe-speed)) ease-in-out infinite alternate;
+		fe-a-wanderC calc(7.4s / var(--fe-speed-x)) ease-in-out infinite alternate,
+		fe-a-breath calc(6.2s / var(--fe-speed-x)) ease-in-out infinite alternate;
 	animation-delay: calc(var(--fe-seed) * 1.93);
 }
 
@@ -1367,10 +1369,75 @@ body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.c
 	margin-left: var(--size-4-2);
 }
 
-/* Settings: your pictures, one row each */
-.fantasy-easel-settings .fantasy-easel-picture input[type="text"] {
+/* Settings: your pictures, one row each (name, address, use) */
+.fantasy-easel-picture input[type="text"] {
 	width: 100%;
 	min-width: 16em;
+}
+
+.fantasy-easel-picture input.fantasy-easel-picture-name {
+	min-width: 8em;
+	width: 10em;
+}
+
+/* Style panel (sidebar): changed rows get a dot, a reset button shows only there */
+.fantasy-easel-panel .fantasy-easel-panel-row .setting-item-name {
+	display: flex;
+	align-items: baseline;
+	gap: var(--size-2-2);
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-row.is-changed .setting-item-name::before {
+	content: "";
+	flex: none;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background-color: var(--interactive-accent);
+	transform: translateY(-1px);
+}
+
+.fantasy-easel-panel .clickable-icon.is-hidden {
+	visibility: hidden;
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-row.is-disabled {
+	opacity: 0.5;
+}
+
+/* narrow sidebar: the control goes under the name */
+.fantasy-easel-panel .fantasy-easel-panel-wide {
+	flex-wrap: wrap;
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-wide .setting-item-control {
+	flex-basis: 100%;
+	justify-content: flex-start;
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-wide select,
+.fantasy-easel-panel .fantasy-easel-panel-wide input[type="range"] {
+	flex: 1;
+	min-width: 0;
+}
+
+/* Gallery in the sidebar: the name above the two tiles */
+.fantasy-easel-panel-gallery .fantasy-easel-gallery-head,
+.fantasy-easel-panel-gallery .fantasy-easel-gallery-row {
+	grid-template-columns: 1fr 1fr;
+	gap: var(--size-2-3);
+}
+
+.fantasy-easel-panel-gallery .fantasy-easel-gallery-name {
+	grid-column: 1 / -1;
+}
+
+.fantasy-easel-panel-gallery .fantasy-easel-gallery-head span:first-child {
+	grid-column: 1;
+}
+
+.fantasy-easel-panel-gallery .fantasy-easel-gallery-head {
+	background: var(--background-secondary);
 }
 
 .fantasy-easel-gallery-row {

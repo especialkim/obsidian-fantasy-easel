@@ -23,7 +23,7 @@ __export(main_exports, {
   default: () => FantasyEaselPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian8 = require("obsidian");
+var import_obsidian9 = require("obsidian");
 
 // src/apply.ts
 var import_obsidian = require("obsidian");
@@ -1043,7 +1043,7 @@ function toCssUrl(src) {
   if (/^url\(/i.test(s)) return s;
   return `url("${s.replace(/["\\]/g, "\\$&")}")`;
 }
-var imageBackgrounds = (images) => images.map((img, i) => ({ id: `img-${img.id}`, name: `Picture ${i + 1}`, kind: "image", url: toCssUrl(img.src) })).filter((b) => b.url);
+var imageBackgrounds = (images) => images.map((img, i) => ({ id: `img-${img.id}`, name: img.name?.trim() || `Picture ${i + 1}`, kind: "image", url: toCssUrl(img.src) })).filter((b) => b.url);
 var allBackgrounds = (images) => [...CSS_BG, ...imageBackgrounds(images)];
 var newImageId = () => Math.random().toString(36).slice(2, 8);
 var ACCENT_CLASS = "fantasy-theme-accent";
@@ -1070,6 +1070,40 @@ var SKINS = [
 ];
 var skinClass = (id) => `fantasy-easel-skin-${id}`;
 var skinOn = (skins, s) => skins[s.id] ?? true;
+
+// src/tuning.ts
+var TUNING_GROUPS = [
+  { id: "glass", name: "Glass" },
+  { id: "cards", name: "Cards" },
+  { id: "text", name: "Text" },
+  { id: "motion", name: "Motion" }
+];
+var HEADINGS = [1.3, 1.2, 1.15, 1.1, 1.05];
+var round = (n) => Math.round(n * 1e3) / 1e3;
+var TUNINGS = [
+  { key: "opacity", name: "Panel opacity", desc: "How solid the glass panels are.", group: "glass", min: 0.2, max: 0.95, step: 0.01, unit: "", def: { dark: 0.6, light: 0.67 }, vars: (v) => ({ "--background-opacity": `${v}` }) },
+  { key: "blur", name: "Glass blur", desc: "Blur of the background behind the panels.", group: "glass", min: 0, max: 24, step: 1, unit: "px", def: { dark: 8, light: 12 }, vars: (v) => ({ "--fantasy-glass-blur": `${v}px` }) },
+  { key: "brightness", name: "Background brightness", desc: "Brightness of the background behind the panels.", group: "glass", min: 0.5, max: 1.3, step: 0.01, unit: "", def: { dark: 0.8, light: 1.05 }, vars: (v) => ({ "--fantasy-glass-brightness": `${v}` }) },
+  { key: "cardGap", name: "Card gap", desc: "Space between the cards.", group: "cards", min: 0, max: 16, step: 1, unit: "px", def: { dark: 4, light: 4 }, vars: (v) => ({ "--cardview-gap": `${v}px` }), cardOnly: true },
+  { key: "cardRadius", name: "Card corners", desc: "Corner radius of the cards.", group: "cards", min: 0, max: 32, step: 1, unit: "px", def: { dark: 20, light: 20 }, vars: (v) => ({ "--cardview-radius": `${v}px` }), cardOnly: true },
+  { key: "cardPadding", name: "Card padding", desc: "Space inside the cards (top and bottom; sides get half).", group: "cards", min: 0, max: 24, step: 1, unit: "px", def: { dark: 10, light: 10 }, vars: (v) => ({ "--cardview-padding": `${v}px ${v / 2}px` }), cardOnly: true },
+  { key: "lineWidth", name: "Note width", desc: "Readable line length.", group: "text", min: 600, max: 1600, step: 10, unit: "px", def: { dark: 850, light: 850 }, vars: (v) => ({ "--file-line-width": `${v}px` }) },
+  { key: "headingScale", name: "Heading size", desc: "How much larger headings are than body text (1 = theme).", group: "text", min: 0, max: 2, step: 0.05, unit: "\xD7", def: { dark: 1, light: 1 }, vars: (v) => Object.fromEntries(HEADINGS.map((h, i) => [`--h${i + 1}-size`, `${round(1 + (h - 1) * v)}em`])) },
+  { key: "paragraph", name: "Paragraph spacing", desc: "Space between paragraphs.", group: "text", min: 0, max: 1.5, step: 0.05, unit: "rem", def: { dark: 0.5, light: 0.5 }, vars: (v) => ({ "--p-spacing": `${v}rem` }) },
+  { key: "propertiesRadius", name: "Properties corners", desc: "Corner radius of the properties tray.", group: "text", min: 0, max: 24, step: 1, unit: "px", def: { dark: 14, light: 14 }, vars: (v) => ({ "--metadata-border-radius": `${v}px` }) },
+  { key: "stageSpeed", name: "Stage speed", desc: "Speed of the stage backgrounds (four moving layers).", group: "motion", min: 0.25, max: 2, step: 0.05, unit: "\xD7", def: { dark: 1, light: 1 }, vars: (v) => ({ "--fantasy-easel-speed": `${v}` }) }
+];
+var TUNING_VARS = [...new Set(TUNINGS.flatMap((t) => Object.keys(t.vars(t.def.dark))))];
+var tuningByKey = (key) => TUNINGS.find((t) => t.key === key);
+function tuningVars(values, card) {
+  const out = {};
+  for (const t of TUNINGS) {
+    const v = values[t.key];
+    if (typeof v !== "number" || !Number.isFinite(v) || t.cardOnly && !card) continue;
+    Object.assign(out, t.vars(Math.min(t.max, Math.max(t.min, v))));
+  }
+  return out;
+}
 
 // src/apply.ts
 var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...SKINS.map((s) => skinClass(s.id))]);
@@ -1127,6 +1161,14 @@ var Applier = class {
       this.body.setCssProps({ [URL_VAR]: value });
       changed++;
     }
+    const tuned = tuningVars(s.tuning, s.look.card);
+    for (const v of TUNING_VARS) {
+      const want2 = tuned[v] ?? "";
+      if (this.body.style.getPropertyValue(v) !== want2) {
+        this.body.setCssProps({ [v]: want2 });
+        changed++;
+      }
+    }
     for (const v of OLD_VARS) if (this.body.style.getPropertyValue(v)) {
       this.body.setCssProps({ [v]: "" });
       changed++;
@@ -1156,7 +1198,7 @@ var Applier = class {
     for (const b of CSS_BG) cl.remove(b.cls);
     cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...SKINS.map((s) => skinClass(s.id)));
     for (const c of THEME_GROUP) cl.remove(c);
-    this.body.setCssProps(Object.fromEntries([URL_VAR, ...OLD_VARS].map((v) => [v, ""])));
+    this.body.setCssProps(Object.fromEntries([URL_VAR, ...OLD_VARS, ...TUNING_VARS].map((v) => [v, ""])));
   }
 };
 
@@ -1167,109 +1209,29 @@ var GROUPS = [
   { title: "Fixed palette", desc: "Same colors with any theme color.", pick: (b) => b.kind === "static" && b.palette === "fixed" },
   { title: "Motion", desc: "Moves slowly.", pick: (b) => b.kind === "motion" }
 ];
-var GalleryModal = class extends import_obsidian2.Modal {
-  constructor(app, store, managePictures) {
-    super(app);
-    this.store = store;
-    this.managePictures = managePictures;
-    this.unsubscribe = null;
-    this.lazy = null;
-  }
-  onOpen() {
-    this.modalEl.addClass("fantasy-easel-gallery-modal");
-    this.setTitle("Backgrounds");
-    this.unsubscribe = this.store.subscribe(() => this.markCurrent());
-    const root = this.contentEl.createDiv({ cls: "fantasy-easel-gallery" });
-    this.lazy = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        const tile = e.target;
-        const stage = tile.querySelector(":scope > .fantasy-easel-stage");
-        if (e.isIntersecting && !stage) tile.prepend(buildStage(tile, tile.dataset.stage));
-        else if (!e.isIntersecting && stage) stage.remove();
-      }
-    }, { root: this.modalEl, rootMargin: "150px 0px" });
-    const { motion } = this.store.settings;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const moving = motion === "on" || motion === "auto" && !reduced;
-    root.toggleClass("is-still", !moving);
-    const head = root.createDiv({ cls: "fantasy-easel-gallery-head" });
-    head.createSpan({ text: "Day" });
-    head.createSpan({ text: "Night" });
-    for (const g of GROUPS) {
-      const section2 = root.createDiv({ cls: "fantasy-easel-gallery-group" });
-      section2.createDiv({ cls: "fantasy-easel-gallery-title", text: g.title });
-      section2.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: g.desc });
-      for (const b of CSS_BACKGROUNDS.filter(g.pick)) {
-        const row = section2.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": `css-${b.key}` } });
-        const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
-        label.createSpan({ text: b.name });
-        const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
-        (0, import_obsidian2.setIcon)(check, "check");
-        for (const side of ["day", "night"]) {
-          const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
-          const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
-          layer.setCssProps({ "--fe-tile-image": `var(--fantasy-easel-grad-${b.key})`, "--fe-tile-motion": b.motion ? motionCss(b.motion) : "none" });
-          if (b.motion?.over) {
-            const over = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
-            over.setCssProps({ "--fe-tile-image": `var(--fantasy-easel-grad-${b.key}-b)`, "--fe-tile-blend": `var(--fantasy-easel-blend-${b.key})`, "--fe-tile-motion": motionCss(b.motion.over) });
-          }
-          const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
-          card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
-          card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
-          tile.addEventListener("click", () => this.store.setLook({ background: `css-${b.key}` }));
-          tile.addEventListener("keydown", (ev) => {
-            if (ev.key === "Enter" || ev.key === " ") {
-              ev.preventDefault();
-              this.store.setLook({ background: `css-${b.key}` });
-            }
-          });
-        }
-      }
+function renderGallery(root, store, opts) {
+  root.addClass("fantasy-easel-gallery");
+  const lazy = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      const tile = e.target;
+      const stage = tile.querySelector(":scope > .fantasy-easel-stage");
+      if (e.isIntersecting && !stage) tile.prepend(buildStage(tile, tile.dataset.stage));
+      else if (!e.isIntersecting && stage) stage.remove();
     }
-    for (const [family, title, desc2] of [
-      ["ambient", "Stage \xB7 ambient", "Four layers of color fields and a texture, drifting and turning."],
-      ["kinetic", "Stage \xB7 kinetic", "Four layer pictures: glass, prism and light patterns that slide and turn."]
-    ]) {
-      const section2 = root.createDiv({ cls: "fantasy-easel-gallery-group" });
-      section2.createDiv({ cls: "fantasy-easel-gallery-title", text: title });
-      section2.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: desc2 });
-      for (const s of STAGES.filter((x) => x.family === family)) {
-        const id = `css-${s.key}`;
-        const row = section2.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": id } });
-        const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
-        label.createSpan({ text: s.name });
-        const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
-        (0, import_obsidian2.setIcon)(check, "check");
-        for (const side of ["day", "night"]) {
-          const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side} fantasy-easel-bg-${s.key}`, attr: { "aria-label": `${s.name} (${side})`, role: "button", tabindex: "0" } });
-          tile.dataset.stage = s.family;
-          this.lazy?.observe(tile);
-          const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
-          card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
-          card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
-          tile.addEventListener("click", () => this.store.setLook({ background: id }));
-          tile.addEventListener("keydown", (ev) => {
-            if (ev.key === "Enter" || ev.key === " ") {
-              ev.preventDefault();
-              this.store.setLook({ background: id });
-            }
-          });
-        }
-      }
-    }
-    const mine = imageBackgrounds(this.store.settings.look.images);
-    const section = root.createDiv({ cls: "fantasy-easel-gallery-group" });
-    section.createDiv({ cls: "fantasy-easel-gallery-title", text: "Your pictures" });
-    const desc = section.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: "Added in settings with +. Same picture in day and night." });
-    if (this.managePictures) {
-      const add = desc.createEl("button", { cls: "fantasy-easel-gallery-add", text: "Add picture" });
-      add.addEventListener("click", () => {
-        this.close();
-        this.managePictures?.();
-      });
-    }
-    for (const b of mine) {
-      const row = section.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": b.id } });
+  }, { root: opts.scrollRoot, rootMargin: "150px 0px" });
+  const { motion } = store.settings;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const moving = !opts.still && (motion === "on" || motion === "auto" && !reduced);
+  root.toggleClass("is-still", !moving);
+  const head = root.createDiv({ cls: "fantasy-easel-gallery-head" });
+  head.createSpan({ text: "Day" });
+  head.createSpan({ text: "Night" });
+  for (const g of GROUPS) {
+    const section2 = root.createDiv({ cls: "fantasy-easel-gallery-group" });
+    section2.createDiv({ cls: "fantasy-easel-gallery-title", text: g.title });
+    section2.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: g.desc });
+    for (const b of CSS_BACKGROUNDS.filter(g.pick)) {
+      const row = section2.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": `css-${b.key}` } });
       const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
       label.createSpan({ text: b.name });
       const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
@@ -1277,31 +1239,117 @@ var GalleryModal = class extends import_obsidian2.Modal {
       for (const side of ["day", "night"]) {
         const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
         const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
-        layer.setCssProps({ "--fe-tile-image": b.url });
+        layer.setCssProps({ "--fe-tile-image": `var(--fantasy-easel-grad-${b.key})`, "--fe-tile-motion": b.motion ? motionCss(b.motion) : "none" });
+        if (b.motion?.over) {
+          const over = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
+          over.setCssProps({ "--fe-tile-image": `var(--fantasy-easel-grad-${b.key}-b)`, "--fe-tile-blend": `var(--fantasy-easel-blend-${b.key})`, "--fe-tile-motion": motionCss(b.motion.over) });
+        }
         const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
         card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
         card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
-        tile.addEventListener("click", () => this.store.setLook({ background: b.id }));
+        tile.addEventListener("click", () => store.setLook({ background: `css-${b.key}` }));
         tile.addEventListener("keydown", (ev) => {
           if (ev.key === "Enter" || ev.key === " ") {
             ev.preventDefault();
-            this.store.setLook({ background: b.id });
+            store.setLook({ background: `css-${b.key}` });
           }
         });
       }
     }
-    this.markCurrent();
+  }
+  for (const [family, title, desc2] of [
+    ["ambient", "Stage \xB7 ambient", "Four layers of color fields and a texture, drifting and turning."],
+    ["kinetic", "Stage \xB7 kinetic", "Four layer pictures: glass, prism and light patterns that slide and turn."]
+  ]) {
+    const section2 = root.createDiv({ cls: "fantasy-easel-gallery-group" });
+    section2.createDiv({ cls: "fantasy-easel-gallery-title", text: title });
+    section2.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: desc2 });
+    for (const s of STAGES.filter((x) => x.family === family)) {
+      const id = `css-${s.key}`;
+      const row = section2.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": id } });
+      const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
+      label.createSpan({ text: s.name });
+      const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
+      (0, import_obsidian2.setIcon)(check, "check");
+      for (const side of ["day", "night"]) {
+        const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side} fantasy-easel-bg-${s.key}`, attr: { "aria-label": `${s.name} (${side})`, role: "button", tabindex: "0" } });
+        tile.dataset.stage = s.family;
+        lazy.observe(tile);
+        const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
+        card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
+        card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
+        tile.addEventListener("click", () => store.setLook({ background: id }));
+        tile.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            store.setLook({ background: id });
+          }
+        });
+      }
+    }
+  }
+  const mine = imageBackgrounds(store.settings.look.images);
+  const section = root.createDiv({ cls: "fantasy-easel-gallery-group" });
+  section.createDiv({ cls: "fantasy-easel-gallery-title", text: "Your pictures" });
+  const desc = section.createDiv({ cls: "fantasy-easel-gallery-desc setting-item-description", text: "Added in settings with +. Same picture in day and night." });
+  if (opts.addPicture) {
+    const add = desc.createEl("button", { cls: "fantasy-easel-gallery-add", text: "Add picture" });
+    add.addEventListener("click", () => opts.addPicture?.());
+  }
+  for (const b of mine) {
+    const row = section.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": b.id } });
+    const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
+    label.createSpan({ text: b.name });
+    const check = label.createSpan({ cls: "fantasy-easel-gallery-check" });
+    (0, import_obsidian2.setIcon)(check, "check");
+    for (const side of ["day", "night"]) {
+      const tile = row.createDiv({ cls: `fantasy-easel-tile fantasy-easel-${side}`, attr: { "aria-label": `${b.name} (${side})`, role: "button", tabindex: "0" } });
+      const layer = tile.createDiv({ cls: "fantasy-easel-tile-layer" });
+      layer.setCssProps({ "--fe-tile-image": b.url });
+      const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
+      card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
+      card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
+      tile.addEventListener("click", () => store.setLook({ background: b.id }));
+      tile.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          store.setLook({ background: b.id });
+        }
+      });
+    }
+  }
+  const markCurrent = () => {
+    const id = store.settings.look.background;
+    root.querySelectorAll(".fantasy-easel-gallery-row").forEach((r) => r.toggleClass("is-current", r.dataset.id === id));
+  };
+  markCurrent();
+  const unsubscribe = store.subscribe(markCurrent);
+  return () => {
+    unsubscribe();
+    lazy.disconnect();
+  };
+}
+var GalleryModal = class extends import_obsidian2.Modal {
+  constructor(app, store, managePictures) {
+    super(app);
+    this.store = store;
+    this.managePictures = managePictures;
+    this.cleanup = null;
+  }
+  onOpen() {
+    this.modalEl.addClass("fantasy-easel-gallery-modal");
+    this.setTitle("Backgrounds");
+    const root = this.contentEl.createDiv();
+    const add = this.managePictures;
+    this.cleanup = renderGallery(root, this.store, { scrollRoot: this.modalEl, addPicture: add ? () => {
+      this.close();
+      add();
+    } : void 0 });
     root.querySelector(".fantasy-easel-gallery-row.is-current")?.scrollIntoView({ block: "center" });
   }
-  markCurrent() {
-    const id = this.store.settings.look.background;
-    this.contentEl.querySelectorAll(".fantasy-easel-gallery-row").forEach((r) => r.toggleClass("is-current", r.dataset.id === id));
-  }
   onClose() {
-    this.unsubscribe?.();
-    this.unsubscribe = null;
-    this.lazy?.disconnect();
-    this.lazy = null;
+    this.cleanup?.();
+    this.cleanup = null;
     this.contentEl.empty();
   }
 };
@@ -1343,6 +1391,7 @@ function stepBackground(store, dir) {
 }
 
 // src/settings.ts
+var STATUS_IDS = ["color", "prev", "background", "next", "gallery", "accent", "card", "motion", "mode"];
 var MOTIONS = ["auto", "on", "off"];
 var DEFAULT_LOOK = {
   color: THEME_DEFAULTS.color,
@@ -1351,7 +1400,7 @@ var DEFAULT_LOOK = {
   card: true,
   images: []
 };
-var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "auto", pauseUnfocused: false, statusBar: true, skins: {}, excalidrawBackup: null };
+var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "auto", pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
 function fromOldUrls(urls, chosen) {
   const images = [];
   let background;
@@ -1366,13 +1415,23 @@ function fromOldUrls(urls, chosen) {
 }
 function normalize(data) {
   const look = data?.look ?? {};
-  let images = Array.isArray(look.images) ? look.images.filter((x) => !!x && typeof x.id === "string" && typeof x.src === "string").map((x) => ({ id: x.id, src: x.src })) : [];
+  let images = Array.isArray(look.images) ? look.images.filter((x) => !!x && typeof x.id === "string" && typeof x.src === "string").map((x) => ({ id: x.id, src: x.src, ...typeof x.name === "string" && x.name ? { name: x.name } : {} })) : [];
   let background = typeof look.background === "string" ? look.background : "";
   if (!Array.isArray(look.images) && Array.isArray(look.urls)) {
     const old = fromOldUrls(look.urls, background);
     images = old.images;
     if (old.background) background = old.background;
   }
+  const seen = /* @__PURE__ */ new Set();
+  const statusItems = [];
+  for (const x of Array.isArray(data?.statusItems) ? data.statusItems : []) {
+    if (!x || !STATUS_IDS.includes(x.id) || seen.has(x.id)) continue;
+    seen.add(x.id);
+    statusItems.push({ id: x.id, on: x.on !== false });
+  }
+  for (const id of STATUS_IDS) if (!seen.has(id)) statusItems.push({ id, on: true });
+  const tuning = {};
+  for (const [k, v] of Object.entries(data?.tuning ?? {})) if (tuningByKey(k) && typeof v === "number" && Number.isFinite(v)) tuning[k] = v;
   const skins = {};
   for (const [k, v] of Object.entries(data?.skins ?? {})) if (typeof v === "boolean") skins[k] = v;
   return {
@@ -1387,6 +1446,8 @@ function normalize(data) {
     motion: MOTIONS.includes(data?.motion) ? data.motion : "auto",
     pauseUnfocused: data?.pauseUnfocused === true,
     statusBar: data?.statusBar !== false,
+    statusItems,
+    tuning,
     skins,
     excalidrawBackup: data?.excalidrawBackup && typeof data.excalidrawBackup === "object" ? { ...data.excalidrawBackup } : null
   };
@@ -1459,116 +1520,168 @@ var ExcalidrawSettingsModal = class extends import_obsidian4.Modal {
   }
 };
 
+// src/options.ts
+var colorOptions = () => Object.fromEntries(THEME_COLORS.map((c) => [c.cls, c.name]));
+var KIND = { static: "CSS", motion: "Motion", image: "Picture" };
+var backgroundOptions = (images) => Object.fromEntries(allBackgrounds(images).map((b) => [b.id, `${b.stage ? "Stage" : KIND[b.kind]} \xB7 ${b.name}`]));
+var MOTION_OPTIONS = { auto: "Auto", on: "On", off: "Off" };
+
 // src/settings-tab.ts
 var FANTASY_URL = "https://github.com/especialkim/obsidian-theme-fantasy";
+var STATUS_LABEL = {
+  color: "Theme color",
+  prev: "Previous background",
+  background: "Background name",
+  next: "Next background",
+  gallery: "Gallery",
+  accent: "Theme accent",
+  card: "Card layout",
+  motion: "Motion",
+  mode: "Dark / light"
+};
 var FantasyEaselSettingTab = class extends import_obsidian5.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
-    this.unsubscribe = null;
     this.queued = false;
-    /** after +: focus the new picture field once */
-    this.focusLast = false;
+    this.icon = "palette";
+    plugin.register(plugin.store.subscribe(() => this.queueUpdate()));
   }
-  display() {
-    if (!this.unsubscribe) this.unsubscribe = this.plugin.store.subscribe(() => this.queueRender());
-    this.render();
-  }
-  /** One redraw after the current event (several changes in one click redraw once). */
-  queueRender() {
+  queueUpdate() {
     if (this.queued) return;
     this.queued = true;
     queueMicrotask(() => {
       this.queued = false;
-      if (this.unsubscribe) this.render();
+      this.update();
     });
   }
-  render() {
-    const { containerEl } = this;
+  getControlValue(key) {
+    const s = this.plugin.store.settings;
+    if (key.startsWith("look.")) return s.look[key.slice(5)];
+    return s[key];
+  }
+  setControlValue(key, value) {
     const store = this.plugin.store;
-    const { look, motion, statusBar, skins } = store.settings;
-    containerEl.empty();
-    containerEl.addClass("fantasy-easel-settings");
-    if (!this.plugin.active) {
-      this.renderNoTheme();
-      return;
-    }
-    const heading = (name, desc) => {
-      const h = new import_obsidian5.Setting(containerEl).setName(name).setHeading();
-      if (desc) h.setDesc(desc);
-      return h;
+    if (key.startsWith("look.")) store.setLook({ [key.slice(5)]: value });
+    else store.set({ [key]: value });
+  }
+  getSettingDefinitions() {
+    if (!this.plugin.active) return this.noTheme();
+    const store = this.plugin.store;
+    const { look, statusItems, skins } = store.settings;
+    const setImages = (images) => {
+      const bg = store.settings.look.background;
+      const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
+      store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
     };
-    heading("Look", "The Fantasy theme reads these. Without this plugin it shows Dark, Plasma (still) and cards.");
-    new import_obsidian5.Setting(containerEl).setName("Theme color").setDesc(colorByCls(look.color)?.name ?? look.color).addButton((b) => b.setButtonText("Change").onClick((ev) => colorMenu(store).showAtMouseEvent(ev)));
-    new import_obsidian5.Setting(containerEl).setName("Theme accent").setDesc("Accent from the theme: theme color in light mode, gold in dark mode. Off = Obsidian's accent color.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
-    new import_obsidian5.Setting(containerEl).setName("Card layout").setDesc("Sidebars and notes as floating glass cards.").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
-    heading("Background");
-    const bg = backgroundById(look.background, look.images);
-    new import_obsidian5.Setting(containerEl).setName("Background").setDesc(bg ? `${bg.name} (${bg.kind === "image" ? "your picture" : `CSS \xB7 ${bg.kind}`})` : look.background).addButton((b) => b.setButtonText("Gallery").onClick(() => this.plugin.openGallery())).addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
-    new import_obsidian5.Setting(containerEl).setName("Motion").setDesc(`For moving backgrounds. Auto follows the OS "reduce motion" setting${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? " (on here, so motion is paused)" : ""}. On moves anyway. `).addButton((b) => b.setButtonText(motion === "auto" ? "Auto" : motion === "on" ? "On" : "Off").onClick((ev) => {
-      const menu = new import_obsidian5.Menu();
-      for (const m of MOTIONS) menu.addItem((i) => i.setTitle(m === "auto" ? "Auto" : m === "on" ? "On" : "Off").setChecked(m === motion).onClick(() => store.set({ motion: m })));
-      menu.showAtMouseEvent(ev);
-    }));
-    new import_obsidian5.Setting(containerEl).setName("Pause when unfocused").setDesc("Stop moving backgrounds while you work in another app (saves GPU). Off = keep moving.").addToggle((t) => t.setValue(this.plugin.store.settings.pauseUnfocused).onChange((v) => store.set({ pauseUnfocused: v })));
-    new import_obsidian5.Setting(containerEl).setName("Your pictures").setDesc('A picture URL (https://\u2026) or a CSS value like url("\u2026"). Add as many as you like with +.').setHeading().addExtraButton((b) => b.setIcon("plus").setTooltip("Add picture").onClick(() => {
-      store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] });
-      this.focusLast = true;
-    }));
-    look.images.forEach((img, i) => {
-      const id = `img-${img.id}`;
-      const usable = !!toCssUrl(img.src);
-      const row = new import_obsidian5.Setting(containerEl).setClass("fantasy-easel-picture").setName(`Picture ${i + 1}`);
-      row.addText((t) => {
-        t.setValue(img.src).setPlaceholder("https://\u2026");
-        t.inputEl.addEventListener("change", () => {
-          const src = t.getValue().trim();
-          const images = store.settings.look.images.map((x) => x.id === img.id ? { ...x, src } : x);
-          const patch = !src && store.settings.look.background === id ? { images, background: DEFAULT_BACKGROUND } : { images };
-          store.setLook(patch);
-        });
-        if (this.focusLast && i === look.images.length - 1) {
-          this.focusLast = false;
-          window.setTimeout(() => t.inputEl.focus(), 0);
-        }
-      });
-      row.addButton((b) => {
-        b.setButtonText(look.background === id ? "In use" : "Use").setDisabled(!usable || look.background === id).onClick(() => store.setLook({ background: id }));
-        if (look.background === id) b.setCta();
-      });
-      row.addExtraButton((b) => b.setIcon("trash-2").setTooltip("Remove").onClick(() => {
-        const images = store.settings.look.images.filter((x) => x.id !== img.id);
-        store.setLook(store.settings.look.background === id ? { images, background: DEFAULT_BACKGROUND } : { images });
-      }));
-    });
-    heading("Plugin skins", "Extra CSS that fits a plugin to the Fantasy glass. It only touches that plugin's own elements.");
-    for (const s of SKINS) {
-      const row = new import_obsidian5.Setting(containerEl).setName(s.name).setDesc(s.desc).addToggle((t) => t.setValue(skinOn(skins, s)).onChange((v) => {
-        store.set({ skins: { ...store.settings.skins, [s.id]: v } });
-        if (s.id === "excalidraw" && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
-      }));
-      if (s.id !== "excalidraw" || !excalidrawAvailable(this.app)) continue;
-      const diff = excalidrawDiff(this.app).length;
-      row.descEl.createDiv({ text: diff ? `${diff} Excalidraw setting(s) differ from what this skin needs.` : "Excalidraw settings match this skin." });
-      if (diff) row.addButton((b) => b.setButtonText("Match settings\u2026").onClick(() => new ExcalidrawSettingsModal(this.app, store).open()));
-      if (store.settings.excalidrawBackup) row.addButton((b) => b.setButtonText("Restore").setTooltip("Put back the Excalidraw settings from before Fantasy Easel changed them").onClick(() => void restoreExcalidraw(this.app, store)));
-    }
-    heading("Controls");
-    new import_obsidian5.Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls: theme color, background, gallery, accent, cards, motion.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
+    const patchImage = (id, patch) => setImages(store.settings.look.images.map((x) => x.id === id ? { ...x, ...patch } : x));
+    const move = (list, from, to) => {
+      const out = [...list];
+      const [x] = out.splice(from, 1);
+      out.splice(to, 0, x);
+      return out;
+    };
+    return [
+      // general rows: no heading (one-section rule)
+      { name: "Theme color", desc: "Background tint, and the accent when theme accent is on.", control: { type: "dropdown", key: "look.color", options: colorOptions() } },
+      { name: "Theme accent", desc: "Accent follows the theme color (gold in dark mode). Off = Obsidian's accent color.", control: { type: "toggle", key: "look.accent" } },
+      { name: "Open style panel", desc: "Sidebar tab with the main switches and style tuning (glass, cards, text, motion), each with a reset.", action: () => void this.plugin.openStylePanel() },
+      {
+        type: "group",
+        heading: "Card layout",
+        items: [{ name: "Card layout", desc: "Sidebars and notes as floating glass cards. Spacing and corners: style panel.", control: { type: "toggle", key: "look.card" } }]
+      },
+      {
+        type: "group",
+        heading: "Background",
+        items: [
+          { name: "Background", desc: "CSS, motion, stage or one of your pictures.", control: { type: "dropdown", key: "look.background", options: backgroundOptions(look.images) } },
+          { name: "Gallery", desc: "Every background side by side, day and night.", action: () => this.plugin.openGallery() },
+          { name: "Motion", desc: 'For moving backgrounds. Auto follows the OS "reduce motion" setting; On moves anyway.', control: { type: "dropdown", key: "motion", options: MOTION_OPTIONS } },
+          { name: "Pause when unfocused", desc: "Stop moving backgrounds while you work in another app (saves GPU).", control: { type: "toggle", key: "pauseUnfocused" } }
+        ]
+      },
+      {
+        type: "list",
+        heading: "Your pictures",
+        emptyState: "No pictures yet. Add one with +.",
+        addItem: { name: "Add picture", action: () => store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] }) },
+        onDelete: (i) => setImages(store.settings.look.images.filter((_, j) => j !== i)),
+        onReorder: (from, to) => setImages(move(store.settings.look.images, from, to)),
+        items: look.images.map((img, i) => ({
+          name: img.name?.trim() || `Picture ${i + 1}`,
+          render: (setting) => {
+            setting.settingEl.addClass("fantasy-easel-picture");
+            const id = `img-${img.id}`;
+            setting.addText((t) => {
+              t.setPlaceholder("Name").setValue(img.name ?? "");
+              t.inputEl.addClass("fantasy-easel-picture-name");
+              t.inputEl.addEventListener("change", () => patchImage(img.id, { name: t.getValue().trim() }));
+            });
+            setting.addText((t) => {
+              t.setPlaceholder('https://\u2026 or url("\u2026")').setValue(img.src);
+              t.inputEl.addEventListener("change", () => patchImage(img.id, { src: t.getValue().trim() }));
+            });
+            setting.addButton((b) => {
+              const using = look.background === id;
+              b.setButtonText(using ? "In use" : "Use").setDisabled(!toCssUrl(img.src) || using).onClick(() => store.setLook({ background: id }));
+              if (using) b.setCta();
+            });
+          }
+        }))
+      },
+      {
+        type: "group",
+        heading: "Status bar",
+        items: [{ name: "Show buttons", desc: "Quick controls in the status bar. Choose and order them below.", control: { type: "toggle", key: "statusBar" } }]
+      },
+      {
+        type: "list",
+        visible: () => store.settings.statusBar,
+        onReorder: (from, to) => store.set({ statusItems: move(store.settings.statusItems, from, to) }),
+        items: statusItems.map((x, i) => ({
+          name: STATUS_LABEL[x.id],
+          render: (setting) => {
+            setting.addToggle((t) => t.setValue(x.on).onChange((on) => {
+              if (on === store.settings.statusItems[i]?.on) return;
+              store.set({ statusItems: store.settings.statusItems.map((y) => y.id === x.id ? { ...y, on } : y) });
+            }));
+          }
+        }))
+      },
+      {
+        type: "group",
+        heading: "Plugin skins",
+        items: SKINS.map((s) => ({
+          name: s.name,
+          desc: s.desc,
+          render: (setting) => {
+            setting.addToggle((t) => t.setValue(skinOn(skins, s)).onChange((v) => {
+              if (v === skinOn(store.settings.skins, s)) return;
+              store.set({ skins: { ...store.settings.skins, [s.id]: v } });
+              if (s.id === "excalidraw" && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
+            }));
+            if (s.id !== "excalidraw" || !excalidrawAvailable(this.app)) return;
+            const diff = excalidrawDiff(this.app).length;
+            setting.descEl.createDiv({ text: diff ? `${diff} Excalidraw setting(s) differ from what this skin needs.` : "Excalidraw settings match this skin." });
+            if (diff) setting.addButton((b) => b.setButtonText("Match settings\u2026").onClick(() => new ExcalidrawSettingsModal(this.app, store).open()));
+            if (store.settings.excalidrawBackup) setting.addButton((b) => b.setButtonText("Restore").setTooltip("Put back the Excalidraw settings from before Fantasy Easel changed them").onClick(() => void restoreExcalidraw(this.app, store)));
+          }
+        }))
+      }
+    ];
   }
   /** Without the Fantasy theme: what this plugin is and where to get the theme. Nothing to set. */
-  renderNoTheme() {
-    const { containerEl } = this;
-    new import_obsidian5.Setting(containerEl).setName("Fantasy Easel").setHeading();
-    containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "Fantasy Easel is the companion of the Fantasy theme. With Fantasy it sets the theme color, accent, card layout, CSS and media-art backgrounds (still or moving), your own pictures and plugin skins, with quick status bar controls. With any other theme it does nothing."
-    });
-    new import_obsidian5.Setting(containerEl).setName("Fantasy theme is not in use").setDesc("Install Fantasy, then choose it in Settings \u2192 Appearance \u2192 Themes. These settings appear once Fantasy is active.").addButton((b) => b.setButtonText("Get Fantasy").setCta().onClick(() => window.open(FANTASY_URL)));
-  }
-  hide() {
-    this.unsubscribe?.();
-    this.unsubscribe = null;
+  noTheme() {
+    return [
+      {
+        name: "Fantasy theme is not in use",
+        desc: "Fantasy Easel is the companion of the Fantasy theme: theme color, accent, card layout, CSS and media-art backgrounds, your own pictures and plugin skins. Install Fantasy, then choose it in Settings \u2192 Appearance \u2192 Themes.",
+        render: (setting) => {
+          setting.addButton((b) => b.setButtonText("Get Fantasy").setCta().onClick(() => window.open(FANTASY_URL)));
+        }
+      }
+    ];
   }
 };
 
@@ -1616,9 +1729,16 @@ var StatusBar = class {
     this.managePictures = managePictures;
     this.items = [];
     this.unsubscribe = null;
+    /** layout the buttons were built for (rebuilt when the order or the chosen buttons change) */
+    this.built = "";
   }
+  /** Build the chosen buttons in the chosen order. Same layout again = nothing to do. */
   show() {
-    if (this.items.length) return;
+    const items = this.store.settings.statusItems.filter((x) => x.on);
+    const layout = items.map((x) => x.id).join(",");
+    if (this.unsubscribe && layout === this.built) return;
+    this.hide();
+    this.built = layout;
     const add = (cls, label, onClick) => {
       const el = this.plugin.addStatusBarItem();
       el.addClass("mod-clickable", "fantasy-easel-sb", cls);
@@ -1629,55 +1749,73 @@ var StatusBar = class {
       return el;
     };
     const menuAt = (ev, make) => make().showAtMouseEvent(ev);
-    const color = add("fantasy-easel-sb-color", "Theme color", (ev) => menuAt(ev, () => colorMenu(this.store)));
-    this.swatch = color.createSpan({ cls: "fantasy-easel-swatch" });
-    this.colorName = color.createSpan({ cls: "fantasy-easel-sb-text" });
-    (0, import_obsidian7.setIcon)(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left");
-    const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store, this.managePictures)));
-    this.bgKind = bg.createSpan({ cls: "fantasy-easel-sb-kind" });
-    this.bgName = bg.createSpan({ cls: "fantasy-easel-sb-text fantasy-easel-sb-bgname" });
-    (0, import_obsidian7.setIcon)(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right");
-    (0, import_obsidian7.setIcon)(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store, this.managePictures).open()), "layout-grid");
-    this.accent = add("fantasy-easel-sb-toggle", "Theme accent on / off", () => this.store.setLook({ accent: !this.store.settings.look.accent }));
-    (0, import_obsidian7.setIcon)(this.accent, "droplet");
-    this.card = add("fantasy-easel-sb-toggle", "Card layout on / off", () => this.store.setLook({ card: !this.store.settings.look.card }));
-    (0, import_obsidian7.setIcon)(this.card, "layout-dashboard");
-    this.still = add("fantasy-easel-sb-toggle", "Motion", () => {
-      const order = MOTIONS;
-      this.store.set({ motion: order[(order.indexOf(this.store.settings.motion) + 1) % order.length] });
-    });
-    (0, import_obsidian7.setIcon)(
-      add("fantasy-easel-sb-mode", "Dark / light", () => this.app.commands.executeCommandById("theme:toggle-light-dark")),
-      "sun-moon"
-    );
+    const build = {
+      color: () => {
+        const color = add("fantasy-easel-sb-color", "Theme color", (ev) => menuAt(ev, () => colorMenu(this.store)));
+        this.swatch = color.createSpan({ cls: "fantasy-easel-swatch" });
+        this.colorName = color.createSpan({ cls: "fantasy-easel-sb-text" });
+      },
+      prev: () => (0, import_obsidian7.setIcon)(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left"),
+      background: () => {
+        const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store, this.managePictures)));
+        this.bgKind = bg.createSpan({ cls: "fantasy-easel-sb-kind" });
+        this.bgName = bg.createSpan({ cls: "fantasy-easel-sb-text fantasy-easel-sb-bgname" });
+      },
+      next: () => (0, import_obsidian7.setIcon)(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right"),
+      gallery: () => (0, import_obsidian7.setIcon)(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store, this.managePictures).open()), "layout-grid"),
+      accent: () => {
+        this.accent = add("fantasy-easel-sb-toggle", "Theme accent on / off", () => this.store.setLook({ accent: !this.store.settings.look.accent }));
+        (0, import_obsidian7.setIcon)(this.accent, "droplet");
+      },
+      card: () => {
+        this.card = add("fantasy-easel-sb-toggle", "Card layout on / off", () => this.store.setLook({ card: !this.store.settings.look.card }));
+        (0, import_obsidian7.setIcon)(this.card, "layout-dashboard");
+      },
+      motion: () => {
+        this.still = add("fantasy-easel-sb-toggle", "Motion", () => {
+          const order = MOTIONS;
+          this.store.set({ motion: order[(order.indexOf(this.store.settings.motion) + 1) % order.length] });
+        });
+      },
+      // Exception to "public API only": Obsidian has no public call to switch dark / light.
+      mode: () => (0, import_obsidian7.setIcon)(add("fantasy-easel-sb-mode", "Dark / light", () => toggleDarkLight(this.app)), "sun-moon")
+    };
+    for (const x of items) build[x.id]();
     this.unsubscribe = this.store.subscribe(() => this.render());
     this.render();
   }
   hide() {
     this.unsubscribe?.();
     this.unsubscribe = null;
+    this.built = "";
+    this.swatch = this.colorName = this.bgName = this.bgKind = this.accent = this.card = this.still = void 0;
     this.items.forEach((el) => el.remove());
     this.items = [];
   }
   render() {
     const { look, motion } = this.store.settings;
     const color = colorByCls(look.color);
-    this.swatch.className = `fantasy-easel-swatch ${look.color}`;
-    this.colorName.setText(color?.name ?? look.color);
+    if (this.swatch) this.swatch.className = `fantasy-easel-swatch ${look.color}`;
+    this.colorName?.setText(color?.name ?? look.color);
     const bg = backgroundById(look.background, look.images);
-    this.bgName.setText(bg?.name ?? look.background);
-    (0, import_obsidian7.setIcon)(this.bgKind, bg?.kind === "motion" ? "wind" : bg?.kind === "static" ? "palette" : "image");
-    this.accent.toggleClass("is-on", look.accent);
-    this.card.toggleClass("is-on", look.card);
+    this.bgName?.setText(bg?.name ?? look.background);
+    if (this.bgKind) (0, import_obsidian7.setIcon)(this.bgKind, bg?.kind === "motion" ? "wind" : bg?.kind === "static" ? "palette" : "image");
+    this.accent?.toggleClass("is-on", look.accent);
+    this.card?.toggleClass("is-on", look.card);
+    const still = this.still;
+    if (!still) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    (0, import_obsidian7.setIcon)(this.still, motion === "off" ? "pause" : motion === "on" ? "play" : "circle-play");
+    (0, import_obsidian7.setIcon)(still, motion === "off" ? "pause" : motion === "on" ? "play" : "circle-play");
     const tip = motion === "auto" ? `Motion: auto (follows OS reduced motion${reduced ? " \u2014 now paused" : ""}). Click: on` : motion === "on" ? "Motion: on (moves even with OS reduced motion). Click: off" : "Motion: off. Click: auto";
-    this.still.setAttr("aria-label", tip);
-    (0, import_obsidian7.setTooltip)(this.still, tip, TIP);
-    this.still.toggleClass("is-on", motion === "on");
-    this.still.toggleClass("is-idle", bg?.kind !== "motion");
+    still.setAttr("aria-label", tip);
+    (0, import_obsidian7.setTooltip)(still, tip, TIP);
+    still.toggleClass("is-on", motion === "on");
+    still.toggleClass("is-idle", bg?.kind !== "motion");
   }
 };
+function toggleDarkLight(app) {
+  app.commands.executeCommandById("theme:toggle-light-dark");
+}
 
 // src/store.ts
 var Store = class {
@@ -1709,8 +1847,194 @@ var Store = class {
   }
 };
 
+// src/style-view.ts
+var import_obsidian8 = require("obsidian");
+var STYLE_VIEW = "fantasy-easel-style";
+var StyleView = class extends import_obsidian8.ItemView {
+  constructor(leaf, plugin) {
+    super(leaf);
+    this.plugin = plugin;
+    /** in-place updates, one per row */
+    this.syncs = [];
+    this.unsubscribe = null;
+    this.galleryCleanup = null;
+    this.galleryOpen = false;
+    /** what the rows were built for: rebuild when it changes */
+    this.built = "";
+    /** true while rows take values from the store: a component's own onChange must not write back */
+    this.syncing = false;
+  }
+  getViewType() {
+    return STYLE_VIEW;
+  }
+  getDisplayText() {
+    return "Fantasy style";
+  }
+  getIcon() {
+    return "palette";
+  }
+  async onOpen() {
+    this.unsubscribe = this.plugin.store.subscribe(() => this.refresh());
+    this.registerEvent(this.app.workspace.on("css-change", () => this.refresh()));
+    this.refresh();
+  }
+  async onClose() {
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    this.galleryCleanup?.();
+    this.galleryCleanup = null;
+  }
+  shape() {
+    const { images } = this.plugin.store.settings.look;
+    return `${this.plugin.active}|${images.map((i) => `${i.id}:${i.name ?? ""}:${i.src ? 1 : 0}`).join(",")}`;
+  }
+  refresh() {
+    if (this.shape() !== this.built) this.build();
+    else this.sync();
+  }
+  sync() {
+    this.syncing = true;
+    try {
+      this.syncs.forEach((f) => f());
+    } finally {
+      this.syncing = false;
+    }
+  }
+  build() {
+    this.built = this.shape();
+    this.syncs = [];
+    this.galleryCleanup?.();
+    this.galleryCleanup = null;
+    const root = this.contentEl;
+    root.empty();
+    root.addClass("fantasy-easel-panel");
+    if (!this.plugin.active) {
+      root.createEl("p", { cls: "setting-item-description", text: "Fantasy Easel works with the Fantasy theme. Choose Fantasy in Settings \u2192 Appearance \u2192 Themes." });
+      return;
+    }
+    const store = this.plugin.store;
+    const dark = () => document.body.hasClass("theme-dark");
+    const row = (parent, name, desc, isDefault, reset) => {
+      const s = new import_obsidian8.Setting(parent).setName(name).setDesc(desc).setClass("fantasy-easel-panel-row");
+      if (reset) {
+        s.addExtraButton((b) => {
+          b.setIcon("rotate-ccw").setTooltip("Reset to default").onClick(reset);
+          this.syncs.push(() => {
+            const same = isDefault();
+            b.setDisabled(same);
+            b.extraSettingsEl.toggleClass("is-hidden", same);
+            s.settingEl.toggleClass("is-changed", !same);
+          });
+        });
+      }
+      return s;
+    };
+    const heading = (name, reset) => {
+      const h = new import_obsidian8.Setting(root).setName(name).setHeading();
+      if (reset) h.addExtraButton((b) => {
+        b.setIcon("rotate-ccw").setTooltip(reset.tip).onClick(reset.run);
+        this.syncs.push(() => b.setDisabled(reset.isDefault()));
+      });
+      return h;
+    };
+    const look = () => store.settings.look;
+    const lookDefault = () => look().color === DEFAULT_LOOK.color && look().accent === DEFAULT_LOOK.accent && look().card === DEFAULT_LOOK.card && look().background === DEFAULT_LOOK.background && store.settings.motion === DEFAULT_SETTINGS.motion && store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused;
+    heading("Look", {
+      tip: "Reset the look (color, accent, cards, background, motion)",
+      isDefault: lookDefault,
+      run: () => store.set({ look: { ...look(), color: DEFAULT_LOOK.color, accent: DEFAULT_LOOK.accent, card: DEFAULT_LOOK.card, background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused })
+    });
+    row(root, "Dark mode", "Obsidian's dark / light mode.", () => true, null).addToggle((t) => {
+      t.onChange((v) => {
+        if (!this.syncing && v !== dark()) toggleDarkLight(this.app);
+      });
+      this.syncs.push(() => t.setValue(dark()));
+    });
+    row(root, "Theme color", "Background tint, and the accent when theme accent is on.", () => look().color === DEFAULT_LOOK.color, () => store.setLook({ color: DEFAULT_LOOK.color })).setClass("fantasy-easel-panel-wide").addDropdown((d) => {
+      d.addOptions(colorOptions()).onChange((v) => this.syncing || store.setLook({ color: v }));
+      this.syncs.push(() => d.setValue(look().color));
+    });
+    row(root, "Theme accent", "Accent follows the theme color (gold in dark mode). Off = Obsidian's accent.", () => look().accent === DEFAULT_LOOK.accent, () => store.setLook({ accent: DEFAULT_LOOK.accent })).addToggle((t) => {
+      t.onChange((v) => this.syncing || store.setLook({ accent: v }));
+      this.syncs.push(() => t.setValue(look().accent));
+    });
+    row(root, "Card layout", "Sidebars and notes as floating glass cards.", () => look().card === DEFAULT_LOOK.card, () => store.setLook({ card: DEFAULT_LOOK.card })).addToggle((t) => {
+      t.onChange((v) => this.syncing || store.setLook({ card: v }));
+      this.syncs.push(() => t.setValue(look().card));
+    });
+    const bgRow = row(root, "Background", "", () => look().background === DEFAULT_LOOK.background, () => store.setLook({ background: DEFAULT_LOOK.background }));
+    bgRow.settingEl.addClass("fantasy-easel-panel-wide");
+    bgRow.addExtraButton((b) => b.setIcon("chevron-left").setTooltip("Previous background").onClick(() => stepBackground(store, -1)));
+    bgRow.addDropdown((d) => {
+      d.addOptions(backgroundOptions(look().images)).onChange((v) => this.syncing || store.setLook({ background: v }));
+      this.syncs.push(() => d.setValue(look().background));
+    });
+    bgRow.addExtraButton((b) => b.setIcon("chevron-right").setTooltip("Next background").onClick(() => stepBackground(store, 1)));
+    row(root, "Motion", "Moving backgrounds. Auto follows the OS reduce-motion setting.", () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion })).addDropdown((d) => {
+      d.addOptions(MOTION_OPTIONS).onChange((v) => this.syncing || store.set({ motion: v }));
+      this.syncs.push(() => d.setValue(store.settings.motion));
+    });
+    row(root, "Pause when unfocused", "Stop moving backgrounds while you work in another app.", () => store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused, () => store.set({ pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused })).addToggle((t) => {
+      t.onChange((v) => this.syncing || store.set({ pauseUnfocused: v }));
+      this.syncs.push(() => t.setValue(store.settings.pauseUnfocused));
+    });
+    const value = (t) => store.settings.tuning[t.key] ?? (dark() ? t.def.dark : t.def.light);
+    const setTuning = (keys, v) => {
+      const tuning = { ...store.settings.tuning };
+      for (const k of keys) {
+        if (v === null) delete tuning[k];
+        else tuning[k] = v;
+      }
+      store.set({ tuning });
+    };
+    const show2 = (t, v) => `${Math.round(v * 100) / 100}${t.unit}`;
+    for (const g of TUNING_GROUPS) {
+      const list = TUNINGS.filter((t) => t.group === g.id);
+      const keys = list.map((t) => t.key);
+      heading(g.name, { tip: `Reset ${g.name.toLowerCase()}`, isDefault: () => keys.every((k) => !(k in store.settings.tuning)), run: () => setTuning(keys, null) });
+      for (const t of list) {
+        const r = row(root, t.name, t.desc, () => !(t.key in store.settings.tuning), () => setTuning([t.key], null));
+        r.settingEl.addClass("fantasy-easel-panel-wide");
+        r.addSlider((sl) => {
+          sl.setLimits(t.min, t.max, t.step).setInstant(true).setDisplayFormat((v) => show2(t, v)).onChange((v) => this.syncing || setTuning([t.key], v));
+          this.syncs.push(() => {
+            const v = value(t);
+            if (sl.getValue() !== v) sl.setValue(v);
+            const off = !!t.cardOnly && !look().card;
+            sl.setDisabled(off);
+            r.settingEl.toggleClass("is-disabled", off);
+          });
+        });
+      }
+    }
+    new import_obsidian8.Setting(root).setClass("fantasy-easel-panel-row").addButton((b) => {
+      b.setButtonText("Reset all styles").onClick(() => store.set({ tuning: {} }));
+      this.syncs.push(() => b.setDisabled(!Object.keys(store.settings.tuning).length));
+    });
+    const gHead = new import_obsidian8.Setting(root).setName("Gallery").setDesc("Every background, day and night. Click one to use it.").setHeading();
+    const gBody = root.createDiv({ cls: "fantasy-easel-panel-gallery" });
+    const setGallery = (open) => {
+      this.galleryOpen = open;
+      this.galleryCleanup?.();
+      this.galleryCleanup = null;
+      gBody.empty();
+      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { scrollRoot: this.contentEl, addPicture: () => this.plugin.addPicture(), still: true });
+    };
+    gHead.addExtraButton((b) => {
+      const draw = () => b.setIcon(this.galleryOpen ? "chevron-up" : "chevron-down").setTooltip(this.galleryOpen ? "Hide gallery" : "Show gallery");
+      b.onClick(() => {
+        setGallery(!this.galleryOpen);
+        draw();
+      });
+      draw();
+    });
+    setGallery(this.galleryOpen);
+    this.sync();
+  }
+};
+
 // src/main.ts
-var FantasyEaselPlugin = class extends import_obsidian8.Plugin {
+var FantasyEaselPlugin = class extends import_obsidian9.Plugin {
   constructor() {
     super(...arguments);
     this.stage = new StageHost();
@@ -1757,11 +2081,13 @@ var FantasyEaselPlugin = class extends import_obsidian8.Plugin {
     this.refresh();
     this.register(this.store.subscribe(() => this.refresh()));
     this.registerEvent(this.app.workspace.on("css-change", () => this.refresh()));
+    this.registerView(STYLE_VIEW, (leaf) => new StyleView(leaf, this));
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
     this.registerObsidianProtocolHandler("fantasy-easel", () => this.openGallery());
     this.addCommand({ id: "next-background", name: "Next background", callback: () => stepBackground(this.store, 1) });
     this.addCommand({ id: "previous-background", name: "Previous background", callback: () => stepBackground(this.store, -1) });
     this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => this.openGallery() });
+    this.addCommand({ id: "open-style-panel", name: "Open style panel", callback: () => void this.openStylePanel() });
     this.addCommand({ id: "add-picture", name: "Add picture", callback: () => this.addPicture() });
     this.app.workspace.onLayoutReady(() => this.refresh());
   }
@@ -1772,8 +2098,13 @@ var FantasyEaselPlugin = class extends import_obsidian8.Plugin {
     this.stage.remove();
   }
   openGallery() {
-    if (!this.active) return void new import_obsidian8.Notice("Fantasy Easel works with the Fantasy theme. Choose Fantasy in Settings \u2192 Appearance \u2192 Themes.");
+    if (!this.active) return void new import_obsidian9.Notice("Fantasy Easel works with the Fantasy theme. Choose Fantasy in Settings \u2192 Appearance \u2192 Themes.");
     new GalleryModal(this.app, this.store, () => this.addPicture()).open();
+  }
+  /** The style panel in the right sidebar (reuses an open one). */
+  async openStylePanel() {
+    const leaf = await this.app.workspace.ensureSideLeaf(STYLE_VIEW, "right", { active: true, reveal: true });
+    await this.app.workspace.revealLeaf(leaf);
   }
   addPicture() {
     new AddPictureModal(this.app, this.store).open();

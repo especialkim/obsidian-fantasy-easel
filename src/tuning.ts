@@ -1,0 +1,64 @@
+// Style tuning (2026-10-23): values the style panel can change. Each one writes CSS variables
+// on body (inline, through apply.ts) that theme.css or styles.css reads. Not set = the theme's
+// own value, so "reset" only deletes the override. The variable names are a contract with
+// theme.css (checked by scripts/selftest.js).
+
+export type TuningGroup = "glass" | "cards" | "text" | "motion";
+
+export interface Tuning {
+  key: string;
+  name: string;
+  desc: string;
+  group: TuningGroup;
+  min: number;
+  max: number;
+  step: number;
+  unit: string;
+  /** the theme's value when nothing is set, per mode */
+  def: { dark: number; light: number };
+  /** CSS variables for a value */
+  vars: (v: number) => Record<string, string>;
+  /** only while the card layout is on (the card variables mean nothing without it) */
+  cardOnly?: boolean;
+}
+
+export const TUNING_GROUPS: { id: TuningGroup; name: string }[] = [
+  { id: "glass", name: "Glass" },
+  { id: "cards", name: "Cards" },
+  { id: "text", name: "Text" },
+  { id: "motion", name: "Motion" },
+];
+
+/** --h1-size … --h5-size at scale 1 (theme.css body) */
+const HEADINGS = [1.3, 1.2, 1.15, 1.1, 1.05];
+const round = (n: number) => Math.round(n * 1000) / 1000;
+
+export const TUNINGS: Tuning[] = [
+  { key: "opacity", name: "Panel opacity", desc: "How solid the glass panels are.", group: "glass", min: 0.2, max: 0.95, step: 0.01, unit: "", def: { dark: 0.6, light: 0.67 }, vars: (v) => ({ "--background-opacity": `${v}` }) },
+  { key: "blur", name: "Glass blur", desc: "Blur of the background behind the panels.", group: "glass", min: 0, max: 24, step: 1, unit: "px", def: { dark: 8, light: 12 }, vars: (v) => ({ "--fantasy-glass-blur": `${v}px` }) },
+  { key: "brightness", name: "Background brightness", desc: "Brightness of the background behind the panels.", group: "glass", min: 0.5, max: 1.3, step: 0.01, unit: "", def: { dark: 0.8, light: 1.05 }, vars: (v) => ({ "--fantasy-glass-brightness": `${v}` }) },
+  { key: "cardGap", name: "Card gap", desc: "Space between the cards.", group: "cards", min: 0, max: 16, step: 1, unit: "px", def: { dark: 4, light: 4 }, vars: (v) => ({ "--cardview-gap": `${v}px` }), cardOnly: true },
+  { key: "cardRadius", name: "Card corners", desc: "Corner radius of the cards.", group: "cards", min: 0, max: 32, step: 1, unit: "px", def: { dark: 20, light: 20 }, vars: (v) => ({ "--cardview-radius": `${v}px` }), cardOnly: true },
+  { key: "cardPadding", name: "Card padding", desc: "Space inside the cards (top and bottom; sides get half).", group: "cards", min: 0, max: 24, step: 1, unit: "px", def: { dark: 10, light: 10 }, vars: (v) => ({ "--cardview-padding": `${v}px ${v / 2}px` }), cardOnly: true },
+  { key: "lineWidth", name: "Note width", desc: "Readable line length.", group: "text", min: 600, max: 1600, step: 10, unit: "px", def: { dark: 850, light: 850 }, vars: (v) => ({ "--file-line-width": `${v}px` }) },
+  { key: "headingScale", name: "Heading size", desc: "How much larger headings are than body text (1 = theme).", group: "text", min: 0, max: 2, step: 0.05, unit: "×", def: { dark: 1, light: 1 }, vars: (v) => Object.fromEntries(HEADINGS.map((h, i) => [`--h${i + 1}-size`, `${round(1 + (h - 1) * v)}em`])) },
+  { key: "paragraph", name: "Paragraph spacing", desc: "Space between paragraphs.", group: "text", min: 0, max: 1.5, step: 0.05, unit: "rem", def: { dark: 0.5, light: 0.5 }, vars: (v) => ({ "--p-spacing": `${v}rem` }) },
+  { key: "propertiesRadius", name: "Properties corners", desc: "Corner radius of the properties tray.", group: "text", min: 0, max: 24, step: 1, unit: "px", def: { dark: 14, light: 14 }, vars: (v) => ({ "--metadata-border-radius": `${v}px` }) },
+  { key: "stageSpeed", name: "Stage speed", desc: "Speed of the stage backgrounds (four moving layers).", group: "motion", min: 0.25, max: 2, step: 0.05, unit: "×", def: { dark: 1, light: 1 }, vars: (v) => ({ "--fantasy-easel-speed": `${v}` }) },
+];
+
+/** Every variable a tuning may write (apply.ts clears the ones not wanted). */
+export const TUNING_VARS: string[] = [...new Set(TUNINGS.flatMap((t) => Object.keys(t.vars(t.def.dark))))];
+
+export const tuningByKey = (key: string) => TUNINGS.find((t) => t.key === key);
+
+/** Body variables for the saved values. Values outside the range are clamped; unknown keys dropped. */
+export function tuningVars(values: Record<string, number>, card: boolean): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const t of TUNINGS) {
+    const v = values[t.key];
+    if (typeof v !== "number" || !Number.isFinite(v) || (t.cardOnly && !card)) continue;
+    Object.assign(out, t.vars(Math.min(t.max, Math.max(t.min, v))));
+  }
+  return out;
+}

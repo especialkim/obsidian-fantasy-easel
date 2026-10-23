@@ -72,6 +72,14 @@ for (const f of ["dataview", "excalidraw", "kanban"]) {
   check(!theme.includes(`/* Plugin - ${f[0].toUpperCase() + f.slice(1)} */`), `theme.css still has the ${f} section`);
 }
 
+// style panel: every variable a tuning writes is read by theme.css / styles.css, or set by theme.css
+// (then Obsidian's app.css reads it, e.g. --file-line-width)
+const { TUNINGS, TUNING_VARS, tuningVars } = loadTs("src/tuning.ts");
+for (const v of TUNING_VARS) check(theme.includes(`var(${v}`) || styles.includes(`var(${v}`) || theme.includes(`${v}:`), `tuning variable ${v} is not in theme.css or styles.css`);
+for (const t of TUNINGS) check(t.def.dark >= t.min && t.def.dark <= t.max && t.def.light >= t.min && t.def.light <= t.max, `tuning ${t.key}: default outside its range`);
+check(!("--cardview-gap" in tuningVars({ cardGap: 8 }, false)), "card tuning applied with the card layout off");
+check(tuningVars({ opacity: 5 }, true)["--background-opacity"] === "0.95", "tuning values are not clamped");
+
 // ---------- 2. color literals ----------
 const lit = /#[0-9a-fA-F]{3,8}\b|\brgba?\(/;
 check(styles.includes("/* ---------- 2."), "styles.css has no UI section marker");

@@ -9,6 +9,7 @@ import { FantasyEaselSettingTab } from "./settings-tab";
 import { AddPictureModal } from "./picture-modal";
 import { StatusBar } from "./statusbar";
 import { Store } from "./store";
+import { STYLE_VIEW, StyleView } from "./style-view";
 
 export default class FantasyEaselPlugin extends Plugin {
   store!: Store;
@@ -66,12 +67,15 @@ export default class FantasyEaselPlugin extends Plugin {
     // theme switched (or snippets changed): start or stop
     this.registerEvent(this.app.workspace.on("css-change", () => this.refresh()));
 
+    this.registerView(STYLE_VIEW, (leaf) => new StyleView(leaf, this));
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
     // obsidian://fantasy-easel opens the background gallery (the theme's Style Settings notice links here)
     this.registerObsidianProtocolHandler("fantasy-easel", () => this.openGallery());
     this.addCommand({ id: "next-background", name: "Next background", callback: () => stepBackground(this.store, 1) });
     this.addCommand({ id: "previous-background", name: "Previous background", callback: () => stepBackground(this.store, -1) });
     this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => this.openGallery() });
+    // no default hotkey (plugin guidelines)
+    this.addCommand({ id: "open-style-panel", name: "Open style panel", callback: () => void this.openStylePanel() });
     this.addCommand({ id: "add-picture", name: "Add picture", callback: () => this.addPicture() });
     this.app.workspace.onLayoutReady(() => this.refresh());
   }
@@ -87,6 +91,12 @@ export default class FantasyEaselPlugin extends Plugin {
   openGallery() {
     if (!this.active) return void new Notice("Fantasy Easel works with the Fantasy theme. Choose Fantasy in Settings → Appearance → Themes.");
     new GalleryModal(this.app, this.store, () => this.addPicture()).open();
+  }
+
+  /** The style panel in the right sidebar (reuses an open one). */
+  async openStylePanel() {
+    const leaf = await this.app.workspace.ensureSideLeaf(STYLE_VIEW, "right", { active: true, reveal: true });
+    await this.app.workspace.revealLeaf(leaf);
   }
 
   addPicture() {

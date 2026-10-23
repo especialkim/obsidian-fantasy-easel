@@ -1,3 +1,4 @@
+import { tuningByKey } from "./tuning";
 import { backgroundById, colorByCls, DEFAULT_BACKGROUND, newImageId, THEME_DEFAULTS, type UserImage } from "./catalog";
 
 /** What the theme shows. */
@@ -12,6 +13,14 @@ export interface Look {
   images: UserImage[];
 }
 
+/** Status bar buttons, in the order the user set (settings → Status bar). */
+export type StatusId = "color" | "prev" | "background" | "next" | "gallery" | "accent" | "card" | "motion" | "mode";
+export const STATUS_IDS: StatusId[] = ["color", "prev", "background", "next", "gallery", "accent", "card", "motion", "mode"];
+export interface StatusItem {
+  id: StatusId;
+  on: boolean;
+}
+
 export type Motion = "auto" | "on" | "off";
 export const MOTIONS: Motion[] = ["auto", "on", "off"];
 
@@ -23,6 +32,10 @@ export interface FantasyEaselSettings {
   /** pause moving backgrounds while the Obsidian window is not focused (saves GPU; off = keep moving) */
   pauseUnfocused: boolean;
   statusBar: boolean;
+  /** which status bar buttons show, in this order */
+  statusItems: StatusItem[];
+  /** style panel values (src/tuning.ts key → value); missing = the theme's own value */
+  tuning: Record<string, number>;
   /** plugin skins the user turned on / off. Missing = on when that plugin is installed. */
   skins: Record<string, boolean>;
   /** Excalidraw settings before Easel changed them (Restore puts them back); null = untouched */
@@ -37,7 +50,7 @@ export const DEFAULT_LOOK: Look = {
   images: [],
 };
 
-export const DEFAULT_SETTINGS: FantasyEaselSettings = { look: DEFAULT_LOOK, motion: "auto", pauseUnfocused: false, statusBar: true, skins: {}, excalidrawBackup: null };
+export const DEFAULT_SETTINGS: FantasyEaselSettings = { look: DEFAULT_LOOK, motion: "auto", pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
 
 /**
  * Old 3 fixed URL slots (data.json before 2026-10-21) → pictures. `chosen` is the old
@@ -60,7 +73,7 @@ function fromOldUrls(urls: unknown[], chosen: unknown): { images: UserImage[]; b
 export function normalize(data: Partial<FantasyEaselSettings> | null | undefined): FantasyEaselSettings {
   const look: Partial<Look> & { urls?: unknown[] } = data?.look ?? {};
   let images: UserImage[] = Array.isArray(look.images)
-    ? look.images.filter((x): x is UserImage => !!x && typeof x.id === "string" && typeof x.src === "string").map((x) => ({ id: x.id, src: x.src }))
+    ? look.images.filter((x): x is UserImage => !!x && typeof x.id === "string" && typeof x.src === "string").map((x) => ({ id: x.id, src: x.src, ...(typeof x.name === "string" && x.name ? { name: x.name } : {}) }))
     : [];
   let background = typeof look.background === "string" ? look.background : "";
   if (!Array.isArray(look.images) && Array.isArray(look.urls)) {
@@ -68,6 +81,17 @@ export function normalize(data: Partial<FantasyEaselSettings> | null | undefined
     images = old.images;
     if (old.background) background = old.background;
   }
+  // status bar: saved order first (known ids, no repeats), then buttons added in a later version
+  const seen = new Set<StatusId>();
+  const statusItems: StatusItem[] = [];
+  for (const x of Array.isArray(data?.statusItems) ? data!.statusItems : []) {
+    if (!x || !STATUS_IDS.includes(x.id) || seen.has(x.id)) continue;
+    seen.add(x.id);
+    statusItems.push({ id: x.id, on: x.on !== false });
+  }
+  for (const id of STATUS_IDS) if (!seen.has(id)) statusItems.push({ id, on: true });
+  const tuning: Record<string, number> = {};
+  for (const [k, v] of Object.entries(data?.tuning ?? {})) if (tuningByKey(k) && typeof v === "number" && Number.isFinite(v)) tuning[k] = v;
   const skins: Record<string, boolean> = {};
   for (const [k, v] of Object.entries(data?.skins ?? {})) if (typeof v === "boolean") skins[k] = v;
   return {
@@ -82,6 +106,8 @@ export function normalize(data: Partial<FantasyEaselSettings> | null | undefined
     motion: MOTIONS.includes(data?.motion as Motion) ? (data!.motion as Motion) : "auto",
     pauseUnfocused: data?.pauseUnfocused === true,
     statusBar: data?.statusBar !== false,
+    statusItems,
+    tuning,
     skins,
     excalidrawBackup: data?.excalidrawBackup && typeof data.excalidrawBackup === "object" ? { ...data.excalidrawBackup } : null,
   };

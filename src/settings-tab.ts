@@ -1,168 +1,184 @@
-import { Menu, PluginSettingTab, Setting, type App } from "obsidian";
-import { backgroundById, colorByCls, DEFAULT_BACKGROUND, newImageId, toCssUrl } from "./catalog";
+import { PluginSettingTab, type App, type SettingDefinitionItem } from "obsidian";
+import { DEFAULT_BACKGROUND, newImageId, toCssUrl, type UserImage } from "./catalog";
 import type FantasyEaselPlugin from "./main";
 import { excalidrawAvailable, excalidrawDiff, ExcalidrawSettingsModal, restoreExcalidraw } from "./excalidraw";
-import { GalleryModal } from "./gallery";
-import { backgroundMenu, colorMenu } from "./menus";
-import { MOTIONS } from "./settings";
+import { backgroundOptions, colorOptions, MOTION_OPTIONS } from "./options";
 import { skinOn, SKINS } from "./skins";
+import type { StatusId } from "./settings";
 
 /** Where to get the theme (not in the community store yet). */
 const FANTASY_URL = "https://github.com/especialkim/obsidian-theme-fantasy";
 
-/** Sections: Look · Background · Your pictures · Plugin skins · Controls. Lists open as Obsidian Menus (same as the status bar). */
+const STATUS_LABEL: Record<StatusId, string> = {
+  color: "Theme color",
+  prev: "Previous background",
+  background: "Background name",
+  next: "Next background",
+  gallery: "Gallery",
+  accent: "Theme accent",
+  card: "Card layout",
+  motion: "Motion",
+  mode: "Dark / light",
+};
+
+/**
+ * Declarative settings (Obsidian 1.13 `getSettingDefinitions`, the documented way): general rows
+ * without a heading, then Card layout · Background · Your pictures · Status bar · Plugin skins.
+ * Controls bind to keys like `look.color`; getControlValue / setControlValue map them to the store.
+ * Fine style tuning lives in the style panel (sidebar), not here.
+ */
 export class FantasyEaselSettingTab extends PluginSettingTab {
-  private unsubscribe: (() => void) | null = null;
+  private queued = false;
 
   constructor(app: App, private plugin: FantasyEaselPlugin) {
     super(app, plugin);
+    this.icon = "palette";
+    // Changes from the status bar, the style panel or commands: re-read the definitions once.
+    plugin.register(plugin.store.subscribe(() => this.queueUpdate()));
   }
 
-  private queued = false;
-  /** after +: focus the new picture field once */
-  private focusLast = false;
-
-  display() {
-    // Subscribe once per open; store changes (here, status bar, commands) redraw via render().
-    if (!this.unsubscribe) this.unsubscribe = this.plugin.store.subscribe(() => this.queueRender());
-    this.render();
-  }
-
-  /** One redraw after the current event (several changes in one click redraw once). */
-  private queueRender() {
+  private queueUpdate() {
     if (this.queued) return;
     this.queued = true;
     queueMicrotask(() => {
       this.queued = false;
-      if (this.unsubscribe) this.render();
+      this.update();
     });
   }
 
-  private render() {
-    const { containerEl } = this;
+  getControlValue(key: string): unknown {
+    const s = this.plugin.store.settings;
+    if (key.startsWith("look.")) return (s.look as unknown as Record<string, unknown>)[key.slice(5)];
+    return (s as unknown as Record<string, unknown>)[key];
+  }
+
+  setControlValue(key: string, value: unknown) {
     const store = this.plugin.store;
-    const { look, motion, statusBar, skins } = store.settings;
-    containerEl.empty();
-    containerEl.addClass("fantasy-easel-settings");
+    if (key.startsWith("look.")) store.setLook({ [key.slice(5)]: value });
+    else store.set({ [key]: value });
+  }
 
-    if (!this.plugin.active) {
-      this.renderNoTheme();
-      return;
-    }
-
-    const heading = (name: string, desc?: string) => {
-      const h = new Setting(containerEl).setName(name).setHeading();
-      if (desc) h.setDesc(desc);
-      return h;
+  getSettingDefinitions(): SettingDefinitionItem[] {
+    if (!this.plugin.active) return this.noTheme();
+    const store = this.plugin.store;
+    const { look, statusItems, skins } = store.settings;
+    const setImages = (images: UserImage[]) => {
+      // a picture that is gone or emptied cannot stay the background
+      const bg = store.settings.look.background;
+      const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
+      store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
+    };
+    const patchImage = (id: string, patch: Partial<UserImage>) => setImages(store.settings.look.images.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+    const move = <T,>(list: T[], from: number, to: number) => {
+      const out = [...list];
+      const [x] = out.splice(from, 1);
+      out.splice(to, 0, x);
+      return out;
     };
 
-    // ---------- Look ----------
-    heading("Look", "The Fantasy theme reads these. Without this plugin it shows Dark, Plasma (still) and cards.");
-    new Setting(containerEl)
-      .setName("Theme color")
-      .setDesc(colorByCls(look.color)?.name ?? look.color)
-      .addButton((b) => b.setButtonText("Change").onClick((ev) => colorMenu(store).showAtMouseEvent(ev)));
-    new Setting(containerEl).setName("Theme accent").setDesc("Accent from the theme: theme color in light mode, gold in dark mode. Off = Obsidian's accent color.").addToggle((t) => t.setValue(look.accent).onChange((v) => store.setLook({ accent: v })));
-    new Setting(containerEl).setName("Card layout").setDesc("Sidebars and notes as floating glass cards.").addToggle((t) => t.setValue(look.card).onChange((v) => store.setLook({ card: v })));
-
-    // ---------- Background ----------
-    heading("Background");
-    const bg = backgroundById(look.background, look.images);
-    new Setting(containerEl)
-      .setName("Background")
-      .setDesc(bg ? `${bg.name} (${bg.kind === "image" ? "your picture" : `CSS · ${bg.kind}`})` : look.background)
-      .addButton((b) => b.setButtonText("Gallery").onClick(() => this.plugin.openGallery()))
-      .addButton((b) => b.setButtonText("Change").onClick((ev) => backgroundMenu(store).showAtMouseEvent(ev)));
-    new Setting(containerEl)
-      .setName("Motion")
-      .setDesc(`For moving backgrounds. Auto follows the OS "reduce motion" setting${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? " (on here, so motion is paused)" : ""}. On moves anyway. `)
-      .addButton((b) => b.setButtonText(motion === "auto" ? "Auto" : motion === "on" ? "On" : "Off").onClick((ev) => {
-        const menu = new Menu();
-        for (const m of MOTIONS) menu.addItem((i) => i.setTitle(m === "auto" ? "Auto" : m === "on" ? "On" : "Off").setChecked(m === motion).onClick(() => store.set({ motion: m })));
-        menu.showAtMouseEvent(ev);
-      }));
-
-    new Setting(containerEl)
-      .setName("Pause when unfocused")
-      .setDesc("Stop moving backgrounds while you work in another app (saves GPU). Off = keep moving.")
-      .addToggle((t) => t.setValue(this.plugin.store.settings.pauseUnfocused).onChange((v) => store.set({ pauseUnfocused: v })));
-
-    new Setting(containerEl)
-      .setName("Your pictures")
-      .setDesc('A picture URL (https://…) or a CSS value like url("…"). Add as many as you like with +.')
-      .setHeading()
-      .addExtraButton((b) => b.setIcon("plus").setTooltip("Add picture").onClick(() => {
-        store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] });
-        this.focusLast = true;
-      }));
-    look.images.forEach((img, i) => {
-      const id = `img-${img.id}`;
-      const usable = !!toCssUrl(img.src);
-      const row = new Setting(containerEl).setClass("fantasy-easel-picture").setName(`Picture ${i + 1}`);
-      row.addText((t) => {
-        t.setValue(img.src).setPlaceholder("https://…");
-        // Save on change (blur / Enter) so redraws do not steal focus while typing.
-        t.inputEl.addEventListener("change", () => {
-          const src = t.getValue().trim();
-          const images = store.settings.look.images.map((x) => (x.id === img.id ? { ...x, src } : x));
-          // An emptied picture cannot stay the background.
-          const patch = !src && store.settings.look.background === id ? { images, background: DEFAULT_BACKGROUND } : { images };
-          store.setLook(patch);
-        });
-        if (this.focusLast && i === look.images.length - 1) {
-          this.focusLast = false;
-          window.setTimeout(() => t.inputEl.focus(), 0);
-        }
-      });
-      row.addButton((b) => {
-        b.setButtonText(look.background === id ? "In use" : "Use").setDisabled(!usable || look.background === id).onClick(() => store.setLook({ background: id }));
-        if (look.background === id) b.setCta();
-      });
-      row.addExtraButton((b) => b.setIcon("trash-2").setTooltip("Remove").onClick(() => {
-        const images = store.settings.look.images.filter((x) => x.id !== img.id);
-        store.setLook(store.settings.look.background === id ? { images, background: DEFAULT_BACKGROUND } : { images });
-      }));
-    });
-
-    // ---------- Plugin skins ----------
-    heading("Plugin skins", "Extra CSS that fits a plugin to the Fantasy glass. It only touches that plugin's own elements.");
-    for (const s of SKINS) {
-      const row = new Setting(containerEl)
-        .setName(s.name)
-        .setDesc(s.desc)
-        .addToggle((t) => t.setValue(skinOn(skins, s)).onChange((v) => {
-          store.set({ skins: { ...store.settings.skins, [s.id]: v } });
-          // turning the Excalidraw skin on: offer the Excalidraw settings it needs
-          if (s.id === "excalidraw" && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
-        }));
-      if (s.id !== "excalidraw" || !excalidrawAvailable(this.app)) continue;
-      const diff = excalidrawDiff(this.app).length;
-      row.descEl.createDiv({ text: diff ? `${diff} Excalidraw setting(s) differ from what this skin needs.` : "Excalidraw settings match this skin." });
-      if (diff) row.addButton((b) => b.setButtonText("Match settings…").onClick(() => new ExcalidrawSettingsModal(this.app, store).open()));
-      if (store.settings.excalidrawBackup) row.addButton((b) => b.setButtonText("Restore").setTooltip("Put back the Excalidraw settings from before Fantasy Easel changed them").onClick(() => void restoreExcalidraw(this.app, store)));
-    }
-
-    // ---------- Controls ----------
-    heading("Controls");
-    new Setting(containerEl).setName("Status bar buttons").setDesc("Quick controls: theme color, background, gallery, accent, cards, motion.").addToggle((t) => t.setValue(statusBar).onChange((v) => store.set({ statusBar: v })));
+    return [
+      // general rows: no heading (one-section rule)
+      { name: "Theme color", desc: "Background tint, and the accent when theme accent is on.", control: { type: "dropdown", key: "look.color", options: colorOptions() } },
+      { name: "Theme accent", desc: "Accent follows the theme color (gold in dark mode). Off = Obsidian's accent color.", control: { type: "toggle", key: "look.accent" } },
+      { name: "Open style panel", desc: "Sidebar tab with the main switches and style tuning (glass, cards, text, motion), each with a reset.", action: () => void this.plugin.openStylePanel() },
+      {
+        type: "group",
+        heading: "Card layout",
+        items: [{ name: "Card layout", desc: "Sidebars and notes as floating glass cards. Spacing and corners: style panel.", control: { type: "toggle", key: "look.card" } }],
+      },
+      {
+        type: "group",
+        heading: "Background",
+        items: [
+          { name: "Background", desc: "CSS, motion, stage or one of your pictures.", control: { type: "dropdown", key: "look.background", options: backgroundOptions(look.images) } },
+          { name: "Gallery", desc: "Every background side by side, day and night.", action: () => this.plugin.openGallery() },
+          { name: "Motion", desc: 'For moving backgrounds. Auto follows the OS "reduce motion" setting; On moves anyway.', control: { type: "dropdown", key: "motion", options: MOTION_OPTIONS } },
+          { name: "Pause when unfocused", desc: "Stop moving backgrounds while you work in another app (saves GPU).", control: { type: "toggle", key: "pauseUnfocused" } },
+        ],
+      },
+      {
+        type: "list",
+        heading: "Your pictures",
+        emptyState: "No pictures yet. Add one with +.",
+        addItem: { name: "Add picture", action: () => store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] }) },
+        onDelete: (i) => setImages(store.settings.look.images.filter((_, j) => j !== i)),
+        onReorder: (from, to) => setImages(move(store.settings.look.images, from, to)),
+        items: look.images.map((img, i) => ({
+          name: img.name?.trim() || `Picture ${i + 1}`,
+          render: (setting) => {
+            setting.settingEl.addClass("fantasy-easel-picture");
+            const id = `img-${img.id}`;
+            // saved on change (blur / Enter), so a redraw never steals focus while typing
+            setting.addText((t) => {
+              t.setPlaceholder("Name").setValue(img.name ?? "");
+              t.inputEl.addClass("fantasy-easel-picture-name");
+              t.inputEl.addEventListener("change", () => patchImage(img.id, { name: t.getValue().trim() }));
+            });
+            setting.addText((t) => {
+              t.setPlaceholder('https://… or url("…")').setValue(img.src);
+              t.inputEl.addEventListener("change", () => patchImage(img.id, { src: t.getValue().trim() }));
+            });
+            setting.addButton((b) => {
+              const using = look.background === id;
+              b.setButtonText(using ? "In use" : "Use").setDisabled(!toCssUrl(img.src) || using).onClick(() => store.setLook({ background: id }));
+              if (using) b.setCta();
+            });
+          },
+        })),
+      },
+      {
+        type: "group",
+        heading: "Status bar",
+        items: [{ name: "Show buttons", desc: "Quick controls in the status bar. Choose and order them below.", control: { type: "toggle", key: "statusBar" } }],
+      },
+      {
+        type: "list",
+        visible: () => store.settings.statusBar,
+        onReorder: (from, to) => store.set({ statusItems: move(store.settings.statusItems, from, to) }),
+        items: statusItems.map((x, i) => ({
+          name: STATUS_LABEL[x.id],
+          render: (setting) => {
+            setting.addToggle((t) => t.setValue(x.on).onChange((on) => {
+              if (on === store.settings.statusItems[i]?.on) return;
+              store.set({ statusItems: store.settings.statusItems.map((y) => (y.id === x.id ? { ...y, on } : y)) });
+            }));
+          },
+        })),
+      },
+      {
+        type: "group",
+        heading: "Plugin skins",
+        items: SKINS.map((s) => ({
+          name: s.name,
+          desc: s.desc,
+          render: (setting) => {
+            setting.addToggle((t) => t.setValue(skinOn(skins, s)).onChange((v) => {
+              if (v === skinOn(store.settings.skins, s)) return;
+              store.set({ skins: { ...store.settings.skins, [s.id]: v } });
+              // turning the Excalidraw skin on: offer the Excalidraw settings it needs
+              if (s.id === "excalidraw" && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
+            }));
+            if (s.id !== "excalidraw" || !excalidrawAvailable(this.app)) return;
+            const diff = excalidrawDiff(this.app).length;
+            setting.descEl.createDiv({ text: diff ? `${diff} Excalidraw setting(s) differ from what this skin needs.` : "Excalidraw settings match this skin." });
+            if (diff) setting.addButton((b) => b.setButtonText("Match settings…").onClick(() => new ExcalidrawSettingsModal(this.app, store).open()));
+            if (store.settings.excalidrawBackup) setting.addButton((b) => b.setButtonText("Restore").setTooltip("Put back the Excalidraw settings from before Fantasy Easel changed them").onClick(() => void restoreExcalidraw(this.app, store)));
+          },
+        })),
+      },
+    ];
   }
 
   /** Without the Fantasy theme: what this plugin is and where to get the theme. Nothing to set. */
-  private renderNoTheme() {
-    const { containerEl } = this;
-    new Setting(containerEl).setName("Fantasy Easel").setHeading();
-    containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "Fantasy Easel is the companion of the Fantasy theme. With Fantasy it sets the theme color, accent, card layout, CSS and media-art backgrounds (still or moving), your own pictures and plugin skins, with quick status bar controls. With any other theme it does nothing.",
-    });
-    new Setting(containerEl)
-      .setName("Fantasy theme is not in use")
-      .setDesc("Install Fantasy, then choose it in Settings → Appearance → Themes. These settings appear once Fantasy is active.")
-      .addButton((b) => b.setButtonText("Get Fantasy").setCta().onClick(() => window.open(FANTASY_URL)));
-  }
-
-  hide() {
-    this.unsubscribe?.();
-    this.unsubscribe = null;
+  private noTheme(): SettingDefinitionItem[] {
+    return [
+      {
+        name: "Fantasy theme is not in use",
+        desc: "Fantasy Easel is the companion of the Fantasy theme: theme color, accent, card layout, CSS and media-art backgrounds, your own pictures and plugin skins. Install Fantasy, then choose it in Settings → Appearance → Themes.",
+        render: (setting) => {
+          setting.addButton((b) => b.setButtonText("Get Fantasy").setCta().onClick(() => window.open(FANTASY_URL)));
+        },
+      },
+    ];
   }
 }

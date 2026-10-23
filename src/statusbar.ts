@@ -2,7 +2,7 @@ import { setIcon, setTooltip, type App, type Plugin } from "obsidian";
 import { backgroundById, colorByCls } from "./catalog";
 import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu, stepBackground } from "./menus";
-import { MOTIONS } from "./settings";
+import { MOTIONS, type StatusId } from "./settings";
 import type { Store } from "./store";
 
 const TIP = { delay: 100, placement: "top" } as const;
@@ -15,18 +15,27 @@ const TIP = { delay: 100, placement: "top" } as const;
 export class StatusBar {
   private items: HTMLElement[] = [];
   private unsubscribe: (() => void) | null = null;
-  private swatch!: HTMLElement;
-  private colorName!: HTMLElement;
-  private bgName!: HTMLElement;
-  private bgKind!: HTMLElement;
-  private accent!: HTMLElement;
-  private card!: HTMLElement;
-  private still!: HTMLElement;
+  // only the buttons that are shown exist
+  private swatch?: HTMLElement;
+  private colorName?: HTMLElement;
+  private bgName?: HTMLElement;
+  private bgKind?: HTMLElement;
+  private accent?: HTMLElement;
+  private card?: HTMLElement;
+  private still?: HTMLElement;
 
   constructor(private app: App, private plugin: Plugin, private store: Store, private managePictures: () => void) {}
 
+  /** layout the buttons were built for (rebuilt when the order or the chosen buttons change) */
+  private built = "";
+
+  /** Build the chosen buttons in the chosen order. Same layout again = nothing to do. */
   show() {
-    if (this.items.length) return;
+    const items = this.store.settings.statusItems.filter((x) => x.on);
+    const layout = items.map((x) => x.id).join(",");
+    if (this.unsubscribe && layout === this.built) return;
+    this.hide();
+    this.built = layout;
     const add = (cls: string, label: string, onClick: (ev: MouseEvent) => void) => {
       const el = this.plugin.addStatusBarItem();
       el.addClass("mod-clickable", "fantasy-easel-sb", cls);
@@ -38,30 +47,38 @@ export class StatusBar {
     };
     const menuAt = (ev: MouseEvent, make: () => { showAtMouseEvent(ev: MouseEvent): unknown }) => make().showAtMouseEvent(ev);
 
-    const color = add("fantasy-easel-sb-color", "Theme color", (ev) => menuAt(ev, () => colorMenu(this.store)));
-    this.swatch = color.createSpan({ cls: "fantasy-easel-swatch" });
-    this.colorName = color.createSpan({ cls: "fantasy-easel-sb-text" });
-
-    setIcon(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left");
-    const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store, this.managePictures)));
-    this.bgKind = bg.createSpan({ cls: "fantasy-easel-sb-kind" });
-    this.bgName = bg.createSpan({ cls: "fantasy-easel-sb-text fantasy-easel-sb-bgname" });
-    setIcon(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right");
-    setIcon(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store, this.managePictures).open()), "layout-grid");
-
-    this.accent = add("fantasy-easel-sb-toggle", "Theme accent on / off", () => this.store.setLook({ accent: !this.store.settings.look.accent }));
-    setIcon(this.accent, "droplet");
-    this.card = add("fantasy-easel-sb-toggle", "Card layout on / off", () => this.store.setLook({ card: !this.store.settings.look.card }));
-    setIcon(this.card, "layout-dashboard");
-    this.still = add("fantasy-easel-sb-toggle", "Motion", () => {
-      const order = MOTIONS;
-      this.store.set({ motion: order[(order.indexOf(this.store.settings.motion) + 1) % order.length] });
-    });
-    // Exception to "public API only": Obsidian has no public call to switch dark / light.
-    setIcon(
-      add("fantasy-easel-sb-mode", "Dark / light", () => (this.app as unknown as { commands: { executeCommandById(id: string): boolean } }).commands.executeCommandById("theme:toggle-light-dark")),
-      "sun-moon",
-    );
+    const build: Record<StatusId, () => void> = {
+      color: () => {
+        const color = add("fantasy-easel-sb-color", "Theme color", (ev) => menuAt(ev, () => colorMenu(this.store)));
+        this.swatch = color.createSpan({ cls: "fantasy-easel-swatch" });
+        this.colorName = color.createSpan({ cls: "fantasy-easel-sb-text" });
+      },
+      prev: () => setIcon(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left"),
+      background: () => {
+        const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store, this.managePictures)));
+        this.bgKind = bg.createSpan({ cls: "fantasy-easel-sb-kind" });
+        this.bgName = bg.createSpan({ cls: "fantasy-easel-sb-text fantasy-easel-sb-bgname" });
+      },
+      next: () => setIcon(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right"),
+      gallery: () => setIcon(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store, this.managePictures).open()), "layout-grid"),
+      accent: () => {
+        this.accent = add("fantasy-easel-sb-toggle", "Theme accent on / off", () => this.store.setLook({ accent: !this.store.settings.look.accent }));
+        setIcon(this.accent, "droplet");
+      },
+      card: () => {
+        this.card = add("fantasy-easel-sb-toggle", "Card layout on / off", () => this.store.setLook({ card: !this.store.settings.look.card }));
+        setIcon(this.card, "layout-dashboard");
+      },
+      motion: () => {
+        this.still = add("fantasy-easel-sb-toggle", "Motion", () => {
+          const order = MOTIONS;
+          this.store.set({ motion: order[(order.indexOf(this.store.settings.motion) + 1) % order.length] });
+        });
+      },
+      // Exception to "public API only": Obsidian has no public call to switch dark / light.
+      mode: () => setIcon(add("fantasy-easel-sb-mode", "Dark / light", () => toggleDarkLight(this.app)), "sun-moon"),
+    };
+    for (const x of items) build[x.id]();
 
     this.unsubscribe = this.store.subscribe(() => this.render());
     this.render();
@@ -70,6 +87,8 @@ export class StatusBar {
   hide() {
     this.unsubscribe?.();
     this.unsubscribe = null;
+    this.built = "";
+    this.swatch = this.colorName = this.bgName = this.bgKind = this.accent = this.card = this.still = undefined;
     this.items.forEach((el) => el.remove());
     this.items = [];
   }
@@ -78,20 +97,27 @@ export class StatusBar {
     const { look, motion } = this.store.settings;
     const color = colorByCls(look.color);
     // The theme color class on the swatch gives it that color's --fantasy-hue (theme.css).
-    this.swatch.className = `fantasy-easel-swatch ${look.color}`;
-    this.colorName.setText(color?.name ?? look.color);
+    if (this.swatch) this.swatch.className = `fantasy-easel-swatch ${look.color}`;
+    this.colorName?.setText(color?.name ?? look.color);
     const bg = backgroundById(look.background, look.images);
-    this.bgName.setText(bg?.name ?? look.background);
-    setIcon(this.bgKind, bg?.kind === "motion" ? "wind" : bg?.kind === "static" ? "palette" : "image");
-    this.accent.toggleClass("is-on", look.accent);
-    this.card.toggleClass("is-on", look.card);
+    this.bgName?.setText(bg?.name ?? look.background);
+    if (this.bgKind) setIcon(this.bgKind, bg?.kind === "motion" ? "wind" : bg?.kind === "static" ? "palette" : "image");
+    this.accent?.toggleClass("is-on", look.accent);
+    this.card?.toggleClass("is-on", look.card);
+    const still = this.still;
+    if (!still) return;
     // auto: follows OS reduced motion / on: always moves / off: never moves
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setIcon(this.still, motion === "off" ? "pause" : motion === "on" ? "play" : "circle-play");
+    setIcon(still, motion === "off" ? "pause" : motion === "on" ? "play" : "circle-play");
     const tip = motion === "auto" ? `Motion: auto (follows OS reduced motion${reduced ? " — now paused" : ""}). Click: on` : motion === "on" ? "Motion: on (moves even with OS reduced motion). Click: off" : "Motion: off. Click: auto";
-    this.still.setAttr("aria-label", tip);
-    setTooltip(this.still, tip, TIP);
-    this.still.toggleClass("is-on", motion === "on");
-    this.still.toggleClass("is-idle", bg?.kind !== "motion");
+    still.setAttr("aria-label", tip);
+    setTooltip(still, tip, TIP);
+    still.toggleClass("is-on", motion === "on");
+    still.toggleClass("is-idle", bg?.kind !== "motion");
   }
+}
+
+/** Exception to "public API only" (AGENTS 12): Obsidian has no public call to switch dark / light. */
+export function toggleDarkLight(app: App) {
+  (app as unknown as { commands: { executeCommandById(id: string): boolean } }).commands.executeCommandById("theme:toggle-light-dark");
 }
