@@ -80,10 +80,10 @@ export class ExcalidrawSettingsModal extends Modal {
   onOpen() {
     this.setTitle("Match Excalidraw settings");
     const diff = excalidrawDiff(this.app);
-    this.contentEl.createEl("p", { text: "The Excalidraw skin shows the Fantasy wallpaper only when Excalidraw follows the Obsidian theme. Fantasy Easel will change these Excalidraw settings:" });
+    this.contentEl.createEl("p", { text: "The Excalidraw style shows the Fantasy wallpaper only when Excalidraw follows the Obsidian theme. Fantasy Easel will change these Excalidraw settings:" });
     const ul = this.contentEl.createEl("ul");
     for (const d of diff) ul.createEl("li", { text: `${d.w.label}: ${show(d.now)} → ${show(d.w.value)}` });
-    this.contentEl.createEl("p", { text: "The current values are kept: Settings → Fantasy Easel → Plugin skins → Restore puts them back." });
+    this.contentEl.createEl("p", { text: "The current values are kept: Settings → Fantasy Easel → Plugin styles → Excalidraw → Restore puts them back." });
     new Setting(this.contentEl)
       .addButton((b) => b.setButtonText("Not now").onClick(() => this.close()))
       .addButton((b) => b.setButtonText("Change Excalidraw settings").setCta().onClick(async () => {

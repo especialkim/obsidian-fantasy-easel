@@ -1069,12 +1069,48 @@ var backgroundById = (id, images = []) => allBackgrounds(images).find((b) => b.i
 
 // src/skins.ts
 var SKINS = [
-  { id: "excalidraw", name: "Excalidraw", desc: "Drawings show the Fantasy wallpaper behind the canvas; embedded notes sit on tinted glass cards without their properties block." },
-  { id: "dataview", name: "Dataview", desc: "Query results (tables, lists, tasks) sit on the glass card with rounded corners and slightly smaller text." },
-  { id: "kanban", name: "Kanban", desc: "Board, lanes and cards use the glass colors; lane headers follow the heading colors." }
+  {
+    id: "excalidraw",
+    name: "Excalidraw",
+    desc: "Drawings over the Fantasy wallpaper, embedded notes on glass.",
+    parts: [
+      { id: "canvas", name: "See-through canvas", desc: "The canvas has no background of its own: the Fantasy wallpaper shows behind the drawing." },
+      { id: "embeds", name: "Embedded notes on glass", desc: "Notes placed in a drawing sit on a tinted glass card with some padding." },
+      { id: "properties", name: "Hide properties in embeds", desc: "Embedded notes show their text without the properties block." },
+      { id: "toolbar", name: "Toolbar", desc: "Top-right tools wrap, the sidebar button and title line up, key hints are smaller." }
+    ]
+  },
+  {
+    id: "dataview",
+    name: "Dataview",
+    desc: "Query results on the glass card.",
+    parts: [
+      { id: "card", name: "Results on glass", desc: "Query results (tables, lists, tasks) sit on a rounded glass card." },
+      { id: "table", name: "Tables", desc: "Tables fill the width; header and cells use the note's table text size." },
+      { id: "tasks", name: "Task lists", desc: "Tasks in results line up with the note's own lists." },
+      { id: "text", name: "Result text", desc: "Slightly smaller result text; DataviewJS headings in the theme heading colors." }
+    ]
+  },
+  {
+    id: "kanban",
+    name: "Kanban",
+    desc: "Boards in the glass colors.",
+    parts: [
+      { id: "glass", name: "Glass board", desc: "Board and lanes use the glass colors instead of solid panels." },
+      { id: "layout", name: "Wrapping lanes", desc: "Lanes wrap onto new rows and scroll inside (35% of the window high)." },
+      { id: "lanes", name: "Lane headers", desc: "Lane titles on a band; the first and last lane in the accent color." },
+      { id: "cards", name: "Cards and buttons", desc: "Card hover border, new item and lane settings buttons in the theme." },
+      { id: "headings", name: "Headings in cards", desc: "Headings inside cards in the theme heading colors and sizes." },
+      { id: "search", name: "Search matches", desc: "Search matches on the board in larger text." }
+    ]
+  }
 ];
+var skinPartClass = (skin, part) => `fantasy-easel-skin-${skin}-${part}`;
 var skinClass = (id) => `fantasy-easel-skin-${id}`;
 var skinOn = (skins, s) => skins[s.id] ?? true;
+var partOn = (skins, s, p) => skins[`${s.id}.${p.id}`] ?? true;
+var skinClasses = (skins) => SKINS.flatMap((s) => skinOn(skins, s) ? s.parts.filter((p) => partOn(skins, s, p)).map((p) => skinPartClass(s.id, p.id)) : []);
+var ALL_SKIN_CLASSES = SKINS.flatMap((s) => [skinClass(s.id), ...s.parts.map((p) => skinPartClass(s.id, p.id))]);
 
 // src/tuning.ts
 var TUNING_GROUPS = [
@@ -1127,7 +1163,7 @@ function tuningVars(values, card, mode) {
 }
 
 // src/apply.ts
-var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...SKINS.map((s) => skinClass(s.id))]);
+var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...ALL_SKIN_CLASSES]);
 var THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
 var URL_VAR = "--background-url";
 var OLD_VARS = ["--background-url1", "--background-url2", "--background-url3"];
@@ -1142,7 +1178,7 @@ function wantedClasses(s) {
   if (s.motion === "off") out.add(STILL_CLASS);
   if (s.motion === "on") out.add(FORCE_MOTION_CLASS);
   if (s.pauseUnfocused) out.add(PAUSE_UNFOCUSED_CLASS);
-  for (const sk of SKINS) if (s.skins[sk.id] ?? true) out.add(skinClass(sk.id));
+  for (const c of skinClasses(s.skins)) out.add(c);
   return out;
 }
 var Applier = class {
@@ -1217,7 +1253,7 @@ var Applier = class {
     this.observer = null;
     const cl = this.body.classList;
     for (const b of CSS_BG) cl.remove(b.cls);
-    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...SKINS.map((s) => skinClass(s.id)));
+    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...ALL_SKIN_CLASSES);
     for (const c of THEME_GROUP) cl.remove(c);
     this.body.setCssProps(Object.fromEntries([URL_VAR, ...OLD_VARS, ...TUNING_VARS].map((v) => [v, ""])));
   }
@@ -1583,10 +1619,10 @@ var ExcalidrawSettingsModal = class extends import_obsidian5.Modal {
   onOpen() {
     this.setTitle("Match Excalidraw settings");
     const diff = excalidrawDiff(this.app);
-    this.contentEl.createEl("p", { text: "The Excalidraw skin shows the Fantasy wallpaper only when Excalidraw follows the Obsidian theme. Fantasy Easel will change these Excalidraw settings:" });
+    this.contentEl.createEl("p", { text: "The Excalidraw style shows the Fantasy wallpaper only when Excalidraw follows the Obsidian theme. Fantasy Easel will change these Excalidraw settings:" });
     const ul = this.contentEl.createEl("ul");
     for (const d of diff) ul.createEl("li", { text: `${d.w.label}: ${show(d.now)} \u2192 ${show(d.w.value)}` });
-    this.contentEl.createEl("p", { text: "The current values are kept: Settings \u2192 Fantasy Easel \u2192 Plugin skins \u2192 Restore puts them back." });
+    this.contentEl.createEl("p", { text: "The current values are kept: Settings \u2192 Fantasy Easel \u2192 Plugin styles \u2192 Excalidraw \u2192 Restore puts them back." });
     new import_obsidian5.Setting(this.contentEl).addButton((b) => b.setButtonText("Not now").onClick(() => this.close())).addButton((b) => b.setButtonText("Change Excalidraw settings").setCta().onClick(async () => {
       this.close();
       await apply(this.app, this.store);
@@ -1648,7 +1684,7 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
   getSettingDefinitions() {
     if (!this.plugin.active) return this.noTheme();
     const store = this.plugin.store;
-    const { look, statusItems, skins } = store.settings;
+    const { look, statusItems } = store.settings;
     const setImages = (images) => {
       const bg = store.settings.look.background;
       const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
@@ -1733,32 +1769,73 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
       },
       {
         type: "group",
-        heading: "Plugin skins",
-        items: SKINS.map((s) => ({
-          name: s.name,
-          desc: s.desc,
-          render: (setting) => {
-            setting.addToggle((t) => t.setValue(skinOn(skins, s)).onChange((v) => {
-              if (v === skinOn(store.settings.skins, s)) return;
-              store.set({ skins: { ...store.settings.skins, [s.id]: v } });
-              if (s.id === "excalidraw" && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
-            }));
-            if (s.id !== "excalidraw" || !excalidrawAvailable(this.app)) return;
-            const diff = excalidrawDiff(this.app).length;
-            setting.descEl.createDiv({ text: diff ? `${diff} Excalidraw setting(s) differ from what this skin needs.` : "Excalidraw settings match this skin." });
-            if (diff) setting.addButton((b) => b.setButtonText("Match settings\u2026").onClick(() => new ExcalidrawSettingsModal(this.app, store).open()));
-            if (store.settings.excalidrawBackup) setting.addButton((b) => b.setButtonText("Restore").setTooltip("Put back the Excalidraw settings from before Fantasy Easel changed them").onClick(() => void restoreExcalidraw(this.app, store)));
-          }
-        }))
+        heading: "Plugin styles",
+        items: SKINS.map((sk) => {
+          const on = () => skinOn(store.settings.skins, sk);
+          const count = () => sk.parts.filter((p) => partOn(store.settings.skins, sk, p)).length;
+          const setSkin = (key, v) => store.set({ skins: { ...store.settings.skins, [key]: v } });
+          const isExcalidraw = sk.id === "excalidraw";
+          return {
+            type: "page",
+            name: sk.name,
+            desc: sk.desc,
+            displayValue: () => on() ? `${count()} of ${sk.parts.length} on` : "Off",
+            // Excalidraw: its own settings differ from what the canvas / embeds parts need
+            status: () => isExcalidraw && on() && excalidrawAvailable(this.app) && excalidrawDiff(this.app).length ? "warning" : null,
+            items: [
+              {
+                name: `${sk.name} style`,
+                desc: "Fit this plugin to the Fantasy glass. Only that plugin's own elements are touched.",
+                render: (setting) => {
+                  setting.addToggle((t) => t.setValue(on()).onChange((v) => {
+                    if (v === on()) return;
+                    setSkin(sk.id, v);
+                    if (isExcalidraw && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
+                  }));
+                }
+              },
+              {
+                type: "group",
+                heading: "Parts",
+                items: sk.parts.map((p) => ({
+                  name: p.name,
+                  desc: p.desc,
+                  render: (setting) => {
+                    setting.addToggle((t) => t.setValue(partOn(store.settings.skins, sk, p)).setDisabled(!on()).onChange((v) => {
+                      if (v !== partOn(store.settings.skins, sk, p)) setSkin(`${sk.id}.${p.id}`, v);
+                    }));
+                    setting.settingEl.toggleClass("is-disabled", !on());
+                  }
+                }))
+              },
+              ...isExcalidraw ? [this.excalidrawRow()] : []
+            ]
+          };
+        })
       }
     ];
+  }
+  /** Excalidraw's own settings that the canvas / embeds parts need: match (with a confirm) or restore. */
+  excalidrawRow() {
+    const store = this.plugin.store;
+    return {
+      name: "Excalidraw settings",
+      desc: "The see-through canvas and glass embeds need five Excalidraw settings (follow the Obsidian theme, no dynamic styling).",
+      visible: () => excalidrawAvailable(this.app),
+      render: (setting) => {
+        const diff = excalidrawDiff(this.app).length;
+        setting.descEl.createDiv({ text: diff ? `${diff} setting(s) differ.` : "They match." });
+        if (diff) setting.addButton((b) => b.setButtonText("Match settings\u2026").onClick(() => new ExcalidrawSettingsModal(this.app, store).open()));
+        if (store.settings.excalidrawBackup) setting.addButton((b) => b.setButtonText("Restore").setTooltip("Put back the Excalidraw settings from before Fantasy Easel changed them").onClick(() => void restoreExcalidraw(this.app, store)));
+      }
+    };
   }
   /** Without the Fantasy theme: what this plugin is and where to get the theme. Nothing to set. */
   noTheme() {
     return [
       {
         name: "Fantasy theme is not in use",
-        desc: "Fantasy Easel is the companion of the Fantasy theme: palette, accent, card layout, CSS and media-art backgrounds, your own pictures and plugin skins. Install Fantasy, then choose it in Settings \u2192 Appearance \u2192 Themes.",
+        desc: "Fantasy Easel is the companion of the Fantasy theme: palette, accent, card layout, CSS and media-art backgrounds, your own pictures and plugin styles. Install Fantasy, then choose it in Settings \u2192 Appearance \u2192 Themes.",
         render: (setting) => {
           setting.addButton((b) => b.setButtonText("Get Fantasy").setCta().onClick(() => window.open(FANTASY_URL)));
         }

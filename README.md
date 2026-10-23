@@ -7,7 +7,7 @@ The theme has no Style Settings options; everything is set here.
 - **Background**: CSS backgrounds (still and moving), 19 four-layer "stage" backgrounds, your own pictures with names (a vault picture, a web address, or a file on this computer)
 - **Style panel** (command "Open style panel", a sidebar tab): the main switches and 11 style sliders (glass per dark / light mode, cards, editor, stage speed), each with a reset to the default
 - **Motion**: auto (follows OS reduce motion) / on / off, optional pause while Obsidian is not focused
-- **Plugin skins**: Dataview, Excalidraw, Kanban. The Excalidraw skin can also set the Excalidraw options it needs (follow the Obsidian theme, no dynamic styling), only after you confirm, with Restore
+- **Plugin styles**: Dataview, Excalidraw, Kanban, each part on or off on its own page. The Excalidraw style can also set the Excalidraw options it needs (follow the Obsidian theme, no dynamic styling), only after you confirm, with Restore
 - **Gallery**: every background side by side in day and night, under a glass card
 - **Status bar**: palette, previous / next background, gallery, accent, cards, motion, dark / light. Choose the buttons and their order in settings
 

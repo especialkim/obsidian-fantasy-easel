@@ -1,11 +1,11 @@
 import { Notice } from "obsidian";
 import { ACCENT_CLASS, backgroundById, CARD_OFF_CLASS, CSS_BG, FORCE_MOTION_CLASS, MARKER_CLASS, MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, STAGE_CLASS, STILL_CLASS, THEME_COLORS, LEGACY_CARD_CLASS } from "./catalog";
 import type { FantasyEaselSettings } from "./settings";
-import { SKINS, skinClass } from "./skins";
+import { ALL_SKIN_CLASSES, skinClasses } from "./skins";
 import { TUNING_VARS, tuningVars } from "./tuning";
 
 /** Every body class Fantasy Easel may add or remove. Other body classes are never touched. */
-const MANAGED = new Set<string>([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls!), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...SKINS.map((s) => skinClass(s.id))]);
+const MANAGED = new Set<string>([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls!), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...ALL_SKIN_CLASSES]);
 /** Theme classes (removed on unload: without Easel the theme shows its defaults). */
 const THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
 /** Your picture goes here as a body inline variable (beats the theme's Plasma and any class rule). */
@@ -25,7 +25,7 @@ export function wantedClasses(s: FantasyEaselSettings): Set<string> {
   if (s.motion === "off") out.add(STILL_CLASS);
   if (s.motion === "on") out.add(FORCE_MOTION_CLASS);
   if (s.pauseUnfocused) out.add(PAUSE_UNFOCUSED_CLASS);
-  for (const sk of SKINS) if (s.skins[sk.id] ?? true) out.add(skinClass(sk.id));
+  for (const c of skinClasses(s.skins)) out.add(c);
   return out;
 }
 
@@ -98,7 +98,7 @@ export class Applier {
     this.observer = null;
     const cl = this.body.classList;
     for (const b of CSS_BG) cl.remove(b.cls!);
-    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...SKINS.map((s) => skinClass(s.id)));
+    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...ALL_SKIN_CLASSES);
     for (const c of THEME_GROUP) cl.remove(c);
     this.body.setCssProps(Object.fromEntries([URL_VAR, ...OLD_VARS, ...TUNING_VARS].map((v) => [v, ""])));
   }

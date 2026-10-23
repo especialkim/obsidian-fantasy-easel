@@ -1,10 +1,10 @@
-import { PluginSettingTab, setTooltip, type App, type SettingDefinitionItem } from "obsidian";
+import { PluginSettingTab, setTooltip, type App, type SettingDefinitionItem, type SettingDefinitionPage } from "obsidian";
 import { DEFAULT_BACKGROUND, newImageId, toCssUrl, type UserImage } from "./catalog";
 import type FantasyEaselPlugin from "./main";
 import { excalidrawAvailable, excalidrawDiff, ExcalidrawSettingsModal, restoreExcalidraw } from "./excalidraw";
 import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_OPTIONS, paletteDesc } from "./options";
 import { PictureSuggest } from "./pictures";
-import { skinOn, SKINS } from "./skins";
+import { partOn, skinOn, SKINS } from "./skins";
 import type { StatusId } from "./settings";
 
 /** Where to get the theme (not in the community store yet). */
@@ -24,7 +24,7 @@ const STATUS_LABEL: Record<StatusId, string> = {
 
 /**
  * Declarative settings (Obsidian 1.13 `getSettingDefinitions`, the documented way): general rows
- * without a heading, then Card layout · Background · Your pictures · Status bar · Plugin skins.
+ * without a heading, then Card layout · Background · Your pictures · Status bar · Plugin styles (a page per plugin).
  * Controls bind to keys like `look.color`; getControlValue / setControlValue map them to the store.
  * Fine style tuning lives in the style panel (sidebar), not here.
  */
@@ -64,7 +64,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
   getSettingDefinitions(): SettingDefinitionItem[] {
     if (!this.plugin.active) return this.noTheme();
     const store = this.plugin.store;
-    const { look, statusItems, skins } = store.settings;
+    const { look, statusItems } = store.settings;
     const setImages = (images: UserImage[]) => {
       // a picture that is gone or emptied cannot stay the background
       const bg = store.settings.look.background;
@@ -152,26 +152,68 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
       },
       {
         type: "group",
-        heading: "Plugin skins",
-        items: SKINS.map((s) => ({
-          name: s.name,
-          desc: s.desc,
-          render: (setting) => {
-            setting.addToggle((t) => t.setValue(skinOn(skins, s)).onChange((v) => {
-              if (v === skinOn(store.settings.skins, s)) return;
-              store.set({ skins: { ...store.settings.skins, [s.id]: v } });
-              // turning the Excalidraw skin on: offer the Excalidraw settings it needs
-              if (s.id === "excalidraw" && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
-            }));
-            if (s.id !== "excalidraw" || !excalidrawAvailable(this.app)) return;
-            const diff = excalidrawDiff(this.app).length;
-            setting.descEl.createDiv({ text: diff ? `${diff} Excalidraw setting(s) differ from what this skin needs.` : "Excalidraw settings match this skin." });
-            if (diff) setting.addButton((b) => b.setButtonText("Match settings…").onClick(() => new ExcalidrawSettingsModal(this.app, store).open()));
-            if (store.settings.excalidrawBackup) setting.addButton((b) => b.setButtonText("Restore").setTooltip("Put back the Excalidraw settings from before Fantasy Easel changed them").onClick(() => void restoreExcalidraw(this.app, store)));
-          },
-        })),
+        heading: "Plugin styles",
+        items: SKINS.map((sk): SettingDefinitionPage => {
+          const on = () => skinOn(store.settings.skins, sk);
+          const count = () => sk.parts.filter((p) => partOn(store.settings.skins, sk, p)).length;
+          const setSkin = (key: string, v: boolean) => store.set({ skins: { ...store.settings.skins, [key]: v } });
+          const isExcalidraw = sk.id === "excalidraw";
+          return {
+            type: "page",
+            name: sk.name,
+            desc: sk.desc,
+            displayValue: () => (on() ? `${count()} of ${sk.parts.length} on` : "Off"),
+            // Excalidraw: its own settings differ from what the canvas / embeds parts need
+            status: () => (isExcalidraw && on() && excalidrawAvailable(this.app) && excalidrawDiff(this.app).length ? "warning" : null),
+            items: [
+              {
+                name: `${sk.name} style`,
+                desc: "Fit this plugin to the Fantasy glass. Only that plugin's own elements are touched.",
+                render: (setting) => {
+                  setting.addToggle((t) => t.setValue(on()).onChange((v) => {
+                    if (v === on()) return;
+                    setSkin(sk.id, v);
+                    // turning the Excalidraw style on: offer the Excalidraw settings it needs
+                    if (isExcalidraw && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
+                  }));
+                },
+              },
+              {
+                type: "group",
+                heading: "Parts",
+                items: sk.parts.map((p) => ({
+                  name: p.name,
+                  desc: p.desc,
+                  render: (setting) => {
+                    setting.addToggle((t) => t.setValue(partOn(store.settings.skins, sk, p)).setDisabled(!on()).onChange((v) => {
+                      if (v !== partOn(store.settings.skins, sk, p)) setSkin(`${sk.id}.${p.id}`, v);
+                    }));
+                    setting.settingEl.toggleClass("is-disabled", !on());
+                  },
+                })),
+              },
+              ...(isExcalidraw ? [this.excalidrawRow()] : []),
+            ],
+          };
+        }),
       },
     ];
+  }
+
+  /** Excalidraw's own settings that the canvas / embeds parts need: match (with a confirm) or restore. */
+  private excalidrawRow(): SettingDefinitionItem {
+    const store = this.plugin.store;
+    return {
+      name: "Excalidraw settings",
+      desc: "The see-through canvas and glass embeds need five Excalidraw settings (follow the Obsidian theme, no dynamic styling).",
+      visible: () => excalidrawAvailable(this.app),
+      render: (setting) => {
+        const diff = excalidrawDiff(this.app).length;
+        setting.descEl.createDiv({ text: diff ? `${diff} setting(s) differ.` : "They match." });
+        if (diff) setting.addButton((b) => b.setButtonText("Match settings…").onClick(() => new ExcalidrawSettingsModal(this.app, store).open()));
+        if (store.settings.excalidrawBackup) setting.addButton((b) => b.setButtonText("Restore").setTooltip("Put back the Excalidraw settings from before Fantasy Easel changed them").onClick(() => void restoreExcalidraw(this.app, store)));
+      },
+    };
   }
 
   /** Without the Fantasy theme: what this plugin is and where to get the theme. Nothing to set. */
@@ -179,7 +221,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     return [
       {
         name: "Fantasy theme is not in use",
-        desc: "Fantasy Easel is the companion of the Fantasy theme: palette, accent, card layout, CSS and media-art backgrounds, your own pictures and plugin skins. Install Fantasy, then choose it in Settings → Appearance → Themes.",
+        desc: "Fantasy Easel is the companion of the Fantasy theme: palette, accent, card layout, CSS and media-art backgrounds, your own pictures and plugin styles. Install Fantasy, then choose it in Settings → Appearance → Themes.",
         render: (setting) => {
           setting.addButton((b) => b.setButtonText("Get Fantasy").setCta().onClick(() => window.open(FANTASY_URL)));
         },

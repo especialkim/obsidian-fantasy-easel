@@ -1,26 +1,25 @@
-/* Fantasy Easel skin: Kanban. Moved from the Fantasy theme (2026-10-21). Uses theme variables only. */
+/* Fantasy Easel plugin style: Kanban. Uses theme variables only. Each "part" is one switch
+   (body.fantasy-easel-skin-kanban-<part>). */
+
+/* part: glass — board and lanes in the glass colors */
 .kanban-plugin,
 .kanban-plugin__drag-container {
 	--background-modifier-border: var(--kanban-line-border);
 	--background-primary: transparent;
 	--background-secondary: rgba(var(--fantasy-background-color-rgb), 0.4);
-	--kanban-header-wrapper-bg-accent: hsla(var(--accent-h), calc(var(--accent-s) + 20%), calc(var(--accent-l) - 10%), 0.4);
-	--kanban-header-wrapper-bg: rgba(var(--fantasy-background-color-rgb), 0.8);
-	--kanban-h3-color: var(--h2-color);
-	--kanban-h4-color: var(--h3-color);
-	--kanban-h5-color: var(--h4-color);
-	--kanban-h3-size: 1.2em;
-	--kanban-h4-size: 1em;
-	--kanban-h5-size: 1em;
+	--background-modifier-form-field: transparent;
 	--kanban-line-border: var(--color-base-30);
 	--kanban-line-border-hover: var(--color-base-60);
-	--kanban-line-min-height: 2.3rem;
-	--background-modifier-form-field: transparent;
+	--text-faint: var(--color-base-80);
+	--hr-color: var(--color-base-50);
 	--h-margin: 0;
 	--p-spacing: 0;
-	--text-faint: var(--color-base-80);
+}
+
+/* part: layout — lanes wrap onto new rows and scroll inside (35% of the window high) */
+.kanban-plugin,
+.kanban-plugin__drag-container {
 	--lane-width: 320px;
-	--hr-color: var(--color-base-50);
 }
 
 .kanban-plugin__board>div {
@@ -32,6 +31,14 @@
 .kanban-plugin__lane {
 	max-height: 35vh;
 	border-radius: 6px;
+}
+
+/* part: lanes — lane headers on a band, the first and last lane in the accent */
+.kanban-plugin,
+.kanban-plugin__drag-container {
+	--kanban-header-wrapper-bg-accent: hsla(var(--accent-h), calc(var(--accent-s) + 20%), calc(var(--accent-l) - 10%), 0.4);
+	--kanban-header-wrapper-bg: rgba(var(--fantasy-background-color-rgb), 0.8);
+	--kanban-line-min-height: 2.3rem;
 }
 
 .kanban-plugin__lane-header-wrapper {
@@ -55,26 +62,16 @@
 	border-color: transparent;
 }
 
+/* part: cards — cards and buttons: hover border, new item and settings buttons */
+.kanban-plugin,
+.kanban-plugin__drag-container {
+	--kanban-line-min-height: 2.3rem;
+	--kanban-line-border: var(--color-base-30);
+	--kanban-line-border-hover: var(--color-base-60);
+}
+
 .kanban-plugin__item-title-wrapper {
 	min-height: var(--kanban-line-min-height);
-}
-
-.kanban-plugin__markdown-preview-view h3 {
-	color: var(--kanban-h3-color);
-}
-
-.kanban-plugin__markdown-preview-view h4 {
-	color: var(--kanban-h4-color);
-	font-size: var(--kanban-h4-size);
-}
-
-.kanban-plugin__markdown-preview-view h5 {
-	color: var(--kanban-h5-color);
-	font-size: var(--kanban-h5-size);
-}
-
-.kanban-plugin__board mark[data-markjs="true"] {
-	font-size: 1.5rem;
 }
 
 .kanban-plugin__item:hover {
@@ -106,4 +103,34 @@ button.kanban-plugin__new-item-button:hover {
 a.kanban-plugin__item-postfix-button.is-enabled.clickable-icon svg {
 	--icon-stroke: 4px;
 	color: red;
+}
+
+/* part: headings — headings inside cards in the theme heading colors */
+.kanban-plugin,
+.kanban-plugin__drag-container {
+	--kanban-h3-color: var(--h2-color);
+	--kanban-h4-color: var(--h3-color);
+	--kanban-h5-color: var(--h4-color);
+	--kanban-h3-size: 1.2em;
+	--kanban-h4-size: 1em;
+	--kanban-h5-size: 1em;
+}
+
+.kanban-plugin__markdown-preview-view h3 {
+	color: var(--kanban-h3-color);
+}
+
+.kanban-plugin__markdown-preview-view h4 {
+	color: var(--kanban-h4-color);
+	font-size: var(--kanban-h4-size);
+}
+
+.kanban-plugin__markdown-preview-view h5 {
+	color: var(--kanban-h5-color);
+	font-size: var(--kanban-h5-size);
+}
+
+/* part: search — search matches in larger text */
+.kanban-plugin__board mark[data-markjs="true"] {
+	font-size: 1.5rem;
 }

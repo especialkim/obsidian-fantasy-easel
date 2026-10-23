@@ -1043,216 +1043,248 @@ body.fantasy-easel.fantasy-easel-stage-on.fantasy-easel-still .fantasy-easel-sta
 
 /* ---------- 1-5. Plugin skins (on/off = body.fantasy-easel-skin-<id>) ---------- */
 /* BEGIN generated: plugin skins (skins/*.css, scripts/build.js). Do not edit. */
-/* dataview */
-body.fantasy-easel-skin-dataview .block-language-dataview,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs {
-	--dataview-radius: var(--blockquote-border-radius);
-	--p-spacing: 0;
-	--table-header-size: var(--table-text-size);
-}
-body.fantasy-easel-skin-dataview .block-language-dataviewjs h1,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs h2,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs h3,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs h4,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs h6 {
-	--p-spacing: var(--p-spacing-Orin);
-	margin-top: calc(var(--p-spacing) * 4);
-	margin-bottom: calc(var(--p-spacing) * 2);
-}
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event table {
-	width: 100%
-}
-body.fantasy-easel-skin-dataview .table-view-table>thead>tr>th {
-	font-size: var(--table-header-size);
-}
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event h4,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event .result-group,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event tbody,
-body.fantasy-easel-skin-dataview .block-language-dataview.node-insert-event tbody,
-body.fantasy-easel-skin-dataview .block-language-dataview.node-insert-event,
-body.fantasy-easel-skin-dataview ul.dataview.list-view-ul,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event ul.contains-task-list,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event p ul li a.internal-link {
-	font-size: 0.92rem;
-}
-body.fantasy-easel-skin-dataview .block-language-dataview.node-insert-event .dataview.dataview-container,
-body.fantasy-easel-skin-dataview .markdown-source-view .block-language-dataviewjs.node-insert-event .dataview.result-group,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event table,
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event ul[dir="auto"],
-body.fantasy-easel-skin-dataview ul.dataview.list-view-ul {
-	background-color: var(--background-primary);
-	border-radius: var(--dataview-radius);
-}
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event .task-list-item ul[dir="auto"] {
+/* excalidraw · canvas */
+body.fantasy-easel-skin-excalidraw-canvas .excalidraw-wrapper,
+body.fantasy-easel-skin-excalidraw-canvas .excalidraw,
+body.fantasy-easel-skin-excalidraw-canvas .excalidraw.excalidraw-container.theme--dark {
 	background-color: transparent;
 }
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event h4 {
-	padding: 25px 0px 10px 0px !important;
-	color: var(--h2-color);
-	font-size: var(--h4-size);
-}
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event ul,
-body.fantasy-easel-skin-dataview ul.dataview.list-view-ul {
-	padding: 0.5rem;
-}
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event div>ul {
-	margin-block-start: 0;
-}
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event tbody td {
-	font-size: inherit;
-}
-body.fantasy-easel-skin-dataview .is-live-preview .block-language-dataviewjs>p,
-body.fantasy-easel-skin-dataview .is-live-preview .block-language-dataviewjs>span {
-	line-height: 1.4;
-}
-body.fantasy-easel-skin-dataview .block-language-dataviewjs.node-insert-event>p:not(ul) {
-	background-color: var(--background-primary);
-}
-body.fantasy-easel-skin-dataview .markdown-source-view li.dataview.task-list-basic-item {
-	margin-inline-start: calc(var(--list-indent) * 2.2);
-}
-body.fantasy-easel-skin-dataview .markdown-preview-view .dataview.dataview-container>ul.contains-task-list {
-	padding-left: 0.5rem;
-}
-body.fantasy-easel-skin-dataview .markdown-source-view .dataview.result-group>ul.contains-task-list,
-body.fantasy-easel-skin-dataview .dataview.result-group {
-	padding: 0;
-}
-body.fantasy-easel-skin-dataview .markdown-source-view .dataview.result-group>ul.contains-task-list>li.dataview.task-list-item,
-body.fantasy-easel-skin-dataview .markdown-source-view .dataview.dataview-container>ul.contains-task-list>li.dataview.task-list-item {
-	margin-inline-start: 0;
-}
-/* excalidraw */
-body.fantasy-easel-skin-excalidraw .excalidraw-wrapper,
-body.fantasy-easel-skin-excalidraw .excalidraw,
-body.fantasy-easel-skin-excalidraw .excalidraw.excalidraw-container.theme--dark {
-	background-color: transparent;
-}
-body.fantasy-easel-skin-excalidraw .excalidraw .excalidraw__embeddable__outer .theme-dark {
+/* excalidraw · embeds */
+body.fantasy-easel-skin-excalidraw-embeds .excalidraw .excalidraw__embeddable__outer .theme-dark {
 	--background-primary: rgba(var(--fantasy-background-color-rgb), var(--background-opacity)) !important;
 }
-body.fantasy-easel-skin-excalidraw .excalidraw .canvas-node-container {
+body.fantasy-easel-skin-excalidraw-embeds .excalidraw .canvas-node-container {
 	background-color: var(--background-primary);
 }
-body.fantasy-easel-skin-excalidraw .excalidraw .canvas-node-content.markdown-embed>.markdown-embed-content>.markdown-preview-view {
+body.fantasy-easel-skin-excalidraw-embeds .excalidraw .canvas-node-content.markdown-embed>.markdown-embed-content>.markdown-preview-view {
 	padding: var(--size-4-3) var(--size-4-6);
 }
-body.fantasy-easel-skin-excalidraw .excalidraw .canvas-node-content.markdown-embed.is-loaded {
+body.fantasy-easel-skin-excalidraw-embeds .excalidraw .canvas-node-content.markdown-embed.is-loaded {
 	background: var(--background-modifier-active-hover);
 }
-body.fantasy-easel-skin-excalidraw .excalidraw .canvas-node-content .metadata-container {
+/* excalidraw · properties */
+body.fantasy-easel-skin-excalidraw-properties .excalidraw .canvas-node-content .metadata-container {
 	display: none;
 }
-body.fantasy-easel-skin-excalidraw .excalidraw .layer-ui__wrapper__top-right.zen-mode-transition {
+/* excalidraw · toolbar */
+body.fantasy-easel-skin-excalidraw-toolbar .excalidraw .layer-ui__wrapper__top-right.zen-mode-transition {
 	gap: 2px;
 }
-body.fantasy-easel-skin-excalidraw .excalidraw .sidebar-trigger__label-element {
+body.fantasy-easel-skin-excalidraw-toolbar .excalidraw .sidebar-trigger__label-element {
 	display: flex;
 	align-items: center;
 	align-self: stretch;
 }
-body.fantasy-easel-skin-excalidraw .excalidraw .layer-ui__wrapper__top-right {
+body.fantasy-easel-skin-excalidraw-toolbar .excalidraw .layer-ui__wrapper__top-right {
 	display: flex;
 	flex-wrap: wrap;
 }
-body.fantasy-easel-skin-excalidraw .excalidraw .mod-header .inline-title {
+body.fantasy-easel-skin-excalidraw-toolbar .excalidraw .mod-header .inline-title {
 	text-align: center;
 }
-body.fantasy-easel-skin-excalidraw .excalidraw kbd,
-body.fantasy-easel-skin-excalidraw .excalidraw .HintViewer kbd {
+body.fantasy-easel-skin-excalidraw-toolbar .excalidraw kbd,
+body.fantasy-easel-skin-excalidraw-toolbar .excalidraw .HintViewer kbd {
 	font-size: 0.8rem;
 }
-/* kanban */
-body.fantasy-easel-skin-kanban .kanban-plugin,
-body.fantasy-easel-skin-kanban .kanban-plugin__drag-container {
+/* dataview · card */
+body.fantasy-easel-skin-dataview-card .block-language-dataview,
+body.fantasy-easel-skin-dataview-card .block-language-dataviewjs {
+	--dataview-radius: var(--blockquote-border-radius);
+}
+body.fantasy-easel-skin-dataview-card .block-language-dataview.node-insert-event .dataview.dataview-container,
+body.fantasy-easel-skin-dataview-card .markdown-source-view .block-language-dataviewjs.node-insert-event .dataview.result-group,
+body.fantasy-easel-skin-dataview-card .block-language-dataviewjs.node-insert-event table,
+body.fantasy-easel-skin-dataview-card .block-language-dataviewjs.node-insert-event ul[dir="auto"],
+body.fantasy-easel-skin-dataview-card ul.dataview.list-view-ul {
+	background-color: var(--background-primary);
+	border-radius: var(--dataview-radius);
+}
+body.fantasy-easel-skin-dataview-card .block-language-dataviewjs.node-insert-event .task-list-item ul[dir="auto"] {
+	background-color: transparent;
+}
+body.fantasy-easel-skin-dataview-card .block-language-dataviewjs.node-insert-event ul,
+body.fantasy-easel-skin-dataview-card ul.dataview.list-view-ul {
+	padding: 0.5rem;
+}
+body.fantasy-easel-skin-dataview-card .block-language-dataviewjs.node-insert-event div>ul {
+	margin-block-start: 0;
+}
+body.fantasy-easel-skin-dataview-card .block-language-dataviewjs.node-insert-event>p:not(ul) {
+	background-color: var(--background-primary);
+}
+/* dataview · table */
+body.fantasy-easel-skin-dataview-table .block-language-dataview,
+body.fantasy-easel-skin-dataview-table .block-language-dataviewjs {
+	--table-header-size: var(--table-text-size);
+}
+body.fantasy-easel-skin-dataview-table .block-language-dataviewjs.node-insert-event table {
+	width: 100%
+}
+body.fantasy-easel-skin-dataview-table .table-view-table>thead>tr>th {
+	font-size: var(--table-header-size);
+}
+body.fantasy-easel-skin-dataview-table .block-language-dataviewjs.node-insert-event tbody td {
+	font-size: inherit;
+}
+/* dataview · tasks */
+body.fantasy-easel-skin-dataview-tasks .markdown-source-view li.dataview.task-list-basic-item {
+	margin-inline-start: calc(var(--list-indent) * 2.2);
+}
+body.fantasy-easel-skin-dataview-tasks .markdown-preview-view .dataview.dataview-container>ul.contains-task-list {
+	padding-left: 0.5rem;
+}
+body.fantasy-easel-skin-dataview-tasks .markdown-source-view .dataview.result-group>ul.contains-task-list,
+body.fantasy-easel-skin-dataview-tasks .dataview.result-group {
+	padding: 0;
+}
+body.fantasy-easel-skin-dataview-tasks .markdown-source-view .dataview.result-group>ul.contains-task-list>li.dataview.task-list-item,
+body.fantasy-easel-skin-dataview-tasks .markdown-source-view .dataview.dataview-container>ul.contains-task-list>li.dataview.task-list-item {
+	margin-inline-start: 0;
+}
+/* dataview · text */
+body.fantasy-easel-skin-dataview-text .block-language-dataview,
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs {
+	--p-spacing: 0;
+}
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs h1,
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs h2,
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs h3,
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs h4,
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs h6 {
+	--p-spacing: var(--p-spacing-Orin);
+	margin-top: calc(var(--p-spacing) * 4);
+	margin-bottom: calc(var(--p-spacing) * 2);
+}
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs.node-insert-event h4,
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs.node-insert-event .result-group,
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs.node-insert-event tbody,
+body.fantasy-easel-skin-dataview-text .block-language-dataview.node-insert-event tbody,
+body.fantasy-easel-skin-dataview-text .block-language-dataview.node-insert-event,
+body.fantasy-easel-skin-dataview-text ul.dataview.list-view-ul,
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs.node-insert-event ul.contains-task-list,
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs.node-insert-event p ul li a.internal-link {
+	font-size: 0.92rem;
+}
+body.fantasy-easel-skin-dataview-text .block-language-dataviewjs.node-insert-event h4 {
+	padding: 25px 0px 10px 0px !important;
+	color: var(--h2-color);
+	font-size: var(--h4-size);
+}
+body.fantasy-easel-skin-dataview-text .is-live-preview .block-language-dataviewjs>p,
+body.fantasy-easel-skin-dataview-text .is-live-preview .block-language-dataviewjs>span {
+	line-height: 1.4;
+}
+/* kanban · glass */
+body.fantasy-easel-skin-kanban-glass .kanban-plugin,
+body.fantasy-easel-skin-kanban-glass .kanban-plugin__drag-container {
 	--background-modifier-border: var(--kanban-line-border);
 	--background-primary: transparent;
 	--background-secondary: rgba(var(--fantasy-background-color-rgb), 0.4);
+	--background-modifier-form-field: transparent;
+	--kanban-line-border: var(--color-base-30);
+	--kanban-line-border-hover: var(--color-base-60);
+	--text-faint: var(--color-base-80);
+	--hr-color: var(--color-base-50);
+	--h-margin: 0;
+	--p-spacing: 0;
+}
+/* kanban · layout */
+body.fantasy-easel-skin-kanban-layout .kanban-plugin,
+body.fantasy-easel-skin-kanban-layout .kanban-plugin__drag-container {
+	--lane-width: 320px;
+}
+body.fantasy-easel-skin-kanban-layout .kanban-plugin__board>div {
+	flex-wrap: wrap;
+	gap: 20px 5px;
+	overflow: auto;
+}
+body.fantasy-easel-skin-kanban-layout .kanban-plugin__lane {
+	max-height: 35vh;
+	border-radius: 6px;
+}
+/* kanban · lanes */
+body.fantasy-easel-skin-kanban-lanes .kanban-plugin,
+body.fantasy-easel-skin-kanban-lanes .kanban-plugin__drag-container {
 	--kanban-header-wrapper-bg-accent: hsla(var(--accent-h), calc(var(--accent-s) + 20%), calc(var(--accent-l) - 10%), 0.4);
 	--kanban-header-wrapper-bg: rgba(var(--fantasy-background-color-rgb), 0.8);
+	--kanban-line-min-height: 2.3rem;
+}
+body.fantasy-easel-skin-kanban-lanes .kanban-plugin__lane-header-wrapper {
+	background-color: var(--kanban-header-wrapper-bg);
+	height: calc(var(--kanban-line-min-height) + 0.7rem);
+	border-radius: 6px 6px 0px 0px;
+}
+body.fantasy-easel-skin-kanban-lanes .kanban-plugin__lane-header-wrapper p {
+	font-size: 1.1em;
+	color: var(--text-faint);
+}
+body.fantasy-easel-skin-kanban-lanes .kanban-plugin__lane-wrapper:first-child .kanban-plugin__lane-header-wrapper,
+body.fantasy-easel-skin-kanban-lanes .kanban-plugin__lane-wrapper:nth-last-child(2) .kanban-plugin__lane-header-wrapper {
+	background-color: var(--kanban-header-wrapper-bg-accent);
+}
+body.fantasy-easel-skin-kanban-lanes .kanban-plugin__lane-wrapper:first-child .kanban-plugin__lane-header-wrapper a.kanban-plugin__lane-settings-button.clickable-icon,
+body.fantasy-easel-skin-kanban-lanes .kanban-plugin__lane-wrapper:nth-last-child(2) .kanban-plugin__lane-header-wrapper a.kanban-plugin__lane-settings-button.clickable-icon {
+	border-color: transparent;
+}
+/* kanban · cards */
+body.fantasy-easel-skin-kanban-cards .kanban-plugin,
+body.fantasy-easel-skin-kanban-cards .kanban-plugin__drag-container {
+	--kanban-line-min-height: 2.3rem;
+	--kanban-line-border: var(--color-base-30);
+	--kanban-line-border-hover: var(--color-base-60);
+}
+body.fantasy-easel-skin-kanban-cards .kanban-plugin__item-title-wrapper {
+	min-height: var(--kanban-line-min-height);
+}
+body.fantasy-easel-skin-kanban-cards .kanban-plugin__item:hover {
+	border-color: var(--kanban-line-border-hover);
+}
+body.fantasy-easel-skin-kanban-cards .kanban-plugin__item-button-wrapper {
+	padding: 0;
+}
+body.fantasy-easel-skin-kanban-cards button.kanban-plugin__new-item-button {
+	height: 3.5em;
+	box-shadow: none;
+}
+body.fantasy-easel-skin-kanban-cards a.kanban-plugin__lane-settings-button.clickable-icon {
+	border: 1px solid var(--background-secondary);
+}
+body.fantasy-easel-skin-kanban-cards a.kanban-plugin__lane-settings-button.clickable-icon:hover,
+body.fantasy-easel-skin-kanban-cards a.kanban-plugin__item-postfix-button.clickable-icon:hover,
+body.fantasy-easel-skin-kanban-cards button.kanban-plugin__new-item-button:hover {
+	background-color: var(--background-primary-alt);
+	border: 1px solid var(--kanban-line-border);
+	cursor: pointer;
+	color: var(--color-base-100);
+}
+body.fantasy-easel-skin-kanban-cards a.kanban-plugin__item-postfix-button.is-enabled.clickable-icon svg {
+	--icon-stroke: 4px;
+	color: red;
+}
+/* kanban · headings */
+body.fantasy-easel-skin-kanban-headings .kanban-plugin,
+body.fantasy-easel-skin-kanban-headings .kanban-plugin__drag-container {
 	--kanban-h3-color: var(--h2-color);
 	--kanban-h4-color: var(--h3-color);
 	--kanban-h5-color: var(--h4-color);
 	--kanban-h3-size: 1.2em;
 	--kanban-h4-size: 1em;
 	--kanban-h5-size: 1em;
-	--kanban-line-border: var(--color-base-30);
-	--kanban-line-border-hover: var(--color-base-60);
-	--kanban-line-min-height: 2.3rem;
-	--background-modifier-form-field: transparent;
-	--h-margin: 0;
-	--p-spacing: 0;
-	--text-faint: var(--color-base-80);
-	--lane-width: 320px;
-	--hr-color: var(--color-base-50);
 }
-body.fantasy-easel-skin-kanban .kanban-plugin__board>div {
-	flex-wrap: wrap;
-	gap: 20px 5px;
-	overflow: auto;
-}
-body.fantasy-easel-skin-kanban .kanban-plugin__lane {
-	max-height: 35vh;
-	border-radius: 6px;
-}
-body.fantasy-easel-skin-kanban .kanban-plugin__lane-header-wrapper {
-	background-color: var(--kanban-header-wrapper-bg);
-	height: calc(var(--kanban-line-min-height) + 0.7rem);
-	border-radius: 6px 6px 0px 0px;
-}
-body.fantasy-easel-skin-kanban .kanban-plugin__lane-header-wrapper p {
-	font-size: 1.1em;
-	color: var(--text-faint);
-}
-body.fantasy-easel-skin-kanban .kanban-plugin__lane-wrapper:first-child .kanban-plugin__lane-header-wrapper,
-body.fantasy-easel-skin-kanban .kanban-plugin__lane-wrapper:nth-last-child(2) .kanban-plugin__lane-header-wrapper {
-	background-color: var(--kanban-header-wrapper-bg-accent);
-}
-body.fantasy-easel-skin-kanban .kanban-plugin__lane-wrapper:first-child .kanban-plugin__lane-header-wrapper a.kanban-plugin__lane-settings-button.clickable-icon,
-body.fantasy-easel-skin-kanban .kanban-plugin__lane-wrapper:nth-last-child(2) .kanban-plugin__lane-header-wrapper a.kanban-plugin__lane-settings-button.clickable-icon {
-	border-color: transparent;
-}
-body.fantasy-easel-skin-kanban .kanban-plugin__item-title-wrapper {
-	min-height: var(--kanban-line-min-height);
-}
-body.fantasy-easel-skin-kanban .kanban-plugin__markdown-preview-view h3 {
+body.fantasy-easel-skin-kanban-headings .kanban-plugin__markdown-preview-view h3 {
 	color: var(--kanban-h3-color);
 }
-body.fantasy-easel-skin-kanban .kanban-plugin__markdown-preview-view h4 {
+body.fantasy-easel-skin-kanban-headings .kanban-plugin__markdown-preview-view h4 {
 	color: var(--kanban-h4-color);
 	font-size: var(--kanban-h4-size);
 }
-body.fantasy-easel-skin-kanban .kanban-plugin__markdown-preview-view h5 {
+body.fantasy-easel-skin-kanban-headings .kanban-plugin__markdown-preview-view h5 {
 	color: var(--kanban-h5-color);
 	font-size: var(--kanban-h5-size);
 }
-body.fantasy-easel-skin-kanban .kanban-plugin__board mark[data-markjs="true"] {
+/* kanban · search */
+body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="true"] {
 	font-size: 1.5rem;
-}
-body.fantasy-easel-skin-kanban .kanban-plugin__item:hover {
-	border-color: var(--kanban-line-border-hover);
-}
-body.fantasy-easel-skin-kanban .kanban-plugin__item-button-wrapper {
-	padding: 0;
-}
-body.fantasy-easel-skin-kanban button.kanban-plugin__new-item-button {
-	height: 3.5em;
-	box-shadow: none;
-}
-body.fantasy-easel-skin-kanban a.kanban-plugin__lane-settings-button.clickable-icon {
-	border: 1px solid var(--background-secondary);
-}
-body.fantasy-easel-skin-kanban a.kanban-plugin__lane-settings-button.clickable-icon:hover,
-body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.clickable-icon:hover,
-body.fantasy-easel-skin-kanban button.kanban-plugin__new-item-button:hover {
-	background-color: var(--background-primary-alt);
-	border: 1px solid var(--kanban-line-border);
-	cursor: pointer;
-	color: var(--color-base-100);
-}
-body.fantasy-easel-skin-kanban a.kanban-plugin__item-postfix-button.is-enabled.clickable-icon svg {
-	--icon-stroke: 4px;
-	color: red;
 }
 /* END generated: plugin skins */
 

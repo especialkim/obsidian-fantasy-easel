@@ -1,38 +1,10 @@
-/* Fantasy Easel skin: Dataview. Moved from the Fantasy theme (2026-10-21). Uses theme variables only. */
+/* Fantasy Easel plugin style: Dataview. Uses theme variables only. Each "part" is one switch
+   (body.fantasy-easel-skin-dataview-<part>). */
+
+/* part: card — query results sit on a rounded glass card */
 .block-language-dataview,
 .block-language-dataviewjs {
 	--dataview-radius: var(--blockquote-border-radius);
-	--p-spacing: 0;
-	--table-header-size: var(--table-text-size);
-}
-
-.block-language-dataviewjs h1,
-.block-language-dataviewjs h2,
-.block-language-dataviewjs h3,
-.block-language-dataviewjs h4,
-.block-language-dataviewjs h6 {
-	--p-spacing: var(--p-spacing-Orin);
-	margin-top: calc(var(--p-spacing) * 4);
-	margin-bottom: calc(var(--p-spacing) * 2);
-}
-
-.block-language-dataviewjs.node-insert-event table {
-	width: 100%
-}
-
-.table-view-table>thead>tr>th {
-	font-size: var(--table-header-size);
-}
-
-.block-language-dataviewjs.node-insert-event h4,
-.block-language-dataviewjs.node-insert-event .result-group,
-.block-language-dataviewjs.node-insert-event tbody,
-.block-language-dataview.node-insert-event tbody,
-.block-language-dataview.node-insert-event,
-ul.dataview.list-view-ul,
-.block-language-dataviewjs.node-insert-event ul.contains-task-list,
-.block-language-dataviewjs.node-insert-event p ul li a.internal-link {
-	font-size: 0.92rem;
 }
 
 .block-language-dataview.node-insert-event .dataview.dataview-container,
@@ -48,12 +20,6 @@ ul.dataview.list-view-ul {
 	background-color: transparent;
 }
 
-.block-language-dataviewjs.node-insert-event h4 {
-	padding: 25px 0px 10px 0px !important;
-	color: var(--h2-color);
-	font-size: var(--h4-size);
-}
-
 .block-language-dataviewjs.node-insert-event ul,
 ul.dataview.list-view-ul {
 	padding: 0.5rem;
@@ -63,19 +29,29 @@ ul.dataview.list-view-ul {
 	margin-block-start: 0;
 }
 
-.block-language-dataviewjs.node-insert-event tbody td {
-	font-size: inherit;
-}
-
-.is-live-preview .block-language-dataviewjs>p,
-.is-live-preview .block-language-dataviewjs>span {
-	line-height: 1.4;
-}
-
 .block-language-dataviewjs.node-insert-event>p:not(ul) {
 	background-color: var(--background-primary);
 }
 
+/* part: table — tables fill the width, header and cells match the theme */
+.block-language-dataview,
+.block-language-dataviewjs {
+	--table-header-size: var(--table-text-size);
+}
+
+.block-language-dataviewjs.node-insert-event table {
+	width: 100%
+}
+
+.table-view-table>thead>tr>th {
+	font-size: var(--table-header-size);
+}
+
+.block-language-dataviewjs.node-insert-event tbody td {
+	font-size: inherit;
+}
+
+/* part: tasks — task lists in results line up with the note */
 .markdown-source-view li.dataview.task-list-basic-item {
 	margin-inline-start: calc(var(--list-indent) * 2.2);
 }
@@ -92,4 +68,42 @@ ul.dataview.list-view-ul {
 .markdown-source-view .dataview.result-group>ul.contains-task-list>li.dataview.task-list-item,
 .markdown-source-view .dataview.dataview-container>ul.contains-task-list>li.dataview.task-list-item {
 	margin-inline-start: 0;
+}
+
+/* part: text — slightly smaller result text, DataviewJS headings in theme colors */
+.block-language-dataview,
+.block-language-dataviewjs {
+	--p-spacing: 0;
+}
+
+.block-language-dataviewjs h1,
+.block-language-dataviewjs h2,
+.block-language-dataviewjs h3,
+.block-language-dataviewjs h4,
+.block-language-dataviewjs h6 {
+	--p-spacing: var(--p-spacing-Orin);
+	margin-top: calc(var(--p-spacing) * 4);
+	margin-bottom: calc(var(--p-spacing) * 2);
+}
+
+.block-language-dataviewjs.node-insert-event h4,
+.block-language-dataviewjs.node-insert-event .result-group,
+.block-language-dataviewjs.node-insert-event tbody,
+.block-language-dataview.node-insert-event tbody,
+.block-language-dataview.node-insert-event,
+ul.dataview.list-view-ul,
+.block-language-dataviewjs.node-insert-event ul.contains-task-list,
+.block-language-dataviewjs.node-insert-event p ul li a.internal-link {
+	font-size: 0.92rem;
+}
+
+.block-language-dataviewjs.node-insert-event h4 {
+	padding: 25px 0px 10px 0px !important;
+	color: var(--h2-color);
+	font-size: var(--h4-size);
+}
+
+.is-live-preview .block-language-dataviewjs>p,
+.is-live-preview .block-language-dataviewjs>span {
+	line-height: 1.4;
 }

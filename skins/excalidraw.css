@@ -1,12 +1,14 @@
-/* Fantasy Easel skin: Excalidraw. Moved from the Fantasy theme (2026-10-22). Uses theme variables only.
-   Pair with the Excalidraw settings Easel offers to set (Settings → Fantasy Easel → Plugin skins). */
-/* Excalidraw dark paints `.excalidraw.excalidraw-container.theme--dark` (0,3,0); match it so the wallpaper shows in both modes. */
+/* Fantasy Easel plugin style: Excalidraw. Uses theme variables only. Each "part" is one switch
+   (body.fantasy-easel-skin-excalidraw-<part>). canvas and embeds pair with the Excalidraw settings Easel offers to set. */
+
+/* part: canvas — the canvas is see-through, the Fantasy wallpaper shows */
 .excalidraw-wrapper,
 .excalidraw,
 .excalidraw.excalidraw-container.theme--dark {
 	background-color: transparent;
 }
 
+/* part: embeds — embedded notes on a tinted glass card */
 /* !important: Excalidraw writes its embed colors in its own <style> with !important */
 .excalidraw .excalidraw__embeddable__outer .theme-dark {
 	--background-primary: rgba(var(--fantasy-background-color-rgb), var(--background-opacity)) !important;
@@ -20,15 +22,16 @@
 	padding: var(--size-4-3) var(--size-4-6);
 }
 
-/* Embedded notes: tinted glass card, no properties block. */
 .excalidraw .canvas-node-content.markdown-embed.is-loaded {
 	background: var(--background-modifier-active-hover);
 }
 
+/* part: properties — no properties block in embedded notes */
 .excalidraw .canvas-node-content .metadata-container {
 	display: none;
 }
 
+/* part: toolbar — toolbar, sidebar button, title and key hints fit the theme */
 .excalidraw .layer-ui__wrapper__top-right.zen-mode-transition {
 	gap: 2px;
 }

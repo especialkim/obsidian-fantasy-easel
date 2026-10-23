@@ -68,21 +68,32 @@ function backgroundCss() {
   ].join("\n");
 }
 
-/** Plugin skins: skins/<id>.css with every selector behind body.fantasy-easel-skin-<id>. */
+/** Plugin styles: skins/<id>.css, split by "part: <part>" comment markers. Every selector of a
+ *  part goes behind body.fantasy-easel-skin-<id>-<part> (one switch per part, src/skins.ts). */
 const SKIN_BEGIN = "/* BEGIN generated: plugin skins (skins/*.css, scripts/build.js). Do not edit. */";
 const SKIN_END = "/* END generated: plugin skins */";
 function skinCss() {
-  const dir = path.join(root, "skins");
+  const { SKINS } = loadTs("src/skins.ts");
   const out = [SKIN_BEGIN];
-  for (const f of fs.readdirSync(dir).filter((f) => f.endsWith(".css")).sort()) {
-    const id = f.replace(/\.css$/, "");
-    const css = fs.readFileSync(path.join(dir, f), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    if (/@/.test(css)) throw new Error(`skins/${f}: at-rules are not supported by the skin wrapper`);
-    out.push(`/* ${id} */`);
-    for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      const sel = m[1].split(",").map((s) => `body.fantasy-easel-skin-${id} ${s.trim()}`).join(",\n");
-      out.push(`${sel} {${m[2].replace(/\s+$/, "")}\n}`);
+  for (const skin of SKINS) {
+    const file = path.join(root, "skins", `${skin.id}.css`);
+    const text = fs.readFileSync(file, "utf8");
+    const pieces = text.split(/\/\*\s*part:\s*([\w-]+)[^*]*\*\//);
+    const found = [];
+    for (let i = 1; i < pieces.length; i += 2) {
+      const part = pieces[i];
+      if (!skin.parts.some((p) => p.id === part)) throw new Error(`skins/${skin.id}.css: part "${part}" is not in src/skins.ts`);
+      found.push(part);
+      const css = pieces[i + 1].replace(/\/\*[\s\S]*?\*\//g, "");
+      if (/@/.test(css)) throw new Error(`skins/${skin.id}.css: at-rules are not supported by the skin wrapper`);
+      out.push(`/* ${skin.id} · ${part} */`);
+      for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+        const sel = m[1].split(",").map((x) => `body.fantasy-easel-skin-${skin.id}-${part} ${x.trim()}`).join(",\n");
+        out.push(`${sel} {${m[2].replace(/\s+$/, "")}\n}`);
+      }
     }
+    for (const p of skin.parts) if (!found.includes(p.id)) throw new Error(`skins/${skin.id}.css: no part "${p.id}"`);
+    if (/\{/.test(pieces[0].replace(/\/\*[\s\S]*?\*\//g, ""))) throw new Error(`skins/${skin.id}.css: rules before the first part marker`);
   }
   out.push(SKIN_END);
   return out.join("\n");
