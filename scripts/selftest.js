@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Source checks (no Obsidian needed):
 // 1. catalog classes exist where they must (theme.css or generated styles.css); @settings covered;
-//    theme has no network resources and shows Plasma still (same picture as src/backgrounds.ts)
+//    theme has no network resources and shows the default background still (same picture as src/backgrounds.ts)
 // 2. plugin UI CSS and src/ (except picture data in backgrounds.ts) have no color literals (UI rule 1-1)
 // 3. the marker class alone changes nothing (accent: gated by its own class)
 // 4. Store: re-subscribing listener does not loop
@@ -12,7 +12,14 @@ const path = require("path");
 const esbuild = require("esbuild");
 
 const root = path.join(__dirname, "..");
-const theme = fs.readFileSync(path.join(root, "../../../../.obsidian/themes/Fantasy/theme.css"), "utf8");
+// The checks compare the plugin with the Fantasy theme. Where is theme.css: FANTASY_THEME, else
+// the vault this is developed in, else a theme checkout next to this repo.
+const themePath = [process.env.FANTASY_THEME, path.join(root, "../../../../.obsidian/themes/Fantasy/theme.css"), path.join(root, "../obsidian-theme-fantasy/theme.css")].find((p) => p && fs.existsSync(p));
+if (!themePath) {
+  console.log("skipped: Fantasy theme.css not found. Set FANTASY_THEME=<path to theme.css> (https://github.com/especialkim/obsidian-theme-fantasy).");
+  process.exit(0);
+}
+const theme = fs.readFileSync(themePath, "utf8");
 const styles = fs.readFileSync(path.join(root, "styles.css"), "utf8");
 
 let fail = 0;
@@ -30,7 +37,7 @@ const { CSS_BACKGROUNDS, resolveHue } = loadTs("src/backgrounds.ts");
 // ---------- 1. classes ----------
 check(THEME_COLORS.length === 6, `theme colors: expected 6, got ${THEME_COLORS.length}`);
 for (const c of THEME_COLORS) check(new RegExp(`\\n\\.${c.cls} \\{`).test(theme), `theme.css has no .${c.cls}`);
-// theme: no network resources, no background choice; Plasma still = Easel's Plasma base layer
+// theme: no network resources, no background choice; its still background = Easel's default background
 check(!/url\(\s*["']?https?:/.test(theme), "theme.css loads a network resource");
 check(!theme.includes("fantasy-theme-background"), "theme.css still has background classes");
 {

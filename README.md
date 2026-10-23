@@ -6,12 +6,12 @@ The theme has no Style Settings options; everything is set here.
 - **Look**: palette (6: Graphite, Sky, Ocean, Emerald, Mystic, Orchid), theme accent, card layout
 - **Background**: CSS backgrounds (still and moving), 19 four-layer "stage" backgrounds, your own pictures with names (a vault picture, a web address, or a file on this computer)
 - **Style panel** (command "Open style panel", a sidebar tab): the main switches and 11 style sliders (glass per dark / light mode, cards, editor, stage speed), each with a reset to the default
-- **Motion**: auto (follows OS reduce motion) / on / off, optional pause while Obsidian is not focused
+- **Motion**: on (default) / auto (follows OS reduce motion) / off, optional pause while Obsidian is not focused
 - **Plugin styles**: Dataview, Excalidraw, Kanban, each part on or off on its own page. The Excalidraw style can also set the Excalidraw options it needs (follow the Obsidian theme, no dynamic styling), only after you confirm, with Restore
-- **Gallery**: every background side by side in day and night, under a glass card
+- **Gallery**: every background under a glass card that follows your glass settings: day and night side by side (command "Background gallery"), or the current mode in two columns in the style panel
 - **Status bar**: palette, previous / next background, gallery, accent, cards, motion, dark / light. Choose the buttons and their order in settings
 
-Without this plugin the theme shows the Graphite palette, the Plasma background (still) and card layout.
+Defaults: Graphite palette, theme accent on, Silk background, card layout, 8px card gap. Without this plugin the theme shows the Graphite palette, the Silk background (still) and card layout.
 
 With any other theme the plugin stays idle (no classes, no background, no status bar) and its settings only point to the Fantasy theme. It switches on by itself when Fantasy becomes the current theme.
 
@@ -29,12 +29,12 @@ Copy `manifest.json`, `main.js` and `styles.css` into `<vault>/.obsidian/plugins
 ```bash
 npm install
 npm run check   # TypeScript
-npm test        # selftest (reads the Fantasy theme at ../../../../.obsidian/themes/Fantasy/theme.css)
+npm test        # selftest against the Fantasy theme: FANTASY_THEME=<path to theme.css> (skipped if not found)
 npm run build   # writes the generated parts of styles.css and main.js
 ```
 
 - `src/backgrounds.ts`, `src/stages.ts`: background sources. `styles.css` blocks marked "generated" are written by the build.
-- `skins/*.css`: plugin skins; the build puts every selector behind `body.fantasy-easel-skin-<id>`.
+- `skins/<id>.css`: plugin styles, split into parts by `/* part: <part> — … */` comments; the build puts every selector of a part behind `body.fantasy-easel-skin-<id>-<part>` (parts listed in `src/skins.ts`).
 
 ## License
 
