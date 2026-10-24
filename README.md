@@ -36,6 +36,10 @@ npm run build   # writes the generated parts of styles.css and main.js
 - `src/backgrounds.ts`, `src/stages.ts`: background sources. `styles.css` blocks marked "generated" are written by the build.
 - `skins/<id>.css`: plugin styles, split into parts by `/* part: <part> — … */` comments; the build puts every selector of a part behind `body.fantasy-easel-skin-<id>-<part>` (parts listed in `src/skins.ts`).
 
+## Support
+
+If you enjoy it, you can [buy me a coffee](https://buymeacoffee.com/yongminkiml). ☕️
+
 ## License
 
 MIT
