@@ -1616,24 +1616,48 @@ async function restoreExcalidraw(app, store) {
   new import_obsidian5.Notice("Excalidraw settings restored. Reopen open drawings to see it.");
 }
 var ExcalidrawSettingsModal = class extends import_obsidian5.Modal {
-  constructor(app, store) {
+  constructor(app, store, turnOn = null) {
     super(app);
     this.store = store;
+    this.turnOn = turnOn;
+    this.decided = false;
   }
   onOpen() {
-    this.setTitle("Match Excalidraw settings");
     const diff = excalidrawDiff(this.app);
-    this.contentEl.createEl("p", { text: "The Excalidraw style shows the Fantasy wallpaper only when Excalidraw follows the Obsidian theme. Fantasy Easel will change these Excalidraw settings:" });
-    const ul = this.contentEl.createEl("ul");
-    for (const d of diff) ul.createEl("li", { text: `${d.w.label}: ${show(d.now)} \u2192 ${show(d.w.value)}` });
-    this.contentEl.createEl("p", { text: "The current values are kept: Settings \u2192 Fantasy Easel \u2192 Plugin styles \u2192 Excalidraw \u2192 Restore puts them back." });
-    new import_obsidian5.Setting(this.contentEl).addButton((b) => b.setButtonText("Not now").onClick(() => this.close())).addButton((b) => b.setButtonText("Change Excalidraw settings").setCta().onClick(async () => {
-      this.close();
-      await apply(this.app, this.store);
-    }));
+    const el = this.contentEl;
+    this.setTitle(this.turnOn ? "Turn on the Excalidraw style" : "Match Excalidraw settings");
+    if (this.turnOn) el.createEl("p", { text: "The Excalidraw style shows the Fantasy wallpaper behind your drawings. For that, Excalidraw has to follow the Obsidian theme." });
+    if (diff.length) {
+      el.createEl("p", { text: "Fantasy Easel can change these Excalidraw settings for you:" });
+      const ul = el.createEl("ul");
+      for (const d of diff) ul.createEl("li", { text: `${d.w.label}: ${show(d.now)} \u2192 ${show(d.w.value)}` });
+      el.createEl("p", { text: "This changes another plugin's settings. The current values are kept, and Settings \u2192 Fantasy Easel \u2192 Plugin styles \u2192 Excalidraw \u2192 Restore puts them back." });
+    } else {
+      el.createEl("p", { text: "Excalidraw's settings already match." });
+    }
+    el.createEl("p", { text: "One more step in Excalidraw itself: give each drawing a transparent background (canvas background color), or the wallpaper stays hidden behind it." });
+    const row = new import_obsidian5.Setting(el);
+    if (this.turnOn) {
+      const done = (on, change) => async () => {
+        this.decided = true;
+        this.close();
+        if (change) await apply(this.app, this.store);
+        this.turnOn?.(on);
+      };
+      row.addButton((b) => b.setButtonText("Cancel").onClick(done(false, false)));
+      if (diff.length) row.addButton((b) => b.setButtonText("Turn on only").onClick(done(true, false)));
+      row.addButton((b) => b.setButtonText(diff.length ? "Turn on and change settings" : "Turn on").setCta().onClick(done(true, diff.length > 0)));
+    } else {
+      row.addButton((b) => b.setButtonText("Not now").onClick(() => this.close()));
+      row.addButton((b) => b.setButtonText("Change Excalidraw settings").setCta().onClick(async () => {
+        this.close();
+        await apply(this.app, this.store);
+      }));
+    }
   }
   onClose() {
     this.contentEl.empty();
+    if (this.turnOn && !this.decided) this.turnOn(false);
   }
 };
 
@@ -1811,8 +1835,14 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
                 render: (setting) => {
                   setting.addToggle((t) => t.setValue(on()).onChange((v) => {
                     if (v === on()) return;
+                    if (isExcalidraw && v && excalidrawAvailable(this.app)) {
+                      new ExcalidrawSettingsModal(this.app, store, (yes) => {
+                        if (yes) setSkin(sk.id, true);
+                        else t.setValue(false);
+                      }).open();
+                      return;
+                    }
                     setSkin(sk.id, v);
-                    if (isExcalidraw && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
                   }));
                 }
               },

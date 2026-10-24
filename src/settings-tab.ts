@@ -191,9 +191,16 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
                 render: (setting) => {
                   setting.addToggle((t) => t.setValue(on()).onChange((v) => {
                     if (v === on()) return;
+                    // the Excalidraw style changes how drawings look and may change Excalidraw's settings:
+                    // warn and let the user make one final choice before anything is turned on
+                    if (isExcalidraw && v && excalidrawAvailable(this.app)) {
+                      new ExcalidrawSettingsModal(this.app, store, (yes) => {
+                        if (yes) setSkin(sk.id, true);
+                        else t.setValue(false); // cancel: the switch goes back to off (onChange returns: already off)
+                      }).open();
+                      return;
+                    }
                     setSkin(sk.id, v);
-                    // turning the Excalidraw style on: offer the Excalidraw settings it needs
-                    if (isExcalidraw && v && excalidrawDiff(this.app).length) new ExcalidrawSettingsModal(this.app, store).open();
                   }));
                 },
               },

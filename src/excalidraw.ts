@@ -71,28 +71,58 @@ export async function restoreExcalidraw(app: App, store: Store) {
   new Notice("Excalidraw settings restored. Reopen open drawings to see it.");
 }
 
-/** Lists what changes (now → new) and asks before touching Excalidraw's settings. */
+/**
+ * Asks before touching Excalidraw's settings, listing what changes (now → new).
+ * - match: from "Match settings…" (the style is already on): change them, or not now.
+ * - turnOn: from the Excalidraw style toggle (2026-10-24 user): a warning and one final choice —
+ *   turn on and change the settings, turn on only, or cancel (nothing changes, the toggle stays off).
+ *   Closing the window counts as cancel.
+ */
 export class ExcalidrawSettingsModal extends Modal {
-  constructor(app: App, private store: Store) {
+  private decided = false;
+
+  constructor(app: App, private store: Store, private turnOn: ((on: boolean) => void) | null = null) {
     super(app);
   }
 
   onOpen() {
-    this.setTitle("Match Excalidraw settings");
     const diff = excalidrawDiff(this.app);
-    this.contentEl.createEl("p", { text: "The Excalidraw style shows the Fantasy wallpaper only when Excalidraw follows the Obsidian theme. Fantasy Easel will change these Excalidraw settings:" });
-    const ul = this.contentEl.createEl("ul");
-    for (const d of diff) ul.createEl("li", { text: `${d.w.label}: ${show(d.now)} → ${show(d.w.value)}` });
-    this.contentEl.createEl("p", { text: "The current values are kept: Settings → Fantasy Easel → Plugin styles → Excalidraw → Restore puts them back." });
-    new Setting(this.contentEl)
-      .addButton((b) => b.setButtonText("Not now").onClick(() => this.close()))
-      .addButton((b) => b.setButtonText("Change Excalidraw settings").setCta().onClick(async () => {
+    const el = this.contentEl;
+    this.setTitle(this.turnOn ? "Turn on the Excalidraw style" : "Match Excalidraw settings");
+    if (this.turnOn) el.createEl("p", { text: "The Excalidraw style shows the Fantasy wallpaper behind your drawings. For that, Excalidraw has to follow the Obsidian theme." });
+    if (diff.length) {
+      el.createEl("p", { text: "Fantasy Easel can change these Excalidraw settings for you:" });
+      const ul = el.createEl("ul");
+      for (const d of diff) ul.createEl("li", { text: `${d.w.label}: ${show(d.now)} → ${show(d.w.value)}` });
+      el.createEl("p", { text: "This changes another plugin's settings. The current values are kept, and Settings → Fantasy Easel → Plugin styles → Excalidraw → Restore puts them back." });
+    } else {
+      el.createEl("p", { text: "Excalidraw's settings already match." });
+    }
+    el.createEl("p", { text: "One more step in Excalidraw itself: give each drawing a transparent background (canvas background color), or the wallpaper stays hidden behind it." });
+
+    const row = new Setting(el);
+    if (this.turnOn) {
+      const done = (on: boolean, change: boolean) => async () => {
+        this.decided = true;
+        this.close();
+        if (change) await apply(this.app, this.store);
+        this.turnOn?.(on);
+      };
+      row.addButton((b) => b.setButtonText("Cancel").onClick(done(false, false)));
+      if (diff.length) row.addButton((b) => b.setButtonText("Turn on only").onClick(done(true, false)));
+      row.addButton((b) => b.setButtonText(diff.length ? "Turn on and change settings" : "Turn on").setCta().onClick(done(true, diff.length > 0)));
+    } else {
+      row.addButton((b) => b.setButtonText("Not now").onClick(() => this.close()));
+      row.addButton((b) => b.setButtonText("Change Excalidraw settings").setCta().onClick(async () => {
         this.close();
         await apply(this.app, this.store);
       }));
+    }
   }
 
   onClose() {
     this.contentEl.empty();
+    // closed without a choice (Esc, ×): same as cancel
+    if (this.turnOn && !this.decided) this.turnOn(false);
   }
 }
