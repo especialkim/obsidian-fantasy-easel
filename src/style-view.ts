@@ -2,8 +2,9 @@ import { ItemView, Setting, SettingGroup, setTooltip, type WorkspaceLeaf } from 
 import { renderGallery } from "./gallery";
 import type FantasyEaselPlugin from "./main";
 import { stepBackground, stepColor } from "./menus";
-import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_OPTIONS, paletteDesc } from "./options";
-import { DEFAULT_LOOK, DEFAULT_SETTINGS, type Motion } from "./settings";
+import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
+import { isLight } from "./apply";
+import { DEFAULT_LOOK, DEFAULT_SETTINGS, type Motion, type MotionQuality } from "./settings";
 import { toggleDarkLight } from "./statusbar";
 import { isDefaultValue, storeKey, TUNING_GROUPS, TUNINGS, type Mode, type Tuning, type TuningGroup } from "./tuning";
 
@@ -191,18 +192,23 @@ export class StyleView extends ItemView {
     const tuned = (id: TuningGroup) => () => keysOf(id).every((k) => !(k in store.settings.tuning));
 
     // ---------- Background: picture, motion, stage speed ----------
-    const bgDefault = () => look().background === DEFAULT_LOOK.background && store.settings.motion === DEFAULT_SETTINGS.motion && store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused && tuned("background")();
+    const bgDefault = () => look().background === DEFAULT_LOOK.background && store.settings.motion === DEFAULT_SETTINGS.motion && store.settings.motionQuality === null && store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused && tuned("background")();
     const bgG = group("Background", {
       isDefault: bgDefault,
       run: () => {
         setTuning(keysOf("background"), null);
-        store.set({ look: { ...look(), background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused });
+        store.set({ look: { ...look(), background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, motionQuality: null, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused });
       },
     });
     picker(bgG, "Background", "CSS, motion, stage or one of your pictures.", backgroundOptions(look().images), () => look().background, (v) => store.setLook({ background: v }), (dir) => stepBackground(store, dir), DEFAULT_LOOK.background);
-    row(bgG, "Motion", "Moving backgrounds. Auto follows the OS reduce-motion setting.", () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion }), (s) => s.addDropdown((d) => {
+    row(bgG, "Motion", MOTION_DESC, () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion }), (s) => s.addDropdown((d) => {
       d.addOptions(MOTION_OPTIONS).onChange((v) => this.syncing || store.set({ motion: v as Motion }));
       this.syncs.push(() => d.setValue(store.settings.motion));
+    }));
+    // not chosen = the OS default (Light on Windows); reset goes back to that
+    row(bgG, "Motion quality", QUALITY_DESC, () => store.settings.motionQuality === null, () => store.set({ motionQuality: null }), (s) => s.addDropdown((d) => {
+      d.addOptions(QUALITY_OPTIONS).onChange((v) => this.syncing || store.set({ motionQuality: v as MotionQuality }));
+      this.syncs.push(() => d.setValue(store.settings.motionQuality ?? (isLight(store.settings, document.body.hasClass("mod-windows")) ? "light" : "full")));
     }));
     row(bgG, "Pause when unfocused", "Stop moving backgrounds while you work in another app.", () => store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused, () => store.set({ pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused }), (s) => s.addToggle((t) => {
       t.onChange((v) => this.syncing || store.set({ pauseUnfocused: v }));

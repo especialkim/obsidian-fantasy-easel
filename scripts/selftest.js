@@ -28,7 +28,8 @@ global.window = { setTimeout: () => 0, clearTimeout: () => {}, matchMedia: () =>
 function loadTs(file) {
   const out = esbuild.buildSync({ entryPoints: [path.join(root, file)], bundle: true, platform: "node", format: "cjs", write: false, external: ["obsidian"] }).outputFiles[0].text;
   const mod = { exports: {} };
-  new Function("module", "exports", "require", out)(mod, mod.exports, require);
+  // "obsidian" exists only inside the app: a stub is enough for these checks
+  new Function("module", "exports", "require", out)(mod, mod.exports, (m) => (m === "obsidian" ? { Notice: class {}, Platform: {} } : require(m)));
   return mod.exports;
 }
 const { THEME_COLORS, CSS_BG, DEFAULT_BACKGROUND, toCssUrl, allBackgrounds } = loadTs("src/catalog.ts");
@@ -98,6 +99,15 @@ for (const t of TUNINGS) check(t.def.dark >= t.min && t.def.dark <= t.max && t.d
 check(!("--cardview-gap" in tuningVars({ cardGap: 8 }, false, "dark")), "card tuning applied with the card layout off");
 check(tuningVars({ "opacity.dark": 5 }, true, "dark")["--background-opacity"] === "0.95", "tuning values are not clamped");
 const { normalize } = loadTs("src/settings.ts");
+// motion: stored values unchanged (on / auto / off); motion quality: not set = OS default (2026-10-24)
+const { isLight, wantedClasses } = loadTs("src/apply.ts");
+for (const m of ["on", "auto", "off"]) check(normalize({ motion: m }).motion === m, `motion "${m}" not kept`);
+check(normalize({}).motionQuality === null && normalize({ motionQuality: "fast" }).motionQuality === null && normalize({ motionQuality: "light" }).motionQuality === "light", "motion quality normalize");
+const base = normalize({});
+check(!isLight(base, false) && isLight(base, true), "light path default: Windows yes, others no");
+check(!isLight({ ...base, motionQuality: "full" }, true) && isLight({ ...base, motionQuality: "light" }, false), "chosen motion quality wins over the OS default");
+check(wantedClasses({ ...base, motionQuality: "light" }).has("fantasy-easel-light") && !wantedClasses(base).has("fantasy-easel-light"), "light class follows the setting");
+check(!styles.includes("mod-windows") && (styles.match(/body\.fantasy-easel-light\./g) || []).length >= 10, "light path CSS: behind body.fantasy-easel-light, not mod-windows");
 const nt = normalize({ tuning: { "opacity.light": 0.6, stageSpeed: 1, "blur.dark": 9, opacity: 0.5, bogus: 3 } }).tuning;
 check(JSON.stringify(nt) === JSON.stringify({ "blur.dark": 9, "opacity.dark": 0.5, "opacity.light": 0.5 }), `normalize tuning: defaults dropped, old single glass value copied per mode (got ${JSON.stringify(nt)})`);
 check(!("--background-opacity" in tuningVars({ "opacity.dark": 0.5 }, true, "light")), "a dark-mode glass value applied in light mode");

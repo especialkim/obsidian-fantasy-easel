@@ -106,10 +106,10 @@ export class StatusBar {
     this.card?.toggleClass("is-on", look.card);
     const still = this.still;
     if (!still) return;
-    // auto: follows OS reduced motion / on: always moves / off: never moves
+    // on = Moving, auto = Follow system (OS reduce motion), off = Still; clicks go in that order
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setIcon(still, motion === "off" ? "pause" : motion === "on" ? "play" : "circle-play");
-    const tip = motion === "auto" ? `Motion: auto (follows OS reduced motion${reduced ? " — now paused" : ""}). Click: on` : motion === "on" ? "Motion: on (moves even with OS reduced motion). Click: off" : "Motion: off. Click: auto";
+    const tip = motion === "on" ? "Motion: Moving. Click: Follow system" : motion === "auto" ? `Motion: Follow system (${reduced ? "Reduce motion is on, so still" : "moving"}). Click: Still` : "Motion: Still. Click: Moving";
     still.setAttr("aria-label", tip);
     setTooltip(still, tip, TIP);
     still.toggleClass("is-on", motion === "on");

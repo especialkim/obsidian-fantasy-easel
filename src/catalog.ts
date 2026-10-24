@@ -95,6 +95,8 @@ export const FORCE_MOTION_CLASS = "fantasy-easel-force-motion";
 export const PAUSE_UNFOCUSED_CLASS = "fantasy-easel-pause-unfocused";
 /** Present on body while a stage background is chosen (shows the four-layer stage). */
 export const STAGE_CLASS = "fantasy-easel-stage-on";
+/** Present on body when moving backgrounds use the light path (motion quality Light; Windows by default). */
+export const LIGHT_CLASS = "fantasy-easel-light";
 /** Present on body while a motion background is chosen (draws the moving layer). */
 export const MOTION_CLASS = "fantasy-easel-motion";
 

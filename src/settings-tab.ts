@@ -2,7 +2,8 @@ import { PluginSettingTab, setTooltip, type App, type SettingDefinitionItem, typ
 import { DEFAULT_BACKGROUND, newImageId, toCssUrl, type UserImage } from "./catalog";
 import type FantasyEaselPlugin from "./main";
 import { excalidrawAvailable, excalidrawDiff, ExcalidrawSettingsModal, restoreExcalidraw } from "./excalidraw";
-import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_OPTIONS, paletteDesc } from "./options";
+import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
+import { isLight } from "./apply";
 import { PictureSuggest } from "./pictures";
 import { partOn, skinOn, SKINS } from "./skins";
 import type { StatusId } from "./settings";
@@ -65,6 +66,8 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
   getControlValue(key: string): unknown {
     const s = this.plugin.store.settings;
     if (key.startsWith("look.")) return (s.look as unknown as Record<string, unknown>)[key.slice(5)];
+    // not chosen yet: show the OS default
+    if (key === "motionQuality") return s.motionQuality ?? (isLight(s, document.body.hasClass("mod-windows")) ? "light" : "full");
     return (s as unknown as Record<string, unknown>)[key];
   }
 
@@ -110,7 +113,8 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
         items: [
           { name: "Background", desc: "CSS, motion, stage or one of your pictures.", control: { type: "dropdown", key: "look.background", options: backgroundOptions(look.images) } },
           { name: "Gallery", desc: "Every background side by side, day and night.", action: () => this.plugin.openGallery() },
-          { name: "Motion", desc: 'For moving backgrounds. Auto follows the OS "reduce motion" setting; On moves anyway.', control: { type: "dropdown", key: "motion", options: MOTION_OPTIONS } },
+          { name: "Motion", desc: MOTION_DESC, control: { type: "dropdown", key: "motion", options: MOTION_OPTIONS } },
+          { name: "Motion quality", desc: QUALITY_DESC, control: { type: "dropdown", key: "motionQuality", options: QUALITY_OPTIONS } },
           { name: "Pause when unfocused", desc: "Stop moving backgrounds while you work in another app (saves GPU).", control: { type: "toggle", key: "pauseUnfocused" } },
         ],
       },

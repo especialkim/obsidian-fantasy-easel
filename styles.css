@@ -694,40 +694,41 @@ body.fantasy-easel.fantasy-easel-motion .app-container::after {
 	animation-delay: var(--fantasy-easel-delay, 0s);
 }
 
-/* Windows (2026-10-23, Windows PR #1): Direct3D compositing stutters when moving layers sit under
-   the panels' backdrop-filter and animate a filter. On Windows only: the hue swing becomes an
+/* Light path (body.fantasy-easel-light: motion quality Light, the default on Windows; 2026-10-23
+   Windows PR #1, any OS since 2026-10-24): Direct3D compositing stutters when moving layers sit under
+   the panels' backdrop-filter and animate a filter. On the light path the hue swing becomes an
    opacity breath (--fantasy-easel-motion-win, generated), the panels drop their per-frame backdrop
    blur and the layers carry its tone as a still filter instead. Movement and margins stay as on macOS.
    Before the pause rules below: same specificity, so they still win. */
-body.mod-windows.fantasy-easel.fantasy-easel-motion .app-container::before,
-body.mod-windows.fantasy-easel.fantasy-easel-motion .app-container::after {
+body.fantasy-easel-light.fantasy-easel.fantasy-easel-motion .app-container::before,
+body.fantasy-easel-light.fantasy-easel.fantasy-easel-motion .app-container::after {
 	filter: var(--fantasy-easel-win-tone);
 	contain: strict;
 	will-change: translate, rotate, scale, opacity;
 }
 
-body.mod-windows.fantasy-easel.fantasy-easel-motion .app-container::before {
+body.fantasy-easel-light.fantasy-easel.fantasy-easel-motion .app-container::before {
 	animation: var(--fantasy-easel-motion-win, none);
 	animation-delay: var(--fantasy-easel-delay, 0s);
 }
 
-body.mod-windows.fantasy-easel.fantasy-easel-motion .app-container::after {
+body.fantasy-easel-light.fantasy-easel.fantasy-easel-motion .app-container::after {
 	animation: var(--fantasy-easel-motion-b-win, none);
 	animation-delay: var(--fantasy-easel-delay, 0s);
 }
 
 /* the theme's backdrop tone (`.app-container>.horizontal-main-container`), without the blur */
-body.mod-windows.fantasy-easel {
+body.fantasy-easel-light.fantasy-easel {
 	--fantasy-easel-win-tone: brightness(var(--fantasy-glass-brightness, 0.95));
 }
 
-body.mod-windows.fantasy-easel.theme-light {
+body.fantasy-easel-light.fantasy-easel.theme-light {
 	--fantasy-easel-win-tone: brightness(var(--fantasy-glass-brightness, 0.85)) saturate(1.1);
 }
 
 /* (0,5,1): beats theme `body.theme-light .app-container>.horizontal-main-container` (0,2,1) */
-body.mod-windows.fantasy-easel.fantasy-easel-motion .app-container > .horizontal-main-container,
-body.mod-windows.fantasy-easel.fantasy-easel-stage-on .app-container > .horizontal-main-container {
+body.fantasy-easel-light.fantasy-easel.fantasy-easel-motion .app-container > .horizontal-main-container,
+body.fantasy-easel-light.fantasy-easel.fantasy-easel-stage-on .app-container > .horizontal-main-container {
 	backdrop-filter: none;
 }
 
@@ -921,31 +922,31 @@ body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > d
 	animation-delay: calc(var(--fe-seed) * 1.93);
 }
 
-/* Windows (2026-10-23): one blur on the whole stage instead of one per layer, the hue swing as an
+/* Light path (Windows by default, 2026-10-23): one blur on the whole stage instead of one per layer, the hue swing as an
    opacity breath, the theme's backdrop tone as part of that one filter (backdrop blur off above).
    animation-name only, so the pause rules (play-state) below keep working. */
-body.mod-windows.fantasy-easel.fantasy-easel-stage-on .app-container > .fantasy-easel-stage {
+body.fantasy-easel-light.fantasy-easel.fantasy-easel-stage-on .app-container > .fantasy-easel-stage {
 	/* past the window edge so the one blur does not fade the border */
 	inset: calc(var(--fe-blur) * -1.5);
 	filter: blur(calc(var(--fe-blur) * 0.7)) var(--fantasy-easel-win-tone);
 }
 
 /* (0,4,2): beats the layer rules `.fantasy-easel-stage.fe-<family> > .fe-lN` (0,3,0) */
-body.mod-windows.fantasy-easel-stage-on .app-container > .fantasy-easel-stage > div {
+body.fantasy-easel-light.fantasy-easel-stage-on .app-container > .fantasy-easel-stage > div {
 	filter: none;
 	contain: strict;
 	will-change: translate, rotate, scale, opacity;
 }
 
-body.mod-windows.fantasy-easel-stage-on .app-container > .fantasy-easel-stage.fe-ambient > .fe-l2 {
+body.fantasy-easel-light.fantasy-easel-stage-on .app-container > .fantasy-easel-stage.fe-ambient > .fe-l2 {
 	animation-name: fe-a-wanderB, fe-spin-back, fe-a-stretchB, fe-a-hue-win;
 }
 
-body.mod-windows.fantasy-easel-stage-on .app-container > .fantasy-easel-stage.fe-ambient > .fe-l4 {
+body.fantasy-easel-light.fantasy-easel-stage-on .app-container > .fantasy-easel-stage.fe-ambient > .fe-l4 {
 	animation-name: fe-a-wanderC, fe-a-breath, fe-a-hue-win;
 }
 
-body.mod-windows.fantasy-easel-stage-on .app-container > .fantasy-easel-stage.fe-kinetic > .fe-l2 {
+body.fantasy-easel-light.fantasy-easel-stage-on .app-container > .fantasy-easel-stage.fe-kinetic > .fe-l2 {
 	animation-name: fe-k-driftB, fe-spin-back, fe-a-stretchB, fe-k-hue-win;
 }
 

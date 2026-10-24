@@ -22,13 +22,19 @@ export interface StatusItem {
 }
 
 export type Motion = "auto" | "on" | "off";
-export const MOTIONS: Motion[] = ["auto", "on", "off"];
+/** Menu and status bar order: Moving, Follow system, Still (stored values stay on / auto / off). */
+export const MOTIONS: Motion[] = ["on", "auto", "off"];
+/** How moving backgrounds are drawn: full, or the light path (one blur, opacity instead of hue swing,
+ *  no backdrop blur). Not set = Light on Windows, Full elsewhere. */
+export type MotionQuality = "full" | "light";
 
 export interface FantasyEaselSettings {
   look: Look;
   /** motion backgrounds: auto = follow OS reduced motion, on = always move, off = never move.
    *  See pauseUnfocused for the window-focus pause. */
   motion: Motion;
+  /** null = the OS default (Windows light, others full) */
+  motionQuality: MotionQuality | null;
   /** pause moving backgrounds while the Obsidian window is not focused (saves GPU; off = keep moving) */
   pauseUnfocused: boolean;
   statusBar: boolean;
@@ -50,7 +56,7 @@ export const DEFAULT_LOOK: Look = {
   images: [],
 };
 
-export const DEFAULT_SETTINGS: FantasyEaselSettings = { look: DEFAULT_LOOK, motion: "on", pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
+export const DEFAULT_SETTINGS: FantasyEaselSettings = { look: DEFAULT_LOOK, motion: "on", motionQuality: null, pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
 
 /**
  * Old 3 fixed URL slots (data.json before 2026-10-21) → pictures. `chosen` is the old
@@ -112,6 +118,7 @@ export function normalize(data: Partial<FantasyEaselSettings> | null | undefined
       images,
     },
     motion: MOTIONS.includes(data?.motion as Motion) ? (data!.motion as Motion) : DEFAULT_SETTINGS.motion,
+    motionQuality: data?.motionQuality === "full" || data?.motionQuality === "light" ? data.motionQuality : null,
     pauseUnfocused: data?.pauseUnfocused === true,
     statusBar: data?.statusBar !== false,
     statusItems,

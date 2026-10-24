@@ -1059,6 +1059,7 @@ var STILL_CLASS = "fantasy-easel-still";
 var FORCE_MOTION_CLASS = "fantasy-easel-force-motion";
 var PAUSE_UNFOCUSED_CLASS = "fantasy-easel-pause-unfocused";
 var STAGE_CLASS = "fantasy-easel-stage-on";
+var LIGHT_CLASS = "fantasy-easel-light";
 var MOTION_CLASS = "fantasy-easel-motion";
 var THEME_DEFAULTS = {
   color: "fantasy-theme-Black"
@@ -1163,11 +1164,11 @@ function tuningVars(values, card, mode) {
 }
 
 // src/apply.ts
-var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...ALL_SKIN_CLASSES]);
+var MANAGED = /* @__PURE__ */ new Set([...THEME_COLORS.map((c) => c.cls), ...CSS_BG.map((b) => b.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS, MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, LIGHT_CLASS, PAUSE_UNFOCUSED_CLASS, ...ALL_SKIN_CLASSES]);
 var THEME_GROUP = [...THEME_COLORS.map((c) => c.cls), ACCENT_CLASS, CARD_OFF_CLASS, LEGACY_CARD_CLASS];
 var URL_VAR = "--background-url";
 var OLD_VARS = ["--background-url1", "--background-url2", "--background-url3"];
-function wantedClasses(s) {
+function wantedClasses(s, windows = false) {
   const bg = backgroundById(s.look.background, s.look.images);
   const out = /* @__PURE__ */ new Set([MARKER_CLASS, s.look.color]);
   if (bg?.cls) out.add(bg.cls);
@@ -1178,9 +1179,11 @@ function wantedClasses(s) {
   if (s.motion === "off") out.add(STILL_CLASS);
   if (s.motion === "on") out.add(FORCE_MOTION_CLASS);
   if (s.pauseUnfocused) out.add(PAUSE_UNFOCUSED_CLASS);
+  if (isLight(s, windows)) out.add(LIGHT_CLASS);
   for (const c of skinClasses(s.skins)) out.add(c);
   return out;
 }
+var isLight = (s, windows) => (s.motionQuality ?? (windows ? "light" : "full")) === "light";
 var Applier = class {
   constructor(body, get) {
     this.body = body;
@@ -1199,7 +1202,7 @@ var Applier = class {
   /** Bring body in line with the wanted state. Returns how many changes were made. */
   reconcile() {
     const s = this.get();
-    const want = wantedClasses(s);
+    const want = wantedClasses(s, this.body.hasClass("mod-windows"));
     const cl = this.body.classList;
     let changed = 0;
     for (const c of MANAGED) {
@@ -1253,7 +1256,7 @@ var Applier = class {
     this.observer = null;
     const cl = this.body.classList;
     for (const b of CSS_BG) cl.remove(b.cls);
-    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, ...ALL_SKIN_CLASSES);
+    cl.remove(MARKER_CLASS, STILL_CLASS, MOTION_CLASS, STAGE_CLASS, FORCE_MOTION_CLASS, LIGHT_CLASS, PAUSE_UNFOCUSED_CLASS, ...ALL_SKIN_CLASSES);
     for (const c of THEME_GROUP) cl.remove(c);
     this.body.setCssProps(Object.fromEntries([URL_VAR, ...OLD_VARS, ...TUNING_VARS].map((v) => [v, ""])));
   }
@@ -1457,7 +1460,7 @@ function stepBackground(store, dir) {
 
 // src/settings.ts
 var STATUS_IDS = ["color", "prev", "background", "next", "gallery", "accent", "card", "motion", "mode"];
-var MOTIONS = ["auto", "on", "off"];
+var MOTIONS = ["on", "auto", "off"];
 var DEFAULT_LOOK = {
   color: THEME_DEFAULTS.color,
   background: DEFAULT_BACKGROUND,
@@ -1465,7 +1468,7 @@ var DEFAULT_LOOK = {
   card: true,
   images: []
 };
-var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "on", pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
+var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "on", motionQuality: null, pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
 function fromOldUrls(urls, chosen) {
   const images = [];
   let background;
@@ -1517,6 +1520,7 @@ function normalize(data) {
       images
     },
     motion: MOTIONS.includes(data?.motion) ? data.motion : DEFAULT_SETTINGS.motion,
+    motionQuality: data?.motionQuality === "full" || data?.motionQuality === "light" ? data.motionQuality : null,
     pauseUnfocused: data?.pauseUnfocused === true,
     statusBar: data?.statusBar !== false,
     statusItems,
@@ -1637,7 +1641,10 @@ var ExcalidrawSettingsModal = class extends import_obsidian5.Modal {
 var colorOptions = () => Object.fromEntries(THEME_COLORS.map((c) => [c.cls, c.name]));
 var KIND = { static: "CSS", motion: "Motion", image: "Picture" };
 var backgroundOptions = (images) => Object.fromEntries(allBackgrounds(images).map((b) => [b.id, `${b.stage ? "Stage" : KIND[b.kind]} \xB7 ${b.name}`]));
-var MOTION_OPTIONS = { auto: "Auto", on: "On", off: "Off" };
+var MOTION_OPTIONS = { on: "Moving", auto: "Follow system", off: "Still" };
+var MOTION_DESC = 'Moving backgrounds. Follow system: still when "Reduce motion" is on in macOS or Windows. To save battery, choose Still or pause when unfocused.';
+var QUALITY_OPTIONS = { full: "Full", light: "Light" };
+var QUALITY_DESC = "Light: one blur and no hue shift, lighter on the GPU (default on Windows). Full: the complete look (default on macOS).";
 var paletteDesc = () => document.body.hasClass("theme-dark") ? "Dark mode: tint of the glass panels and the hue of palette backgrounds." : "Light mode: accent (when theme accent is on), heading colors and the hue of palette backgrounds.";
 var ACCENT_DESC = "Accent from the palette (gold in dark mode). Off = Obsidian's accent color.";
 
@@ -1686,6 +1693,7 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
   getControlValue(key) {
     const s = this.plugin.store.settings;
     if (key.startsWith("look.")) return s.look[key.slice(5)];
+    if (key === "motionQuality") return s.motionQuality ?? (isLight(s, document.body.hasClass("mod-windows")) ? "light" : "full");
     return s[key];
   }
   setControlValue(key, value) {
@@ -1726,7 +1734,8 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
         items: [
           { name: "Background", desc: "CSS, motion, stage or one of your pictures.", control: { type: "dropdown", key: "look.background", options: backgroundOptions(look.images) } },
           { name: "Gallery", desc: "Every background side by side, day and night.", action: () => this.plugin.openGallery() },
-          { name: "Motion", desc: 'For moving backgrounds. Auto follows the OS "reduce motion" setting; On moves anyway.', control: { type: "dropdown", key: "motion", options: MOTION_OPTIONS } },
+          { name: "Motion", desc: MOTION_DESC, control: { type: "dropdown", key: "motion", options: MOTION_OPTIONS } },
+          { name: "Motion quality", desc: QUALITY_DESC, control: { type: "dropdown", key: "motionQuality", options: QUALITY_OPTIONS } },
           { name: "Pause when unfocused", desc: "Stop moving backgrounds while you work in another app (saves GPU).", control: { type: "toggle", key: "pauseUnfocused" } }
         ]
       },
@@ -1979,7 +1988,7 @@ var StatusBar = class {
     if (!still) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     (0, import_obsidian8.setIcon)(still, motion === "off" ? "pause" : motion === "on" ? "play" : "circle-play");
-    const tip = motion === "auto" ? `Motion: auto (follows OS reduced motion${reduced ? " \u2014 now paused" : ""}). Click: on` : motion === "on" ? "Motion: on (moves even with OS reduced motion). Click: off" : "Motion: off. Click: auto";
+    const tip = motion === "on" ? "Motion: Moving. Click: Follow system" : motion === "auto" ? `Motion: Follow system (${reduced ? "Reduce motion is on, so still" : "moving"}). Click: Still` : "Motion: Still. Click: Moving";
     still.setAttr("aria-label", tip);
     (0, import_obsidian8.setTooltip)(still, tip, TIP);
     still.toggleClass("is-on", motion === "on");
@@ -2176,18 +2185,22 @@ var StyleView = class extends import_obsidian9.ItemView {
     };
     const keysOf = (id) => TUNINGS.filter((t) => t.group === id).map(key);
     const tuned = (id) => () => keysOf(id).every((k) => !(k in store.settings.tuning));
-    const bgDefault = () => look().background === DEFAULT_LOOK.background && store.settings.motion === DEFAULT_SETTINGS.motion && store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused && tuned("background")();
+    const bgDefault = () => look().background === DEFAULT_LOOK.background && store.settings.motion === DEFAULT_SETTINGS.motion && store.settings.motionQuality === null && store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused && tuned("background")();
     const bgG = group("Background", {
       isDefault: bgDefault,
       run: () => {
         setTuning(keysOf("background"), null);
-        store.set({ look: { ...look(), background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused });
+        store.set({ look: { ...look(), background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, motionQuality: null, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused });
       }
     });
     picker(bgG, "Background", "CSS, motion, stage or one of your pictures.", backgroundOptions(look().images), () => look().background, (v) => store.setLook({ background: v }), (dir) => stepBackground(store, dir), DEFAULT_LOOK.background);
-    row(bgG, "Motion", "Moving backgrounds. Auto follows the OS reduce-motion setting.", () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion }), (s) => s.addDropdown((d) => {
+    row(bgG, "Motion", MOTION_DESC, () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion }), (s) => s.addDropdown((d) => {
       d.addOptions(MOTION_OPTIONS).onChange((v) => this.syncing || store.set({ motion: v }));
       this.syncs.push(() => d.setValue(store.settings.motion));
+    }));
+    row(bgG, "Motion quality", QUALITY_DESC, () => store.settings.motionQuality === null, () => store.set({ motionQuality: null }), (s) => s.addDropdown((d) => {
+      d.addOptions(QUALITY_OPTIONS).onChange((v) => this.syncing || store.set({ motionQuality: v }));
+      this.syncs.push(() => d.setValue(store.settings.motionQuality ?? (isLight(store.settings, document.body.hasClass("mod-windows")) ? "light" : "full")));
     }));
     row(bgG, "Pause when unfocused", "Stop moving backgrounds while you work in another app.", () => store.settings.pauseUnfocused === DEFAULT_SETTINGS.pauseUnfocused, () => store.set({ pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused }), (s) => s.addToggle((t) => {
       t.onChange((v) => this.syncing || store.set({ pauseUnfocused: v }));
