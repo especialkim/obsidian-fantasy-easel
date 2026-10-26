@@ -50,6 +50,8 @@ export interface UserImage {
   src: string;
   /** your name for it (lists, status bar); "" = Picture N */
   name?: string;
+  /** Only validated, enabled pictures appear in background pickers and cycling. */
+  enabled?: boolean;
 }
 
 /** Local pictures (vault path, file://, absolute path) → an address Obsidian can show. Set by
@@ -73,7 +75,7 @@ export function toCssUrl(src: string): string {
 
 /** Your pictures as backgrounds (empty entries left out). */
 export const imageBackgrounds = (images: UserImage[]): Background[] =>
-  images.map((img, i) => ({ id: `img-${img.id}`, name: img.name?.trim() || `Picture ${i + 1}`, kind: "image" as const, url: toCssUrl(img.src) })).filter((b) => b.url);
+  images.map((img, i) => ({ id: `img-${img.id}`, name: img.name?.trim() || `Picture ${i + 1}`, kind: "image" as const, url: toCssUrl(img.src) })).filter((_, i) => images[i].enabled === true && images[i].src.trim());
 
 /** Every background to choose from, in menu / step order. */
 export const allBackgrounds = (images: UserImage[]): Background[] => [...CSS_BG, ...imageBackgrounds(images)];

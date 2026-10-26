@@ -1,5 +1,5 @@
-import { PluginSettingTab, setTooltip, type App, type SettingDefinitionItem, type SettingDefinitionPage } from "obsidian";
-import { DEFAULT_BACKGROUND, newImageId, toCssUrl, type UserImage } from "./catalog";
+import { PluginSettingTab, setIcon, setTooltip, TextComponent, type App, type SettingDefinitionItem, type SettingDefinitionPage } from "obsidian";
+import { DEFAULT_BACKGROUND, type UserImage } from "./catalog";
 import type FantasyEaselPlugin from "./main";
 import { excalidrawAvailable, excalidrawDiff, ExcalidrawSettingsModal, restoreExcalidraw } from "./excalidraw";
 import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
@@ -37,6 +37,8 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     this.icon = "palette";
     // Changes from the status bar, the style panel or commands: re-read the definitions once.
     plugin.register(plugin.store.subscribe(() => this.queueUpdate()));
+    plugin.register(plugin.applier.subscribePictures(() => this.queueUpdate()));
+    plugin.register(plugin.pictures.subscribe(() => this.queueUpdate()));
     // dark / light switched: the palette description changes
     plugin.registerEvent(app.workspace.on("css-change", () => this.queueUpdate()));
   }
@@ -75,6 +77,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     // the same value again (a control set while rendering): nothing to save, nothing to redraw
     if (this.getControlValue(key) === value) return;
     const store = this.plugin.store;
+    if (key === "look.background") return store.chooseBackground(String(value));
     if (key.startsWith("look.")) store.setLook({ [key.slice(5)]: value });
     else store.set({ [key]: value });
   }
@@ -86,10 +89,10 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     const setImages = (images: UserImage[]) => {
       // a picture that is gone or emptied cannot stay the background
       const bg = store.settings.look.background;
-      const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
+      const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && x.enabled === true && x.src.trim());
       store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
     };
-    const patchImage = (id: string, patch: Partial<UserImage>) => setImages(store.settings.look.images.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+    const patchImage = (id: string, patch: Partial<UserImage>) => setImages(store.settings.look.images.map((x) => (x.id === id ? { ...x, ...patch, ...(patch.src !== undefined && patch.src !== x.src ? { enabled: false } : {}) } : x)));
     const move = <T,>(list: T[], from: number, to: number) => {
       const out = [...list];
       const [x] = out.splice(from, 1);
@@ -122,30 +125,48 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
         type: "list",
         heading: "Your pictures",
         emptyState: "No pictures yet. Add one with +: a vault picture (type to search), https://… or file://… (this computer only).",
-        addItem: { name: "Add picture", action: () => store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] }) },
+        addItem: { name: "Add picture", action: () => this.plugin.addPicture() },
         onDelete: (i) => setImages(store.settings.look.images.filter((_, j) => j !== i)),
         onReorder: (from, to) => setImages(move(store.settings.look.images, from, to)),
         items: look.images.map((img, i) => ({
           name: img.name?.trim() || `Picture ${i + 1}`,
+          desc: this.plugin.pictures.error(`img-${img.id}`) || (look.background === `img-${img.id}` ? this.plugin.applier.pictureError : ""),
           render: (setting) => {
             setting.settingEl.addClass("fantasy-easel-picture");
             setTooltip(setting.nameEl, img.name?.trim() || `Picture ${i + 1}`);
             const id = `img-${img.id}`;
+            const selected = look.background === id;
+            const error = this.plugin.pictures.error(id) || (selected ? this.plugin.applier.pictureError : "");
+            const using = selected && img.enabled === true && !error;
+            const checking = this.plugin.pictures.checking === id;
+            setting.nameEl.empty();
+            if (using) {
+              const check = setting.nameEl.createSpan({ cls: "fantasy-easel-picture-active", attr: { "aria-label": "Active picture" } });
+              setIcon(check, "check");
+            }
+            setting.descEl.addClass("fantasy-easel-picture-error");
+            const fields = setting.settingEl.createDiv({ cls: "fantasy-easel-picture-fields" });
+            const field = (label: string, suffix: string) => {
+              const text = new TextComponent(fields);
+              text.inputEl.id = `fantasy-easel-${img.id}-${suffix}`;
+              text.inputEl.setAttr("aria-label", label);
+              text.inputEl.addClass(`fantasy-easel-picture-${suffix}`);
+              setTooltip(text.inputEl, label);
+              return text;
+            };
             // saved on change (blur / Enter), so a redraw never steals focus while typing
-            setting.addText((t) => {
-              t.setPlaceholder("Name").setValue(img.name ?? "");
-              t.inputEl.addClass("fantasy-easel-picture-name");
-              t.inputEl.addEventListener("change", () => patchImage(img.id, { name: t.getValue().trim() }));
-            });
-            setting.addText((t) => {
-              t.setPlaceholder("Vault path, https://… or file://…").setValue(img.src);
-              t.inputEl.addEventListener("change", () => patchImage(img.id, { src: t.getValue().trim() }));
-              new PictureSuggest(this.app, t.inputEl, (path) => patchImage(img.id, { src: path }));
+            const alias = field("Alias", "alias").setPlaceholder("Alias").setValue(img.name ?? "");
+            alias.inputEl.addEventListener("change", () => patchImage(img.id, { name: alias.getValue().trim() }));
+            const path = field("Path or URL", "path").setPlaceholder("Vault path, https://… or file://…").setValue(img.src);
+            path.inputEl.addEventListener("change", () => patchImage(img.id, { src: path.getValue().trim() }));
+            new PictureSuggest(this.app, path.inputEl, (value) => patchImage(img.id, { src: value }));
+            setting.addToggle((toggle) => {
+              toggle.setValue(img.enabled === true).setDisabled(checking || !img.src.trim()).onChange((on) => this.plugin.pictures.enable(id, on));
+              toggle.toggleEl.setAttr("aria-label", "Use in background choices");
+              setTooltip(toggle.toggleEl, "Use in background choices");
             });
             setting.addButton((b) => {
-              const using = look.background === id;
-              b.setButtonText(using ? "In use" : "Use").setDisabled(!toCssUrl(img.src) || using).onClick(() => store.setLook({ background: id }));
-              if (using) b.setCta();
+              b.setButtonText(checking ? "Checking…" : "Apply").setDisabled(img.enabled !== true || using || checking).onClick(() => store.chooseBackground(id));
             });
           },
         })),

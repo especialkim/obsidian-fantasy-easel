@@ -38,6 +38,12 @@ Desktop only, Obsidian 1.13 or later. With any other theme the plugin stays idle
 - **Network use:** a picture you add as a web address (`https://…`) is loaded from that site. Nothing else goes over the network; the built-in wallpapers are CSS only.
 - **Files outside the vault:** a picture you add as `file://…` or an absolute path is read from that place on your computer, only to show it as the wallpaper. It works only on that computer; vault pictures work wherever the vault is.
 
+**Add picture** saves an optional alias and path or URL with **Use** off. Turn **Use** on in **Your pictures** to validate the image (up to 10 seconds). Only successful checks add it to background dropdowns, the gallery and previous/next cycling; the current background stays unchanged. A failed check leaves **Use** off and shows a notice plus an error below the compact picture row. **Apply** selects an enabled picture as the current background; a small check marks it.
+
+If an enabled picture later fails when selected/cycled to, or the current picture becomes unavailable, Easel selects the default Silk background, turns **Use** off and explains that in a notice. Turning **Use** off also selects Silk if that picture was current. Saved picture entries stay in the list. Editing a path turns **Use** off so the new path must be validated again. Vault file changes and returning to the Obsidian window recheck the current picture automatically.
+
+Older entries without **Use** preserve the current picture as enabled; other saved entries start disabled. Aliases and paths are retained.
+
 ## Develop
 
 ```bash

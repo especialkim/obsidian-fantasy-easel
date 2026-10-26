@@ -5,6 +5,12 @@ import type { FantasyEaselSettings, Look } from "./settings";
  * re-applies, the status bar and settings tab redraw, and the save is batched (300ms).
  */
 export class Store {
+  /** User background choices go through the plugin's image validation gate. */
+  backgroundChooser: ((id: string) => void) | null = null;
+  chooseBackground(id: string) {
+    if (this.backgroundChooser) this.backgroundChooser(id);
+    else this.setLook({ background: id });
+  }
   private listeners = new Set<() => void>();
   private saveTimer: number | null = null;
 

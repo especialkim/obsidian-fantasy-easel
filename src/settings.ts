@@ -79,13 +79,14 @@ function fromOldUrls(urls: unknown[], chosen: unknown): { images: UserImage[]; b
 export function normalize(data: Partial<FantasyEaselSettings> | null | undefined): FantasyEaselSettings {
   const look: Partial<Look> & { urls?: unknown[] } = data?.look ?? {};
   let images: UserImage[] = Array.isArray(look.images)
-    ? look.images.filter((x): x is UserImage => !!x && typeof x.id === "string" && typeof x.src === "string").map((x) => ({ id: x.id, src: x.src, ...(typeof x.name === "string" && x.name ? { name: x.name } : {}) }))
+    ? look.images.filter((x): x is UserImage => !!x && typeof x.id === "string" && typeof x.src === "string").map((x) => ({ id: x.id, src: x.src, enabled: typeof x.enabled === "boolean" ? x.enabled : look.background === `img-${x.id}`, ...(typeof x.name === "string" && x.name ? { name: x.name } : {}) }))
     : [];
   let background = typeof look.background === "string" ? look.background : "";
   if (!Array.isArray(look.images) && Array.isArray(look.urls)) {
     const old = fromOldUrls(look.urls, background);
     images = old.images;
     if (old.background) background = old.background;
+    images = images.map((img) => ({ ...img, enabled: `img-${img.id}` === background }));
   }
   // status bar: saved order first (known ids, no repeats), then buttons added in a later version
   const seen = new Set<StatusId>();
@@ -112,7 +113,7 @@ export function normalize(data: Partial<FantasyEaselSettings> | null | undefined
       // a color dropped from the list falls back to Dark
       color: typeof look.color === "string" && colorByCls(look.color) ? look.color : DEFAULT_LOOK.color,
       // a vault picture may not resolve yet (vault index not ready at load): keep it if the entry exists
-      background: backgroundById(background, images) || images.some((x) => `img-${x.id}` === background && x.src.trim()) ? background : DEFAULT_LOOK.background,
+      background: backgroundById(background, images) || images.some((x) => `img-${x.id}` === background && x.enabled === true && x.src.trim()) ? background : DEFAULT_LOOK.background,
       accent: look.accent === true,
       card: look.card !== false,
       images,

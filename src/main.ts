@@ -1,4 +1,4 @@
-import { Notice, Plugin } from "obsidian";
+import { Notice, Plugin, type TAbstractFile } from "obsidian";
 import { Applier } from "./apply";
 import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu, stepBackground } from "./menus";
@@ -8,6 +8,7 @@ import { backgroundById, setPictureResolver } from "./catalog";
 import { resolvePicture } from "./pictures";
 import { FantasyEaselSettingTab } from "./settings-tab";
 import { AddPictureModal } from "./picture-modal";
+import { PictureActivation } from "./picture-activation";
 import { StatusBar } from "./statusbar";
 import { Store } from "./store";
 import { STYLE_VIEW, StyleView } from "./style-view";
@@ -15,6 +16,7 @@ import { STYLE_VIEW, StyleView } from "./style-view";
 export default class FantasyEaselPlugin extends Plugin {
   store!: Store;
   applier!: Applier;
+  pictures!: PictureActivation;
   private statusBar!: StatusBar;
   private stage = new StageHost();
   private syncStage() {
@@ -64,12 +66,28 @@ export default class FantasyEaselPlugin extends Plugin {
     document.body.setCssProps({ "--fantasy-easel-delay": `-${Math.round(Math.random() * 600)}s` });
     this.register(() => document.body.setCssProps({ "--fantasy-easel-delay": "" }));
     this.applier = new Applier(document.body, () => this.store.settings);
+    this.pictures = new PictureActivation(this.store, this.applier, (message) => { new Notice(message); });
+    this.store.backgroundChooser = (id) => this.pictures.activate(id);
     this.statusBar = new StatusBar(this.app, this, this.store, () => this.addPicture());
+    const fallbackUnavailable = () => {
+      if (this.active && this.applier.pictureError) this.pictures.unavailable(this.store.settings.look.background);
+    };
+    this.register(this.applier.subscribePictures(fallbackUnavailable));
     this.refresh();
+    fallbackUnavailable();
 
-    this.register(this.store.subscribe(() => this.refresh()));
+    this.register(this.store.subscribe(() => { this.refresh(); fallbackUnavailable(); }));
     // theme switched (or snippets changed): start or stop
     this.registerEvent(this.app.workspace.on("css-change", () => this.refresh()));
+    // Recheck external files/URLs when returning to Obsidian. Vault changes are immediate.
+    const retryPicture = () => { if (this.active) this.applier.retryPicture(); };
+    this.registerDomEvent(window, "focus", retryPicture);
+    const pictureChanged = (file: TAbstractFile) => {
+      if (this.store.settings.look.images.some((img) => `img-${img.id}` === this.store.settings.look.background && img.src.trim() === file.path)) retryPicture();
+    };
+    this.registerEvent(this.app.vault.on("create", pictureChanged));
+    this.registerEvent(this.app.vault.on("delete", pictureChanged));
+    this.registerEvent(this.app.vault.on("modify", pictureChanged));
 
     this.registerView(STYLE_VIEW, (leaf) => new StyleView(leaf, this));
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
@@ -94,6 +112,8 @@ export default class FantasyEaselPlugin extends Plugin {
   }
 
   onunload() {
+    this.pictures.dispose();
+    this.store.backgroundChooser = null;
     this.store.flush();
     this.statusBar.hide();
     // always: an observer left running after unload keeps old settings and fights the next load

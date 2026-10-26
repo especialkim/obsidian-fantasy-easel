@@ -92,8 +92,8 @@ export function renderGallery(root: HTMLElement, store: Store, opts: { scrollRoo
         const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
         card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
         card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
-        tile.addEventListener("click", () => store.setLook({ background: id }));
-        tile.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); store.setLook({ background: id }); } });
+        tile.addEventListener("click", () => store.chooseBackground(id));
+        tile.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); store.chooseBackground(id); } });
       }
     }
   }
@@ -120,8 +120,8 @@ export function renderGallery(root: HTMLElement, store: Store, opts: { scrollRoo
       const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
       card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
       card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
-      tile.addEventListener("click", () => store.setLook({ background: b.id }));
-      tile.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); store.setLook({ background: b.id }); } });
+      tile.addEventListener("click", () => store.chooseBackground(b.id));
+      tile.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); store.chooseBackground(b.id); } });
     }
   }
   const markCurrent = () => {

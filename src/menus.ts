@@ -32,7 +32,7 @@ export function backgroundMenu(store: Store, managePictures?: () => void): Menu 
         item
           .setTitle(b.name)
           .setChecked(store.settings.look.background === b.id)
-          .onClick(() => store.setLook({ background: b.id })),
+          .onClick(() => store.chooseBackground(b.id)),
       );
     }
     if (kind === "image" && managePictures) menu.addItem((item) => item.setTitle("Add picture…").setIcon("plus").onClick(managePictures));
@@ -51,5 +51,5 @@ export function stepBackground(store: Store, dir: 1 | -1) {
   const all = allBackgrounds(store.settings.look.images);
   const i = all.findIndex((b) => b.id === store.settings.look.background);
   const next = all[(i + dir + all.length) % all.length];
-  store.setLook({ background: next.id });
+  store.chooseBackground(next.id);
 }

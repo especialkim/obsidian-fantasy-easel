@@ -1048,7 +1048,7 @@ function toCssUrl(src) {
   const href = kind === "web" ? s : resolveLocal?.(s) ?? "";
   return href ? `url("${href.replace(/["\\]/g, "\\$&")}")` : "";
 }
-var imageBackgrounds = (images) => images.map((img, i) => ({ id: `img-${img.id}`, name: img.name?.trim() || `Picture ${i + 1}`, kind: "image", url: toCssUrl(img.src) })).filter((b) => b.url);
+var imageBackgrounds = (images) => images.map((img, i) => ({ id: `img-${img.id}`, name: img.name?.trim() || `Picture ${i + 1}`, kind: "image", url: toCssUrl(img.src) })).filter((_, i) => images[i].enabled === true && images[i].src.trim());
 var allBackgrounds = (images) => [...CSS_BG, ...imageBackgrounds(images)];
 var newImageId = () => Math.random().toString(36).slice(2, 8);
 var ACCENT_CLASS = "fantasy-theme-accent";
@@ -1067,6 +1067,63 @@ var THEME_DEFAULTS = {
 var DEFAULT_BACKGROUND = "css-silk";
 var colorByCls = (cls) => THEME_COLORS.find((c) => c.cls === cls);
 var backgroundById = (id, images = []) => allBackgrounds(images).find((b) => b.id === id);
+
+// src/picture-loader.ts
+var PictureLoader = class {
+  constructor(changed, makeImage = () => new Image()) {
+    this.changed = changed;
+    this.makeImage = makeImage;
+    this.key = "";
+    this.cancel = null;
+    this.value = "";
+    this.error = "";
+  }
+  select(key, css, local = false) {
+    if (key === this.key) return;
+    this.reset();
+    this.key = key;
+    if (!key) return;
+    const match = /^url\(\s*(["']?)(.*?)\1\s*\)$/i.exec(css);
+    if (!match?.[2]) {
+      this.error = "Cannot load picture. Showing Silk; the saved path is kept.";
+      return;
+    }
+    const img = this.makeImage();
+    const finish = (ok) => {
+      if (this.key !== key || this.cancel !== cancel) return;
+      cancel();
+      this.cancel = null;
+      this.value = ok ? css : "";
+      this.error = ok ? "" : "Cannot load picture. Showing Silk; the saved path is kept.";
+      this.changed();
+    };
+    const timer = window.setTimeout(() => finish(false), 1e4);
+    const cancel = () => {
+      window.clearTimeout(timer);
+      img.onload = img.onerror = null;
+      img.removeAttribute("src");
+    };
+    this.cancel = cancel;
+    img.onload = () => finish(true);
+    img.onerror = () => finish(false);
+    const href = match[2].replace(/\\(["\\])/g, "$1");
+    const hash = href.indexOf("#");
+    const base = hash < 0 ? href : href.slice(0, hash);
+    img.src = local ? `${base}${base.includes("?") ? "&" : "?"}fantasy-easel-check=${Date.now()}${hash < 0 ? "" : href.slice(hash)}` : href;
+  }
+  reset() {
+    this.cancel?.();
+    this.cancel = null;
+    this.key = "";
+    this.value = "";
+    this.error = "";
+  }
+  accept(key, css) {
+    this.reset();
+    this.key = key;
+    this.value = css;
+  }
+};
 
 // src/skins.ts
 var SKINS = [
@@ -1188,10 +1245,32 @@ var Applier = class {
   constructor(body, get) {
     this.body = body;
     this.get = get;
+    this.pictureListeners = /* @__PURE__ */ new Set();
+    this.picture = new PictureLoader(() => {
+      this.reconcile();
+      this.pictureListeners.forEach((f) => f());
+    });
     this.observer = null;
     this.hits = [];
     /** reconcile runs (for tests: settled = no new runs) */
     this.runs = 0;
+  }
+  get pictureError() {
+    return this.picture.error;
+  }
+  acceptPicture(id, src, css) {
+    this.picture.accept(JSON.stringify([id, src, css]), css);
+  }
+  subscribePictures(f) {
+    this.pictureListeners.add(f);
+    return () => {
+      this.pictureListeners.delete(f);
+    };
+  }
+  retryPicture() {
+    this.picture.reset();
+    this.reconcile();
+    this.pictureListeners.forEach((f) => f());
   }
   attach() {
     this.observer?.disconnect();
@@ -1215,7 +1294,10 @@ var Applier = class {
         changed++;
       }
     }
-    const value = backgroundById(s.look.background, s.look.images)?.url ?? "";
+    const selected = s.look.images.find((img) => img.enabled === true && `img-${img.id}` === s.look.background);
+    const css = selected ? toCssUrl(selected.src) : "";
+    this.picture.select(selected ? JSON.stringify([selected.id, selected.src, css]) : "", css, !!selected && pictureKind(selected.src) === "local");
+    const value = this.picture.value;
     const now = this.body.style.getPropertyValue(URL_VAR);
     if (value !== now) {
       this.body.setCssProps({ [URL_VAR]: value });
@@ -1252,6 +1334,7 @@ var Applier = class {
   }
   /** Remove everything Easel added; the theme shows its defaults (Dark, Plasma still, cards). */
   detach() {
+    this.picture.reset();
     this.observer?.disconnect();
     this.observer = null;
     const cl = this.body.classList;
@@ -1342,11 +1425,11 @@ function renderGallery(root, store, opts) {
         const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
         card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
         card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
-        tile.addEventListener("click", () => store.setLook({ background: id }));
+        tile.addEventListener("click", () => store.chooseBackground(id));
         tile.addEventListener("keydown", (ev) => {
           if (ev.key === "Enter" || ev.key === " ") {
             ev.preventDefault();
-            store.setLook({ background: id });
+            store.chooseBackground(id);
           }
         });
       }
@@ -1373,11 +1456,11 @@ function renderGallery(root, store, opts) {
       const card = tile.createDiv({ cls: "fantasy-easel-tile-card" });
       card.createDiv({ cls: "fantasy-easel-tile-h", text: "Heading" });
       card.createDiv({ cls: "fantasy-easel-tile-p", text: "Body text on the glass card." });
-      tile.addEventListener("click", () => store.setLook({ background: b.id }));
+      tile.addEventListener("click", () => store.chooseBackground(b.id));
       tile.addEventListener("keydown", (ev) => {
         if (ev.key === "Enter" || ev.key === " ") {
           ev.preventDefault();
-          store.setLook({ background: b.id });
+          store.chooseBackground(b.id);
         }
       });
     }
@@ -1440,7 +1523,7 @@ function backgroundMenu(store, managePictures) {
     menu.addItem((item) => item.setTitle(KIND_LABEL[kind]).setIsLabel(true));
     for (const b of list) {
       menu.addItem(
-        (item) => item.setTitle(b.name).setChecked(store.settings.look.background === b.id).onClick(() => store.setLook({ background: b.id }))
+        (item) => item.setTitle(b.name).setChecked(store.settings.look.background === b.id).onClick(() => store.chooseBackground(b.id))
       );
     }
     if (kind === "image" && managePictures) menu.addItem((item) => item.setTitle("Add picture\u2026").setIcon("plus").onClick(managePictures));
@@ -1455,7 +1538,7 @@ function stepBackground(store, dir) {
   const all = allBackgrounds(store.settings.look.images);
   const i = all.findIndex((b) => b.id === store.settings.look.background);
   const next = all[(i + dir + all.length) % all.length];
-  store.setLook({ background: next.id });
+  store.chooseBackground(next.id);
 }
 
 // src/settings.ts
@@ -1484,12 +1567,13 @@ function fromOldUrls(urls, chosen) {
 function normalize(data) {
   var _a;
   const look = data?.look ?? {};
-  let images = Array.isArray(look.images) ? look.images.filter((x) => !!x && typeof x.id === "string" && typeof x.src === "string").map((x) => ({ id: x.id, src: x.src, ...typeof x.name === "string" && x.name ? { name: x.name } : {} })) : [];
+  let images = Array.isArray(look.images) ? look.images.filter((x) => !!x && typeof x.id === "string" && typeof x.src === "string").map((x) => ({ id: x.id, src: x.src, enabled: typeof x.enabled === "boolean" ? x.enabled : look.background === `img-${x.id}`, ...typeof x.name === "string" && x.name ? { name: x.name } : {} })) : [];
   let background = typeof look.background === "string" ? look.background : "";
   if (!Array.isArray(look.images) && Array.isArray(look.urls)) {
     const old = fromOldUrls(look.urls, background);
     images = old.images;
     if (old.background) background = old.background;
+    images = images.map((img) => ({ ...img, enabled: `img-${img.id}` === background }));
   }
   const seen = /* @__PURE__ */ new Set();
   const statusItems = [];
@@ -1514,7 +1598,7 @@ function normalize(data) {
       // a color dropped from the list falls back to Dark
       color: typeof look.color === "string" && colorByCls(look.color) ? look.color : DEFAULT_LOOK.color,
       // a vault picture may not resolve yet (vault index not ready at load): keep it if the entry exists
-      background: backgroundById(background, images) || images.some((x) => `img-${x.id}` === background && x.src.trim()) ? background : DEFAULT_LOOK.background,
+      background: backgroundById(background, images) || images.some((x) => `img-${x.id}` === background && x.enabled === true && x.src.trim()) ? background : DEFAULT_LOOK.background,
       accent: look.accent === true,
       card: look.card !== false,
       images
@@ -1694,6 +1778,8 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
     this.updates = [];
     this.icon = "palette";
     plugin.register(plugin.store.subscribe(() => this.queueUpdate()));
+    plugin.register(plugin.applier.subscribePictures(() => this.queueUpdate()));
+    plugin.register(plugin.pictures.subscribe(() => this.queueUpdate()));
     plugin.registerEvent(app.workspace.on("css-change", () => this.queueUpdate()));
   }
   /** Re-read the definitions once, on the next frame, and only while the tab is on screen. A
@@ -1723,6 +1809,7 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
   setControlValue(key, value) {
     if (this.getControlValue(key) === value) return;
     const store = this.plugin.store;
+    if (key === "look.background") return store.chooseBackground(String(value));
     if (key.startsWith("look.")) store.setLook({ [key.slice(5)]: value });
     else store.set({ [key]: value });
   }
@@ -1732,10 +1819,10 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
     const { look, statusItems } = store.settings;
     const setImages = (images) => {
       const bg = store.settings.look.background;
-      const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
+      const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && x.enabled === true && x.src.trim());
       store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
     };
-    const patchImage = (id, patch) => setImages(store.settings.look.images.map((x) => x.id === id ? { ...x, ...patch } : x));
+    const patchImage = (id, patch) => setImages(store.settings.look.images.map((x) => x.id === id ? { ...x, ...patch, ...patch.src !== void 0 && patch.src !== x.src ? { enabled: false } : {} } : x));
     const move = (list, from, to) => {
       const out = [...list];
       const [x] = out.splice(from, 1);
@@ -1767,29 +1854,47 @@ var FantasyEaselSettingTab = class extends import_obsidian6.PluginSettingTab {
         type: "list",
         heading: "Your pictures",
         emptyState: "No pictures yet. Add one with +: a vault picture (type to search), https://\u2026 or file://\u2026 (this computer only).",
-        addItem: { name: "Add picture", action: () => store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] }) },
+        addItem: { name: "Add picture", action: () => this.plugin.addPicture() },
         onDelete: (i) => setImages(store.settings.look.images.filter((_, j) => j !== i)),
         onReorder: (from, to) => setImages(move(store.settings.look.images, from, to)),
         items: look.images.map((img, i) => ({
           name: img.name?.trim() || `Picture ${i + 1}`,
+          desc: this.plugin.pictures.error(`img-${img.id}`) || (look.background === `img-${img.id}` ? this.plugin.applier.pictureError : ""),
           render: (setting) => {
             setting.settingEl.addClass("fantasy-easel-picture");
             (0, import_obsidian6.setTooltip)(setting.nameEl, img.name?.trim() || `Picture ${i + 1}`);
             const id = `img-${img.id}`;
-            setting.addText((t) => {
-              t.setPlaceholder("Name").setValue(img.name ?? "");
-              t.inputEl.addClass("fantasy-easel-picture-name");
-              t.inputEl.addEventListener("change", () => patchImage(img.id, { name: t.getValue().trim() }));
-            });
-            setting.addText((t) => {
-              t.setPlaceholder("Vault path, https://\u2026 or file://\u2026").setValue(img.src);
-              t.inputEl.addEventListener("change", () => patchImage(img.id, { src: t.getValue().trim() }));
-              new PictureSuggest(this.app, t.inputEl, (path) => patchImage(img.id, { src: path }));
+            const selected = look.background === id;
+            const error = this.plugin.pictures.error(id) || (selected ? this.plugin.applier.pictureError : "");
+            const using = selected && img.enabled === true && !error;
+            const checking = this.plugin.pictures.checking === id;
+            setting.nameEl.empty();
+            if (using) {
+              const check = setting.nameEl.createSpan({ cls: "fantasy-easel-picture-active", attr: { "aria-label": "Active picture" } });
+              (0, import_obsidian6.setIcon)(check, "check");
+            }
+            setting.descEl.addClass("fantasy-easel-picture-error");
+            const fields = setting.settingEl.createDiv({ cls: "fantasy-easel-picture-fields" });
+            const field = (label, suffix) => {
+              const text = new import_obsidian6.TextComponent(fields);
+              text.inputEl.id = `fantasy-easel-${img.id}-${suffix}`;
+              text.inputEl.setAttr("aria-label", label);
+              text.inputEl.addClass(`fantasy-easel-picture-${suffix}`);
+              (0, import_obsidian6.setTooltip)(text.inputEl, label);
+              return text;
+            };
+            const alias = field("Alias", "alias").setPlaceholder("Alias").setValue(img.name ?? "");
+            alias.inputEl.addEventListener("change", () => patchImage(img.id, { name: alias.getValue().trim() }));
+            const path = field("Path or URL", "path").setPlaceholder("Vault path, https://\u2026 or file://\u2026").setValue(img.src);
+            path.inputEl.addEventListener("change", () => patchImage(img.id, { src: path.getValue().trim() }));
+            new PictureSuggest(this.app, path.inputEl, (value) => patchImage(img.id, { src: value }));
+            setting.addToggle((toggle) => {
+              toggle.setValue(img.enabled === true).setDisabled(checking || !img.src.trim()).onChange((on) => this.plugin.pictures.enable(id, on));
+              toggle.toggleEl.setAttr("aria-label", "Use in background choices");
+              (0, import_obsidian6.setTooltip)(toggle.toggleEl, "Use in background choices");
             });
             setting.addButton((b) => {
-              const using = look.background === id;
-              b.setButtonText(using ? "In use" : "Use").setDisabled(!toCssUrl(img.src) || using).onClick(() => store.setLook({ background: id }));
-              if (using) b.setCta();
+              b.setButtonText(checking ? "Checking\u2026" : "Apply").setDisabled(img.enabled !== true || using || checking).onClick(() => store.chooseBackground(id));
             });
           }
         }))
@@ -1903,17 +2008,25 @@ var AddPictureModal = class extends import_obsidian7.Modal {
     super(app);
     this.store = store;
     this.src = "";
+    this.alias = "";
   }
   onOpen() {
     this.setTitle("Add picture");
+    this.modalEl.addClass("fantasy-easel-picture-modal");
     const add = () => {
-      if (!toCssUrl(this.src)) return;
-      const img = { id: newImageId(), src: this.src.trim() };
-      this.store.setLook({ images: [...this.store.settings.look.images, img], background: `img-${img.id}` });
+      if (!this.src.trim()) return;
+      const img = { id: newImageId(), name: this.alias.trim(), src: this.src.trim(), enabled: false };
+      this.store.setLook({ images: [...this.store.settings.look.images, img] });
       this.close();
     };
-    new import_obsidian7.Setting(this.contentEl).setName("Picture").setDesc("A vault picture (type to search), https://\u2026 or a file on this computer (file://\u2026, only here).").addText((t) => {
+    new import_obsidian7.Setting(this.contentEl).setName("Alias").setClass("fantasy-easel-picture-field").addText((t) => {
+      t.setPlaceholder("Optional picture name").onChange((v) => this.alias = v);
+      t.inputEl.setAttr("aria-label", "Picture alias");
+      window.setTimeout(() => t.inputEl.focus(), 0);
+    });
+    new import_obsidian7.Setting(this.contentEl).setName("Path or URL").setClass("fantasy-easel-picture-field").setDesc("A vault picture (type to search), https://\u2026 or a file on this computer (file://\u2026, only here).").addText((t) => {
       t.setPlaceholder("Vault path, https://\u2026 or file://\u2026").onChange((v) => this.src = v);
+      t.inputEl.setAttr("aria-label", "Picture path or URL");
       new PictureSuggest(this.app, t.inputEl, (path) => this.src = path);
       t.inputEl.addEventListener("keydown", (ev) => {
         if (ev.key === "Enter") {
@@ -1921,12 +2034,126 @@ var AddPictureModal = class extends import_obsidian7.Modal {
           add();
         }
       });
-      window.setTimeout(() => t.inputEl.focus(), 0);
     });
-    new import_obsidian7.Setting(this.contentEl).addButton((b) => b.setButtonText("Cancel").onClick(() => this.close())).addButton((b) => b.setButtonText("Add and use").setCta().onClick(add));
+    new import_obsidian7.Setting(this.contentEl).addButton((b) => b.setButtonText("Cancel").onClick(() => this.close())).addButton((b) => b.setButtonText("Add").setCta().onClick(add));
   }
   onClose() {
     this.contentEl.empty();
+  }
+};
+
+// src/picture-activation.ts
+var PictureActivation = class {
+  constructor(store, applier, notify) {
+    this.store = store;
+    this.applier = applier;
+    this.notify = notify;
+    this.checking = "";
+    this.mode = "apply";
+    this.source = "";
+    this.previous = "";
+    this.errors = /* @__PURE__ */ new Map();
+    this.listeners = /* @__PURE__ */ new Set();
+    this.loader = new PictureLoader(() => this.finish());
+    this.unsubscribe = store.subscribe(() => {
+      if (!this.checking) return;
+      const img = store.settings.look.images.find((img2) => `img-${img2.id}` === this.checking);
+      if (store.settings.look.background !== this.previous || img?.src !== this.source || this.mode === "apply" && !img?.enabled) this.cancel();
+    });
+  }
+  error(id) {
+    const error = this.errors.get(id);
+    const img = this.store.settings.look.images.find((img2) => `img-${img2.id}` === id);
+    return error?.src === img?.src ? error?.message ?? "" : "";
+  }
+  subscribe(f) {
+    this.listeners.add(f);
+    return () => {
+      this.listeners.delete(f);
+    };
+  }
+  emit() {
+    this.listeners.forEach((f) => f());
+  }
+  enable(id, on) {
+    if (on) return this.start(id, "enable");
+    if (this.checking === id) this.cancel();
+    const look = this.store.settings.look;
+    this.store.setLook({
+      images: look.images.map((img) => `img-${img.id}` === id ? { ...img, enabled: false } : img),
+      ...look.background === id ? { background: DEFAULT_BACKGROUND } : {}
+    });
+  }
+  activate(id) {
+    if (!id.startsWith("img-")) {
+      this.cancel();
+      this.store.setLook({ background: id });
+      return;
+    }
+    const img = this.store.settings.look.images.find((img2) => `img-${img2.id}` === id);
+    if (img?.enabled === true) this.start(id, "apply");
+  }
+  start(id, mode) {
+    if (this.checking === id && this.mode === mode) return;
+    this.cancel();
+    const img = this.store.settings.look.images.find((img2) => `img-${img2.id}` === id);
+    if (!img) return;
+    this.mode = mode;
+    this.checking = id;
+    this.source = img.src;
+    this.previous = this.store.settings.look.background;
+    this.errors.delete(id);
+    this.loader.select(id, toCssUrl(img.src), pictureKind(img.src) === "local");
+    if (this.loader.error) this.finish();
+    else this.emit();
+  }
+  /** An enabled picture stopped loading: remove it from pickers and select Silk. */
+  unavailable(id) {
+    const look = this.store.settings.look;
+    const img = look.images.find((img2) => `img-${img2.id}` === id);
+    if (!img?.enabled) return;
+    const message = "Cannot load picture. Switched to the default Silk background and turned off Use.";
+    this.errors.set(id, { src: img.src, message });
+    this.store.setLook({
+      background: DEFAULT_BACKGROUND,
+      images: look.images.map((image) => image.id === img.id ? { ...image, enabled: false } : image)
+    });
+    this.notify(`Fantasy Easel: ${message}`);
+    this.emit();
+  }
+  finish() {
+    const id = this.checking;
+    if (!id) return;
+    this.checking = "";
+    const look = this.store.settings.look;
+    const img = look.images.find((img2) => `img-${img2.id}` === id);
+    if (!img || img.src !== this.source || look.background !== this.previous) return;
+    if (this.loader.error) {
+      if (this.mode === "apply") return this.unavailable(id);
+      const message = "Cannot enable picture. Check the path or URL. Use stays off; the current background is unchanged.";
+      this.errors.set(id, { src: img.src, message });
+      this.notify(`Fantasy Easel: ${message}`);
+    } else {
+      this.errors.delete(id);
+      if (this.mode === "enable") {
+        this.store.setLook({ images: look.images.map((image) => image.id === img.id ? { ...image, enabled: true } : image) });
+      } else {
+        this.applier.acceptPicture(img.id, img.src, this.loader.value);
+        this.store.setLook({ background: id });
+      }
+    }
+    this.emit();
+  }
+  cancel() {
+    const wasChecking = !!this.checking;
+    this.loader.reset();
+    this.checking = "";
+    if (wasChecking) this.emit();
+  }
+  dispose() {
+    this.unsubscribe();
+    this.listeners.clear();
+    this.cancel();
   }
 };
 
@@ -2034,8 +2261,14 @@ var Store = class {
   constructor(settings, save) {
     this.settings = settings;
     this.save = save;
+    /** User background choices go through the plugin's image validation gate. */
+    this.backgroundChooser = null;
     this.listeners = /* @__PURE__ */ new Set();
     this.saveTimer = null;
+  }
+  chooseBackground(id) {
+    if (this.backgroundChooser) this.backgroundChooser(id);
+    else this.setLook({ background: id });
   }
   setLook(patch) {
     this.set({ look: { ...this.settings.look, ...patch } });
@@ -2069,6 +2302,7 @@ var StyleView = class extends import_obsidian9.ItemView {
     /** in-place updates, one per row */
     this.syncs = [];
     this.unsubscribe = null;
+    this.unsubscribePictures = null;
     this.galleryCleanup = null;
     this.galleryOpen = false;
     /** what the rows were built for: rebuild when it changes */
@@ -2087,10 +2321,13 @@ var StyleView = class extends import_obsidian9.ItemView {
   }
   async onOpen() {
     this.unsubscribe = this.plugin.store.subscribe(() => this.refresh());
+    this.unsubscribePictures = this.plugin.pictures.subscribe(() => this.sync());
     this.registerEvent(this.app.workspace.on("css-change", () => this.refresh()));
     this.refresh();
   }
   async onClose() {
+    this.unsubscribePictures?.();
+    this.unsubscribePictures = null;
     this.unsubscribe?.();
     this.unsubscribe = null;
     this.galleryCleanup?.();
@@ -2098,7 +2335,7 @@ var StyleView = class extends import_obsidian9.ItemView {
   }
   shape() {
     const { images } = this.plugin.store.settings.look;
-    return `${this.plugin.active}|${this.mode()}|${images.map((i) => `${i.id}:${i.name ?? ""}:${i.src ? 1 : 0}`).join(",")}`;
+    return `${this.plugin.active}|${this.mode()}|${images.map((i) => `${i.id}:${i.name ?? ""}:${i.enabled === true}:${i.src}`).join(",")}`;
   }
   refresh() {
     if (this.shape() !== this.built) this.build();
@@ -2223,7 +2460,7 @@ var StyleView = class extends import_obsidian9.ItemView {
         store.set({ look: { ...look(), background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, motionQuality: null, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused });
       }
     });
-    picker(bgG, "Background", "CSS, motion, stage or one of your pictures.", backgroundOptions(look().images), () => look().background, (v) => store.setLook({ background: v }), (dir) => stepBackground(store, dir), DEFAULT_LOOK.background);
+    picker(bgG, "Background", "CSS, motion, stage or one of your pictures.", backgroundOptions(look().images), () => look().background, (v) => store.chooseBackground(v), (dir) => stepBackground(store, dir), DEFAULT_LOOK.background);
     row(bgG, "Motion", MOTION_DESC, () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion }), (s) => s.addDropdown((d) => {
       d.addOptions(MOTION_OPTIONS).onChange((v) => this.syncing || store.set({ motion: v }));
       this.syncs.push(() => d.setValue(store.settings.motion));
@@ -2319,10 +2556,32 @@ var FantasyEaselPlugin = class extends import_obsidian10.Plugin {
     document.body.setCssProps({ "--fantasy-easel-delay": `-${Math.round(Math.random() * 600)}s` });
     this.register(() => document.body.setCssProps({ "--fantasy-easel-delay": "" }));
     this.applier = new Applier(document.body, () => this.store.settings);
+    this.pictures = new PictureActivation(this.store, this.applier, (message) => {
+      new import_obsidian10.Notice(message);
+    });
+    this.store.backgroundChooser = (id) => this.pictures.activate(id);
     this.statusBar = new StatusBar(this.app, this, this.store, () => this.addPicture());
+    const fallbackUnavailable = () => {
+      if (this.active && this.applier.pictureError) this.pictures.unavailable(this.store.settings.look.background);
+    };
+    this.register(this.applier.subscribePictures(fallbackUnavailable));
     this.refresh();
-    this.register(this.store.subscribe(() => this.refresh()));
+    fallbackUnavailable();
+    this.register(this.store.subscribe(() => {
+      this.refresh();
+      fallbackUnavailable();
+    }));
     this.registerEvent(this.app.workspace.on("css-change", () => this.refresh()));
+    const retryPicture = () => {
+      if (this.active) this.applier.retryPicture();
+    };
+    this.registerDomEvent(window, "focus", retryPicture);
+    const pictureChanged = (file) => {
+      if (this.store.settings.look.images.some((img) => `img-${img.id}` === this.store.settings.look.background && img.src.trim() === file.path)) retryPicture();
+    };
+    this.registerEvent(this.app.vault.on("create", pictureChanged));
+    this.registerEvent(this.app.vault.on("delete", pictureChanged));
+    this.registerEvent(this.app.vault.on("modify", pictureChanged));
     this.registerView(STYLE_VIEW, (leaf) => new StyleView(leaf, this));
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
     this.registerObsidianProtocolHandler("fantasy-easel", () => this.openGallery());
@@ -2341,6 +2600,8 @@ var FantasyEaselPlugin = class extends import_obsidian10.Plugin {
     });
   }
   onunload() {
+    this.pictures.dispose();
+    this.store.backgroundChooser = null;
     this.store.flush();
     this.statusBar.hide();
     this.applier.detach();

@@ -1,5 +1,6 @@
 import { Notice } from "obsidian";
-import { ACCENT_CLASS, backgroundById, CARD_OFF_CLASS, CSS_BG, FORCE_MOTION_CLASS, LIGHT_CLASS, MARKER_CLASS, MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, STAGE_CLASS, STILL_CLASS, THEME_COLORS, LEGACY_CARD_CLASS } from "./catalog";
+import { ACCENT_CLASS, backgroundById, CARD_OFF_CLASS, CSS_BG, FORCE_MOTION_CLASS, LIGHT_CLASS, MARKER_CLASS, MOTION_CLASS, PAUSE_UNFOCUSED_CLASS, STAGE_CLASS, STILL_CLASS, THEME_COLORS, LEGACY_CARD_CLASS, pictureKind, toCssUrl } from "./catalog";
+import { PictureLoader } from "./picture-loader";
 import type { FantasyEaselSettings } from "./settings";
 import { ALL_SKIN_CLASSES, skinClasses } from "./skins";
 import { TUNING_VARS, tuningVars } from "./tuning";
@@ -40,6 +41,24 @@ export const isLight = (s: FantasyEaselSettings, windows: boolean) => (s.motionQ
  * by itself (no flag needed); own mutations are dropped with takeRecords().
  */
 export class Applier {
+  private pictureListeners = new Set<() => void>();
+  private picture = new PictureLoader(() => {
+    this.reconcile();
+    this.pictureListeners.forEach((f) => f());
+  });
+  get pictureError() { return this.picture.error; }
+  acceptPicture(id: string, src: string, css: string) {
+    this.picture.accept(JSON.stringify([id, src, css]), css);
+  }
+  subscribePictures(f: () => void) {
+    this.pictureListeners.add(f);
+    return () => { this.pictureListeners.delete(f); };
+  }
+  retryPicture() {
+    this.picture.reset();
+    this.reconcile();
+    this.pictureListeners.forEach((f) => f());
+  }
   private observer: MutationObserver | null = null;
   private hits: number[] = [];
   /** reconcile runs (for tests: settled = no new runs) */
@@ -66,7 +85,10 @@ export class Applier {
       if (want.has(c) && !has) { cl.add(c); changed++; }
       else if (!want.has(c) && has) { cl.remove(c); changed++; }
     }
-    const value = backgroundById(s.look.background, s.look.images)?.url ?? "";
+    const selected = s.look.images.find((img) => img.enabled === true && `img-${img.id}` === s.look.background);
+    const css = selected ? toCssUrl(selected.src) : "";
+    this.picture.select(selected ? JSON.stringify([selected.id, selected.src, css]) : "", css, !!selected && pictureKind(selected.src) === "local");
+    const value = this.picture.value;
     const now = this.body.style.getPropertyValue(URL_VAR);
     if (value !== now) { this.body.setCssProps({ [URL_VAR]: value }); changed++; }
     // style panel values: body inline variables; a value not set leaves the theme's own
@@ -98,6 +120,7 @@ export class Applier {
 
   /** Remove everything Easel added; the theme shows its defaults (Dark, Plasma still, cards). */
   detach() {
+    this.picture.reset();
     this.observer?.disconnect();
     this.observer = null;
     const cl = this.body.classList;

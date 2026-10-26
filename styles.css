@@ -1402,29 +1402,41 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 	margin-left: var(--size-4-2);
 }
 
-/* Settings: your pictures, one row each (name, address, use) */
-.fantasy-easel-picture input[type="text"] {
-	width: 100%;
-	min-width: 16em;
+/* Your pictures: one compact row; only errors take a separate full-width line. */
+.fantasy-easel-picture {
+    display: grid;
+    grid-template-columns: var(--icon-s) minmax(0, 1fr) auto;
+    grid-template-areas: "state fields actions" "error error error";
+    column-gap: var(--size-4-2);
+    row-gap: var(--size-2-1);
+    align-items: center;
+    padding-block: var(--size-4-2);
 }
-
-.fantasy-easel-picture input.fantasy-easel-picture-name {
-	min-width: 6em;
-	width: 8em;
+.fantasy-easel-picture .setting-item-info { display: contents; }
+.fantasy-easel-picture .setting-item-name { grid-area: state; min-width: 0; }
+.fantasy-easel-picture .setting-item-control { grid-area: actions; flex-wrap: nowrap; gap: var(--size-4-2); }
+.fantasy-easel-picture-fields {
+    grid-area: fields;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(5em, 0.35fr) minmax(0, 1fr);
+    gap: var(--size-4-2);
 }
-
-/* the name on the left: one line, cut with … (the full name is in the field and the tooltip) */
-.fantasy-easel-picture .setting-item-info {
-	flex: 0 0 7em;
-	min-width: 0;
+.fantasy-easel-picture input[type="text"] { width: 100%; min-width: 0; }
+.fantasy-easel-picture .fantasy-easel-picture-error {
+    grid-area: error;
+    color: var(--text-error);
+    white-space: normal;
+    overflow-wrap: anywhere;
+    margin: 0;
 }
-
-.fantasy-easel-picture .setting-item-name {
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
+.fantasy-easel-picture-error:empty { display: none; }
+.fantasy-easel-picture-active { display: inline-flex; align-items: center; color: var(--text-accent); }
+.fantasy-easel-picture-active svg { width: var(--icon-s); height: var(--icon-s); }
+.fantasy-easel-picture-modal .fantasy-easel-picture-field { display: block; }
+.fantasy-easel-picture-modal .fantasy-easel-picture-field .setting-item-info { margin: 0 0 var(--size-4-2); }
+.fantasy-easel-picture-modal .fantasy-easel-picture-field .setting-item-control { width: 100%; }
+.fantasy-easel-picture-modal input[type="text"] { width: 100%; min-width: 0; }
 /* Style panel (sidebar): Obsidian setting groups, one line per row (descriptions are tooltips),
    changed rows get a dot and a reset button that shows only there */
 .fantasy-easel-panel .fantasy-easel-panel-group {

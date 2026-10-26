@@ -21,6 +21,7 @@ export class StyleView extends ItemView {
   /** in-place updates, one per row */
   private syncs: (() => void)[] = [];
   private unsubscribe: (() => void) | null = null;
+  private unsubscribePictures: (() => void) | null = null;
   private galleryCleanup: (() => void) | null = null;
   private galleryOpen = false;
   /** what the rows were built for: rebuild when it changes */
@@ -46,12 +47,15 @@ export class StyleView extends ItemView {
 
   async onOpen() {
     this.unsubscribe = this.plugin.store.subscribe(() => this.refresh());
+    this.unsubscribePictures = this.plugin.pictures.subscribe(() => this.sync());
     // dark / light switched, or the theme changed: defaults and the mode toggle follow
     this.registerEvent(this.app.workspace.on("css-change", () => this.refresh()));
     this.refresh();
   }
 
   async onClose() {
+    this.unsubscribePictures?.();
+    this.unsubscribePictures = null;
     this.unsubscribe?.();
     this.unsubscribe = null;
     this.galleryCleanup?.();
@@ -60,7 +64,7 @@ export class StyleView extends ItemView {
 
   private shape() {
     const { images } = this.plugin.store.settings.look;
-    return `${this.plugin.active}|${this.mode()}|${images.map((i) => `${i.id}:${i.name ?? ""}:${i.src ? 1 : 0}`).join(",")}`;
+    return `${this.plugin.active}|${this.mode()}|${images.map((i) => `${i.id}:${i.name ?? ""}:${i.enabled === true}:${i.src}`).join(",")}`;
   }
 
   private refresh() {
@@ -200,7 +204,7 @@ export class StyleView extends ItemView {
         store.set({ look: { ...look(), background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, motionQuality: null, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused });
       },
     });
-    picker(bgG, "Background", "CSS, motion, stage or one of your pictures.", backgroundOptions(look().images), () => look().background, (v) => store.setLook({ background: v }), (dir) => stepBackground(store, dir), DEFAULT_LOOK.background);
+    picker(bgG, "Background", "CSS, motion, stage or one of your pictures.", backgroundOptions(look().images), () => look().background, (v) => store.chooseBackground(v), (dir) => stepBackground(store, dir), DEFAULT_LOOK.background);
     row(bgG, "Motion", MOTION_DESC, () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion }), (s) => s.addDropdown((d) => {
       d.addOptions(MOTION_OPTIONS).onChange((v) => this.syncing || store.set({ motion: v as Motion }));
       this.syncs.push(() => d.setValue(store.settings.motion));
