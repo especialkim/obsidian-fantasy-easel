@@ -38,7 +38,7 @@ export function backgroundMenu(store: Store, managePictures?: () => void, openGa
           .onClick(() => store.setLook({ background: b.id })),
       );
     }
-    if (g.label === PICTURES_GROUP && managePictures) menu.addItem((item) => item.setTitle("Add picture…").setIcon("plus").onClick(managePictures));
+    if (g.label === PICTURES_GROUP && managePictures) menu.addItem((item) => item.setTitle("Manage pictures…").setIcon("image-plus").onClick(managePictures));
   });
   return menu;
 }

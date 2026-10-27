@@ -7,7 +7,7 @@ import { StageHost } from "./stages";
 import { backgroundById, setPictureResolver } from "./catalog";
 import { resolvePicture } from "./pictures";
 import { FantasyEaselSettingTab } from "./settings-tab";
-import { AddPictureModal } from "./picture-modal";
+import { PicturesModal } from "./picture-modal";
 import { StatusBar } from "./statusbar";
 import { Store } from "./store";
 import { STYLE_VIEW, StyleView } from "./style-view";
@@ -49,7 +49,7 @@ export default class FantasyEaselPlugin extends Plugin {
   }
 
   /** Menu builders, also for CLI checks (a Menu closes at once when the window has no focus). */
-  menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.addPicture(), () => void this.openGallery()) };
+  menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.managePictures(), () => void this.openGallery()) };
 
   async onload() {
     const saved = (await this.loadData()) as Partial<FantasyEaselSettings> | null;
@@ -64,7 +64,7 @@ export default class FantasyEaselPlugin extends Plugin {
     document.body.setCssProps({ "--fantasy-easel-delay": `-${Math.round(Math.random() * 600)}s` });
     this.register(() => document.body.setCssProps({ "--fantasy-easel-delay": "" }));
     this.applier = new Applier(document.body, () => this.store.settings);
-    this.statusBar = new StatusBar(this.app, this, this.store, () => this.addPicture(), () => void this.openGallery());
+    this.statusBar = new StatusBar(this.app, this, this.store, () => this.managePictures(), () => void this.openGallery());
     this.refresh();
 
     this.register(this.store.subscribe(() => this.refresh()));
@@ -86,7 +86,7 @@ export default class FantasyEaselPlugin extends Plugin {
     this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => void this.openGallery() });
     // no default hotkey (plugin guidelines)
     this.addCommand({ id: "open-style-panel", name: "Open style panel", callback: () => void this.openStylePanel() });
-    this.addCommand({ id: "add-picture", name: "Add picture", checkCallback: whenActive(() => this.addPicture()) });
+    this.addCommand({ id: "manage-pictures", name: "Manage pictures", checkCallback: whenActive(() => this.managePictures()) });
     // a vault picture that is renamed or moved keeps working
     this.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
       const images = this.store.settings.look.images;
@@ -121,8 +121,9 @@ export default class FantasyEaselPlugin extends Plugin {
     return leaf.view instanceof StyleView ? leaf.view : null;
   }
 
-  addPicture() {
-    new AddPictureModal(this.app, this.store).open();
+  /** Your pictures window: add, use, remove. */
+  managePictures() {
+    new PicturesModal(this.app, this.store).open();
   }
 
 }

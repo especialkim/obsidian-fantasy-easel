@@ -96,7 +96,7 @@ export function renderGallery(root: HTMLElement, store: Store, opts: { addPictur
   const { section, head } = group("Your pictures", "Your own pictures. The same picture day and night.");
   // "+" at the right of the title, like the list in settings
   if (opts.addPicture) {
-    const add = head.createDiv({ cls: "clickable-icon fantasy-easel-gallery-add", attr: { "aria-label": "Add picture", role: "button", tabindex: "0" } });
+    const add = head.createDiv({ cls: "clickable-icon fantasy-easel-gallery-add", attr: { "aria-label": "Manage pictures", role: "button", tabindex: "0" } });
     setIcon(add, "plus");
     add.addEventListener("click", () => opts.addPicture?.());
     add.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); opts.addPicture?.(); } });

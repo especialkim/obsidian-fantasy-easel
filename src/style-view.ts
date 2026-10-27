@@ -260,7 +260,7 @@ export class StyleView extends ItemView {
       this.galleryCleanup?.();
       this.galleryCleanup = null;
       gBody.empty();
-      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { addPicture: () => this.plugin.addPicture(), still: true, sides: [mode === "dark" ? "night" : "day"] });
+      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { addPicture: () => this.plugin.managePictures(), still: true, sides: [mode === "dark" ? "night" : "day"] });
     };
     let draw = () => {};
     galleryG.addExtraButton((b) => {

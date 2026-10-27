@@ -1,4 +1,6 @@
 import { AbstractInputSuggest, normalizePath, Platform, type App, type TFile } from "obsidian";
+import { DEFAULT_BACKGROUND, toCssUrl, type UserImage } from "./catalog";
+import type { Store } from "./store";
 
 // Your pictures from this computer (2026-10-23): a vault path ("Assets/sky.png", or [[sky.png]]),
 // file:///… or an absolute path (/Users/…, C:\…). Web addresses (https://) need nothing here.
@@ -51,4 +53,12 @@ export class PictureSuggest extends AbstractInputSuggest<TFile> {
     this.pick(file.path);
     this.close();
   }
+}
+
+/** Save the picture list (settings list, picture window). A picture that is gone or emptied
+ *  cannot stay the background: it falls back to the default. */
+export function setPictures(store: Store, images: UserImage[]) {
+  const bg = store.settings.look.background;
+  const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
+  store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
 }

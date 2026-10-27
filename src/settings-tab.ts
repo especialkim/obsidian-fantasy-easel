@@ -1,10 +1,10 @@
 import { PluginSettingTab, setTooltip, type App, type SettingDefinitionItem, type SettingDefinitionPage } from "obsidian";
-import { DEFAULT_BACKGROUND, newImageId, toCssUrl, type UserImage } from "./catalog";
+import { newImageId, toCssUrl, type UserImage } from "./catalog";
 import type FantasyEaselPlugin from "./main";
 import { excalidrawAvailable, excalidrawDiff, ExcalidrawSettingsModal, restoreExcalidraw } from "./excalidraw";
 import { ACCENT_DESC, backgroundOptions, FANTASY_URL, colorOptions, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
 import { isLight } from "./apply";
-import { PictureSuggest } from "./pictures";
+import { PictureSuggest, setPictures } from "./pictures";
 import { partOn, skinOn, SKINS } from "./skins";
 import { DEFAULT_SETTINGS, type StatusId } from "./settings";
 
@@ -82,12 +82,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     if (!this.plugin.active) return this.noTheme();
     const store = this.plugin.store;
     const { look, statusItems } = store.settings;
-    const setImages = (images: UserImage[]) => {
-      // a picture that is gone or emptied cannot stay the background
-      const bg = store.settings.look.background;
-      const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
-      store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
-    };
+    const setImages = (images: UserImage[]) => setPictures(store, images);
     const patchImage = (id: string, patch: Partial<UserImage>) => setImages(store.settings.look.images.map((x) => (x.id === id ? { ...x, ...patch } : x)));
     const move = <T,>(list: T[], from: number, to: number) => {
       const out = [...list];
@@ -121,7 +116,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
         type: "list",
         heading: "Your pictures",
         emptyState: "No pictures yet. Add one with +: a vault picture (type to search), https://… or file://… (this computer only).",
-        addItem: { name: "Add picture", action: () => store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] }) },
+        addItem: { name: "Add picture", action: () => store.setLook({ images: [{ id: newImageId(), src: "" }, ...store.settings.look.images] }) },
         onDelete: (i) => setImages(store.settings.look.images.filter((_, j) => j !== i)),
         onReorder: (from, to) => setImages(move(store.settings.look.images, from, to)),
         items: look.images.map((img, i) => ({

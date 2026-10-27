@@ -1315,7 +1315,7 @@ function backgroundMenu(store, managePictures, openGallery) {
         (item) => item.setTitle(b.name).setChecked(store.settings.look.background === b.id).onClick(() => store.setLook({ background: b.id }))
       );
     }
-    if (g.label === PICTURES_GROUP && managePictures) menu.addItem((item) => item.setTitle("Add picture\u2026").setIcon("plus").onClick(managePictures));
+    if (g.label === PICTURES_GROUP && managePictures) menu.addItem((item) => item.setTitle("Manage pictures\u2026").setIcon("image-plus").onClick(managePictures));
   });
   return menu;
 }
@@ -1441,6 +1441,11 @@ var PictureSuggest = class extends import_obsidian3.AbstractInputSuggest {
     this.close();
   }
 };
+function setPictures(store, images) {
+  const bg = store.settings.look.background;
+  const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
+  store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
+}
 
 // src/settings-tab.ts
 var import_obsidian5 = require("obsidian");
@@ -1590,11 +1595,7 @@ var FantasyEaselSettingTab = class extends import_obsidian5.PluginSettingTab {
     if (!this.plugin.active) return this.noTheme();
     const store = this.plugin.store;
     const { look, statusItems } = store.settings;
-    const setImages = (images) => {
-      const bg = store.settings.look.background;
-      const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
-      store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
-    };
+    const setImages = (images) => setPictures(store, images);
     const patchImage = (id, patch) => setImages(store.settings.look.images.map((x) => x.id === id ? { ...x, ...patch } : x));
     const move = (list, from, to) => {
       const out = [...list];
@@ -1633,7 +1634,7 @@ var FantasyEaselSettingTab = class extends import_obsidian5.PluginSettingTab {
         type: "list",
         heading: "Your pictures",
         emptyState: "No pictures yet. Add one with +: a vault picture (type to search), https://\u2026 or file://\u2026 (this computer only).",
-        addItem: { name: "Add picture", action: () => store.setLook({ images: [...store.settings.look.images, { id: newImageId(), src: "" }] }) },
+        addItem: { name: "Add picture", action: () => store.setLook({ images: [{ id: newImageId(), src: "" }, ...store.settings.look.images] }) },
         onDelete: (i) => setImages(store.settings.look.images.filter((_, j) => j !== i)),
         onReorder: (from, to) => setImages(move(store.settings.look.images, from, to)),
         items: look.images.map((img, i) => ({
@@ -1779,40 +1780,46 @@ var FantasyEaselSettingTab = class extends import_obsidian5.PluginSettingTab {
 
 // src/picture-modal.ts
 var import_obsidian6 = require("obsidian");
-var AddPictureModal = class extends import_obsidian6.Modal {
+var NOT_FOUND = "Not found: check the path or address.";
+var PicturesModal = class extends import_obsidian6.Modal {
   constructor(app, store) {
     super(app);
     this.store = store;
-    this.src = "";
-    this.name = "";
+    this.unsubscribe = null;
   }
   onOpen() {
-    this.setTitle("Add picture");
-    this.modalEl.addClass("fantasy-easel-add-picture");
-    const images = this.store.settings.look.images;
-    const fallback = `Picture ${images.length + 1}`;
-    new import_obsidian6.Setting(this.contentEl).setName("Name").setDesc("Shown in the menus and the gallery. Empty: " + fallback + ".").addText((t) => t.setPlaceholder(fallback).onChange((v) => this.name = v));
-    let preview;
-    let note;
-    const show2 = () => {
-      const url = toCssUrl(this.src);
-      preview.toggleClass("is-empty", !url);
-      preview.setCssProps({ "--fantasy-easel-preview": url || "none" });
-      note.setText(this.src.trim() && !url ? "Not found: check the path or address." : "");
-    };
-    const add = () => {
-      if (!toCssUrl(this.src)) return void note.setText(this.src.trim() ? "Not found: check the path or address." : "Choose a picture first.");
-      const img = { id: newImageId(), src: this.src.trim(), name: this.name.trim() };
-      this.store.setLook({ images: [...this.store.settings.look.images, img], background: `img-${img.id}` });
-      this.close();
-    };
-    const pick = new import_obsidian6.Setting(this.contentEl).setName("Picture").setDesc("A vault picture (type to search), https://\u2026 or a file on this computer (file://\u2026, only here).").setClass("fantasy-easel-add-picture-src").addText((t) => {
+    this.setTitle("Your pictures");
+    this.modalEl.addClass("fantasy-easel-pictures");
+    this.addForm(this.contentEl.createDiv());
+    const list = this.contentEl.createDiv({ cls: "fantasy-easel-pictures-list" });
+    const draw = () => this.drawList(list);
+    draw();
+    this.unsubscribe = this.store.subscribe(draw);
+  }
+  onClose() {
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    this.contentEl.empty();
+  }
+  /** Name, address (vault search), preview, "Add and use". The window stays open for the next one. */
+  addForm(el) {
+    let src = "";
+    let name = "";
+    let nameInput;
+    let srcInput;
+    const fallback = () => `Picture ${this.store.settings.look.images.length + 1}`;
+    new import_obsidian6.Setting(el).setName("Name").addText((t) => {
+      nameInput = t.inputEl;
+      t.setPlaceholder(fallback()).onChange((v) => name = v);
+    });
+    const srcRow = new import_obsidian6.Setting(el).setName("Picture").setDesc("A vault picture (type to search), https://\u2026 or a file on this computer (file://\u2026, only here).").setClass("fantasy-easel-pictures-src").addText((t) => {
+      srcInput = t.inputEl;
       t.setPlaceholder("Vault path, https://\u2026 or file://\u2026").onChange((v) => {
-        this.src = v;
+        src = v;
         show2();
       });
       new PictureSuggest(this.app, t.inputEl, (path) => {
-        this.src = path;
+        src = path;
         t.setValue(path);
         show2();
       });
@@ -1824,13 +1831,48 @@ var AddPictureModal = class extends import_obsidian6.Modal {
       });
       window.setTimeout(() => t.inputEl.focus(), 0);
     });
-    preview = this.contentEl.createDiv({ cls: "fantasy-easel-add-picture-preview is-empty" });
-    preview.createSpan({ text: "Preview" });
-    note = pick.descEl.createDiv({ cls: "fantasy-easel-add-picture-note mod-warning" });
-    new import_obsidian6.Setting(this.contentEl).addButton((b) => b.setButtonText("Cancel").onClick(() => this.close())).addButton((b) => b.setButtonText("Add and use").setCta().onClick(add));
+    const note = srcRow.descEl.createDiv({ cls: "fantasy-easel-pictures-note mod-warning" });
+    const preview = el.createDiv({ cls: "fantasy-easel-pictures-preview is-empty" });
+    new import_obsidian6.Setting(el).addButton((b) => b.setButtonText("Add and use").setCta().onClick(() => add()));
+    function show2() {
+      const url = toCssUrl(src);
+      preview.toggleClass("is-empty", !url);
+      preview.setCssProps({ "--fantasy-easel-preview": url || "none" });
+      note.setText(src.trim() && !url ? NOT_FOUND : "");
+    }
+    const add = () => {
+      if (!toCssUrl(src)) return void note.setText(src.trim() ? NOT_FOUND : "Choose a picture first.");
+      const img = { id: newImageId(), src: src.trim(), name: name.trim() };
+      this.store.setLook({ images: [img, ...this.store.settings.look.images], background: `img-${img.id}` });
+      src = name = "";
+      nameInput.value = srcInput.value = "";
+      nameInput.placeholder = fallback();
+      show2();
+      srcInput.focus();
+    };
   }
-  onClose() {
-    this.contentEl.empty();
+  /** Each picture: thumbnail, name, Use (or "In use"), remove. */
+  drawList(el) {
+    el.empty();
+    const { images, background } = this.store.settings.look;
+    if (!images.length) {
+      el.createDiv({ cls: "setting-item-description fantasy-easel-pictures-empty", text: "No pictures yet." });
+      return;
+    }
+    images.forEach((img, i) => {
+      const url = toCssUrl(img.src);
+      const id = `img-${img.id}`;
+      const row = new import_obsidian6.Setting(el).setName(img.name?.trim() || `Picture ${i + 1}`).setClass("fantasy-easel-pictures-row");
+      if (!url) row.setDesc(img.src.trim() ? NOT_FOUND : "No address yet (Settings \u2192 Your pictures).");
+      const thumb = createDiv({ cls: "fantasy-easel-pictures-thumb" });
+      thumb.setCssProps({ "--fantasy-easel-preview": url || "none" });
+      row.settingEl.prepend(thumb);
+      if (background === id) row.controlEl.createSpan({ cls: "fantasy-easel-pictures-inuse", text: "In use" });
+      else if (url) row.addButton((b) => b.setButtonText("Use").onClick(() => this.store.setLook({ background: id })));
+      row.addExtraButton((b) => {
+        b.setIcon("trash-2").setTooltip("Remove from the list (the file stays)").onClick(() => setPictures(this.store, this.store.settings.look.images.filter((x) => x.id !== img.id)));
+      });
+    });
   }
 };
 
@@ -2049,7 +2091,7 @@ function renderGallery(root, store, opts) {
   const mine = imageBackgrounds(store.settings.look.images);
   const { section, head } = group("Your pictures", "Your own pictures. The same picture day and night.");
   if (opts.addPicture) {
-    const add = head.createDiv({ cls: "clickable-icon fantasy-easel-gallery-add", attr: { "aria-label": "Add picture", role: "button", tabindex: "0" } });
+    const add = head.createDiv({ cls: "clickable-icon fantasy-easel-gallery-add", attr: { "aria-label": "Manage pictures", role: "button", tabindex: "0" } });
     (0, import_obsidian8.setIcon)(add, "plus");
     add.addEventListener("click", () => opts.addPicture?.());
     add.addEventListener("keydown", (ev) => {
@@ -2303,7 +2345,7 @@ var StyleView = class extends import_obsidian9.ItemView {
       this.galleryCleanup?.();
       this.galleryCleanup = null;
       gBody.empty();
-      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { addPicture: () => this.plugin.addPicture(), still: true, sides: [mode === "dark" ? "night" : "day"] });
+      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { addPicture: () => this.plugin.managePictures(), still: true, sides: [mode === "dark" ? "night" : "day"] });
     };
     let draw = () => {
     };
@@ -2343,7 +2385,7 @@ var FantasyEaselPlugin = class extends import_obsidian10.Plugin {
     /** True while the Fantasy theme is the current theme. Otherwise the plugin stays idle. */
     this.active = false;
     /** Menu builders, also for CLI checks (a Menu closes at once when the window has no focus). */
-    this.menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.addPicture(), () => void this.openGallery()) };
+    this.menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.managePictures(), () => void this.openGallery()) };
   }
   syncStage() {
     const { look } = this.store.settings;
@@ -2381,7 +2423,7 @@ var FantasyEaselPlugin = class extends import_obsidian10.Plugin {
     document.body.setCssProps({ "--fantasy-easel-delay": `-${Math.round(Math.random() * 600)}s` });
     this.register(() => document.body.setCssProps({ "--fantasy-easel-delay": "" }));
     this.applier = new Applier(document.body, () => this.store.settings);
-    this.statusBar = new StatusBar(this.app, this, this.store, () => this.addPicture(), () => void this.openGallery());
+    this.statusBar = new StatusBar(this.app, this, this.store, () => this.managePictures(), () => void this.openGallery());
     this.refresh();
     this.register(this.store.subscribe(() => this.refresh()));
     this.registerEvent(this.app.workspace.on("css-change", () => this.refresh()));
@@ -2397,7 +2439,7 @@ var FantasyEaselPlugin = class extends import_obsidian10.Plugin {
     this.addCommand({ id: "previous-background", name: "Previous background", checkCallback: whenActive(() => stepBackground(this.store, -1)) });
     this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => void this.openGallery() });
     this.addCommand({ id: "open-style-panel", name: "Open style panel", callback: () => void this.openStylePanel() });
-    this.addCommand({ id: "add-picture", name: "Add picture", checkCallback: whenActive(() => this.addPicture()) });
+    this.addCommand({ id: "manage-pictures", name: "Manage pictures", checkCallback: whenActive(() => this.managePictures()) });
     this.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
       const images = this.store.settings.look.images;
       if (images.some((x) => x.src.trim() === oldPath)) this.store.setLook({ images: images.map((x) => x.src.trim() === oldPath ? { ...x, src: file.path } : x) });
@@ -2425,7 +2467,8 @@ var FantasyEaselPlugin = class extends import_obsidian10.Plugin {
     await this.app.workspace.revealLeaf(leaf);
     return leaf.view instanceof StyleView ? leaf.view : null;
   }
-  addPicture() {
-    new AddPictureModal(this.app, this.store).open();
+  /** Your pictures window: add, use, remove. */
+  managePictures() {
+    new PicturesModal(this.app, this.store).open();
   }
 };

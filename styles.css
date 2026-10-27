@@ -1400,44 +1400,68 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 	padding-block: var(--size-4-2);
 }
 
-/* Add picture (Modal): the address field takes the full width under its name, preview below */
-.fantasy-easel-add-picture .fantasy-easel-add-picture-src {
+/* Your pictures (Modal): the add form on top (address at full width under its name, preview
+   below), then the list, newest first: thumbnail, name, Use / In use, remove */
+.fantasy-easel-pictures .fantasy-easel-pictures-src {
 	flex-wrap: wrap;
 	row-gap: var(--size-4-2);
 }
 
-.fantasy-easel-add-picture .fantasy-easel-add-picture-src .setting-item-control {
+.fantasy-easel-pictures .fantasy-easel-pictures-src .setting-item-control {
 	flex: 1 1 100%;
 }
 
-.fantasy-easel-add-picture .fantasy-easel-add-picture-src input[type="text"] {
+.fantasy-easel-pictures .fantasy-easel-pictures-src input[type="text"] {
 	width: 100%;
 }
 
-.fantasy-easel-add-picture-note:empty {
+.fantasy-easel-pictures-note:empty {
 	display: none;
 }
 
-.fantasy-easel-add-picture-preview {
+.fantasy-easel-pictures-preview {
 	aspect-ratio: 16 / 9;
-	max-height: 12rem;
+	max-height: 10rem;
 	margin-inline: auto;
 	border-radius: var(--radius-m);
 	border: 1px solid var(--background-modifier-border);
 	background: var(--fantasy-easel-preview) center / cover no-repeat;
-	display: flex;
-	align-items: center;
-	justify-content: center;
 }
 
-.fantasy-easel-add-picture-preview > span {
+/* shown only once the address finds a picture */
+.fantasy-easel-pictures-preview.is-empty {
 	display: none;
-	color: var(--text-faint);
+}
+
+.fantasy-easel-pictures-list {
+	margin-top: var(--size-4-2);
+	padding-top: var(--size-4-2);
+	border-top: 1px solid var(--background-modifier-border);
+	max-height: 40vh;
+	overflow-y: auto;
+}
+
+.fantasy-easel-pictures .fantasy-easel-pictures-row {
+	gap: var(--size-4-3);
+	align-items: center;
+}
+
+.fantasy-easel-pictures-thumb {
+	flex: none;
+	width: 4.5em;
+	aspect-ratio: 16 / 9;
+	border-radius: var(--radius-s);
+	border: 1px solid var(--background-modifier-border);
+	background: var(--fantasy-easel-preview) center / cover no-repeat var(--background-secondary);
+}
+
+.fantasy-easel-pictures-inuse {
+	color: var(--text-accent);
 	font-size: var(--font-ui-small);
 }
 
-.fantasy-easel-add-picture-preview.is-empty > span {
-	display: block;
+.fantasy-easel-pictures-empty {
+	padding-block: var(--size-4-3);
 }
 
 /* Settings: your pictures, one row each (name, address, use) */
