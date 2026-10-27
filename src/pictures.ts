@@ -62,3 +62,47 @@ export function setPictures(store: Store, images: UserImage[]) {
   const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
   store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
 }
+
+/**
+ * A picture dropped on a target → its address for Your pictures ("" = not a picture).
+ * From Obsidian's file explorer the drag carries obsidian://open?vault=…&file=… (a vault path);
+ * a file from Finder or the desktop is copied into the vault's attachment folder (Obsidian's
+ * own setting), so it works on every device; an image dragged from a browser gives https://.
+ */
+export async function pictureFromDrop(app: App, data: DataTransfer): Promise<string> {
+  const file = Array.from(data.files).find((f) => f.type.startsWith("image/"));
+  if (file) {
+    const path = await app.fileManager.getAvailablePathForAttachment(file.name);
+    return (await app.vault.createBinary(path, await file.arrayBuffer())).path;
+  }
+  const text = (data.getData("text/uri-list") || data.getData("text/plain")).split(/\r?\n/).find((l) => l.trim() && !l.startsWith("#"))?.trim() ?? "";
+  if (text.startsWith("obsidian://")) {
+    const url = new URL(text);
+    if (url.searchParams.get("vault") !== app.vault.getName()) return "";
+    const path = url.searchParams.get("file") ?? "";
+    const hit = app.vault.getFileByPath(path) ?? app.metadataCache.getFirstLinkpathDest(path, "");
+    return hit && IMAGE.test(hit.extension) ? hit.path : "";
+  }
+  return /^https?:\/\//i.test(text) ? text : "";
+}
+
+/** Let `el` take dropped pictures: `is-drop-target` while a drag is over it, then the address
+ *  (or an error message for something that is not a picture). */
+export function acceptPictureDrop(app: App, el: HTMLElement, onPicture: (src: string) => void, onError: (message: string) => void) {
+  let depth = 0;
+  const set = (on: boolean) => el.toggleClass("is-drop-target", on);
+  el.addEventListener("dragenter", (ev) => { ev.preventDefault(); depth++; set(true); });
+  el.addEventListener("dragover", (ev) => { ev.preventDefault(); if (ev.dataTransfer) ev.dataTransfer.dropEffect = "copy"; });
+  el.addEventListener("dragleave", () => { if (--depth <= 0) { depth = 0; set(false); } });
+  el.addEventListener("drop", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    depth = 0;
+    set(false);
+    if (!ev.dataTransfer) return;
+    pictureFromDrop(app, ev.dataTransfer).then(
+      (src) => (src ? onPicture(src) : onError("Not a picture. Drop an image file or a picture from the vault.")),
+      (err: unknown) => onError(`Could not add the picture: ${err instanceof Error ? err.message : String(err)}`),
+    );
+  });
+}

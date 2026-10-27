@@ -1,10 +1,10 @@
-import { PluginSettingTab, setTooltip, type App, type SettingDefinitionItem, type SettingDefinitionPage } from "obsidian";
+import { Notice, PluginSettingTab, setIcon, setTooltip, type App, type SettingDefinitionItem, type SettingDefinitionPage } from "obsidian";
 import { newImageId, toCssUrl, type UserImage } from "./catalog";
 import type FantasyEaselPlugin from "./main";
 import { excalidrawAvailable, excalidrawDiff, ExcalidrawSettingsModal, restoreExcalidraw } from "./excalidraw";
 import { ACCENT_DESC, backgroundOptions, FANTASY_URL, colorOptions, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
 import { isLight } from "./apply";
-import { PictureSuggest, setPictures } from "./pictures";
+import { acceptPictureDrop, PictureSuggest, setPictures } from "./pictures";
 import { partOn, skinOn, SKINS } from "./skins";
 import { DEFAULT_SETTINGS, type StatusId } from "./settings";
 
@@ -124,6 +124,22 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
           render: (setting) => {
             setting.settingEl.addClass("fantasy-easel-picture");
             setTooltip(setting.nameEl, img.name?.trim() || `Picture ${i + 1}`);
+            // thumbnail first (as in the Your pictures window); drop a picture anywhere on the row.
+            // Obsidian reuses list rows and calls render again on every redraw: replace the
+            // thumbnail, attach the drop once, and look up the row's picture when it is dropped.
+            const row = setting.settingEl;
+            row.querySelector(":scope > .fantasy-easel-picture-thumb")?.remove();
+            const url = toCssUrl(img.src);
+            const thumb = createDiv({ cls: "fantasy-easel-picture-thumb", attr: { "aria-label": "Drop a picture on this row" } });
+            thumb.toggleClass("is-empty", !url);
+            thumb.setCssProps({ "--fantasy-easel-preview": url || "none" });
+            if (!url) setIcon(thumb, "image-plus");
+            row.prepend(thumb);
+            row.dataset.picture = img.id;
+            if (!row.dataset.dropReady) {
+              row.dataset.dropReady = "1";
+              acceptPictureDrop(this.app, row, (src) => { if (row.dataset.picture) patchImage(row.dataset.picture, { src }); }, (message) => new Notice(message));
+            }
             const id = `img-${img.id}`;
             // saved on change (blur / Enter), so a redraw never steals focus while typing
             setting.addText((t) => {

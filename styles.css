@@ -1429,9 +1429,27 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 	color: var(--text-faint);
 }
 
-/* the icon only marks the empty slot */
-.fantasy-easel-pictures-preview:not(.is-empty) > svg {
+/* the drop hint only marks the empty slot */
+.fantasy-easel-pictures-preview:not(.is-empty) > .fantasy-easel-pictures-drop {
 	display: none;
+}
+
+.fantasy-easel-pictures-drop {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--size-2-2);
+	font-size: var(--font-ui-smaller);
+	pointer-events: none;
+}
+
+/* a picture is being dragged over the slot (or a settings row) */
+.fantasy-easel-pictures-preview.is-drop-target,
+.fantasy-easel-picture.is-drop-target {
+	outline: 2px dashed var(--interactive-accent);
+	outline-offset: -2px;
+	background-color: color-mix(in srgb, var(--interactive-accent) 12%, transparent);
+	color: var(--interactive-accent);
 }
 
 .fantasy-easel-pictures-preview.is-empty {
@@ -1583,7 +1601,31 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 	color: var(--text-normal);
 }
 
-/* Settings: your pictures, one row each (name, address, use) */
+/* Settings: your pictures, one row each (thumbnail, name, address, use); a row takes a dropped picture */
+.fantasy-easel-picture {
+	border-radius: var(--radius-m);
+}
+
+.fantasy-easel-picture-thumb {
+	flex: none;
+	width: 4em;
+	aspect-ratio: 16 / 9;
+	margin-inline-end: var(--size-4-2);
+	border-radius: var(--radius-s);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-normal) 15%, transparent);
+	background: var(--fantasy-easel-preview) center / cover no-repeat;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-faint);
+	--icon-size: 14px;
+}
+
+.fantasy-easel-picture-thumb.is-empty {
+	box-shadow: none;
+	outline: 1px dashed color-mix(in srgb, var(--text-normal) 25%, transparent);
+	outline-offset: -1px;
+}
 .fantasy-easel-picture input[type="text"] {
 	width: 100%;
 	min-width: 16em;

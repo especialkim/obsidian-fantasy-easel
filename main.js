@@ -1446,6 +1446,52 @@ function setPictures(store, images) {
   const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
   store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
 }
+async function pictureFromDrop(app, data) {
+  const file = Array.from(data.files).find((f) => f.type.startsWith("image/"));
+  if (file) {
+    const path = await app.fileManager.getAvailablePathForAttachment(file.name);
+    return (await app.vault.createBinary(path, await file.arrayBuffer())).path;
+  }
+  const text = (data.getData("text/uri-list") || data.getData("text/plain")).split(/\r?\n/).find((l) => l.trim() && !l.startsWith("#"))?.trim() ?? "";
+  if (text.startsWith("obsidian://")) {
+    const url = new URL(text);
+    if (url.searchParams.get("vault") !== app.vault.getName()) return "";
+    const path = url.searchParams.get("file") ?? "";
+    const hit = app.vault.getFileByPath(path) ?? app.metadataCache.getFirstLinkpathDest(path, "");
+    return hit && IMAGE.test(hit.extension) ? hit.path : "";
+  }
+  return /^https?:\/\//i.test(text) ? text : "";
+}
+function acceptPictureDrop(app, el, onPicture, onError) {
+  let depth = 0;
+  const set = (on) => el.toggleClass("is-drop-target", on);
+  el.addEventListener("dragenter", (ev) => {
+    ev.preventDefault();
+    depth++;
+    set(true);
+  });
+  el.addEventListener("dragover", (ev) => {
+    ev.preventDefault();
+    if (ev.dataTransfer) ev.dataTransfer.dropEffect = "copy";
+  });
+  el.addEventListener("dragleave", () => {
+    if (--depth <= 0) {
+      depth = 0;
+      set(false);
+    }
+  });
+  el.addEventListener("drop", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    depth = 0;
+    set(false);
+    if (!ev.dataTransfer) return;
+    pictureFromDrop(app, ev.dataTransfer).then(
+      (src) => src ? onPicture(src) : onError("Not a picture. Drop an image file or a picture from the vault."),
+      (err) => onError(`Could not add the picture: ${err instanceof Error ? err.message : String(err)}`)
+    );
+  });
+}
 
 // src/settings-tab.ts
 var import_obsidian5 = require("obsidian");
@@ -1642,6 +1688,21 @@ var FantasyEaselSettingTab = class extends import_obsidian5.PluginSettingTab {
           render: (setting) => {
             setting.settingEl.addClass("fantasy-easel-picture");
             (0, import_obsidian5.setTooltip)(setting.nameEl, img.name?.trim() || `Picture ${i + 1}`);
+            const row = setting.settingEl;
+            row.querySelector(":scope > .fantasy-easel-picture-thumb")?.remove();
+            const url = toCssUrl(img.src);
+            const thumb = createDiv({ cls: "fantasy-easel-picture-thumb", attr: { "aria-label": "Drop a picture on this row" } });
+            thumb.toggleClass("is-empty", !url);
+            thumb.setCssProps({ "--fantasy-easel-preview": url || "none" });
+            if (!url) (0, import_obsidian5.setIcon)(thumb, "image-plus");
+            row.prepend(thumb);
+            row.dataset.picture = img.id;
+            if (!row.dataset.dropReady) {
+              row.dataset.dropReady = "1";
+              acceptPictureDrop(this.app, row, (src) => {
+                if (row.dataset.picture) patchImage(row.dataset.picture, { src });
+              }, (message) => new import_obsidian5.Notice(message));
+            }
             const id = `img-${img.id}`;
             setting.addText((t) => {
               t.setPlaceholder("Name").setValue(img.name ?? "");
@@ -1802,8 +1863,10 @@ var PicturesModal = class extends import_obsidian6.Modal {
     this.contentEl.empty();
   }
   addRow(el) {
-    const preview = el.createDiv({ cls: "fantasy-easel-pictures-preview is-empty" });
-    (0, import_obsidian6.setIcon)(preview, "image-plus");
+    const preview = el.createDiv({ cls: "fantasy-easel-pictures-preview is-empty", attr: { "aria-label": "Drop a picture here" } });
+    const hint = preview.createDiv({ cls: "fantasy-easel-pictures-drop" });
+    (0, import_obsidian6.setIcon)(hint, "image-plus");
+    hint.createSpan({ text: "Drop a picture" });
     const fields = el.createDiv({ cls: "fantasy-easel-pictures-fields" });
     const src = new import_obsidian6.TextComponent(fields).setPlaceholder("Vault picture, https://\u2026 or file://\u2026");
     src.inputEl.addClass("fantasy-easel-pictures-src");
@@ -1832,6 +1895,11 @@ var PicturesModal = class extends import_obsidian6.Modal {
       src.inputEl.focus();
     };
     src.onChange(show2);
+    acceptPictureDrop(this.app, preview, (path) => {
+      src.setValue(path);
+      show2();
+      name.inputEl.focus();
+    }, (message) => note.setText(message));
     new PictureSuggest(this.app, src.inputEl, (path) => {
       src.setValue(path);
       show2();

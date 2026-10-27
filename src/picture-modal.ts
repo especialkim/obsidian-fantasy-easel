@@ -1,13 +1,14 @@
 import { ButtonComponent, Modal, setIcon, setTooltip, TextComponent, type App } from "obsidian";
 import { newImageId, toCssUrl } from "./catalog";
-import { PictureSuggest, setPictures } from "./pictures";
+import { acceptPictureDrop, PictureSuggest, setPictures } from "./pictures";
 import type { Store } from "./store";
 
 const NOT_FOUND = "Not found. Check the path or address.";
 
 /**
  * Your pictures in one window (status bar menu, command, "+" in the panel gallery).
- * Top: one add row (preview slot, address with vault search, optional name, Add).
+ * Top: one add row (preview slot, address with vault search, optional name, Add). A picture
+ * can also be dropped on the preview slot (vault file, Finder file, browser image).
  * Below: the pictures as cards like the gallery tiles, newest first. Click a card to use it;
  * the one in use has the accent ring and a check; remove shows on hover or focus. Removing
  * takes the entry off the list only (the file stays), so there is no confirmation.
@@ -37,8 +38,10 @@ export class PicturesModal extends Modal {
   }
 
   private addRow(el: HTMLElement) {
-    const preview = el.createDiv({ cls: "fantasy-easel-pictures-preview is-empty" });
-    setIcon(preview, "image-plus");
+    const preview = el.createDiv({ cls: "fantasy-easel-pictures-preview is-empty", attr: { "aria-label": "Drop a picture here" } });
+    const hint = preview.createDiv({ cls: "fantasy-easel-pictures-drop" });
+    setIcon(hint, "image-plus");
+    hint.createSpan({ text: "Drop a picture" });
     const fields = el.createDiv({ cls: "fantasy-easel-pictures-fields" });
     const src = new TextComponent(fields).setPlaceholder("Vault picture, https://… or file://…");
     src.inputEl.addClass("fantasy-easel-pictures-src");
@@ -69,6 +72,8 @@ export class PicturesModal extends Modal {
       src.inputEl.focus();
     };
     src.onChange(show);
+    // dropped: fill the address and preview it; the name is next
+    acceptPictureDrop(this.app, preview, (path) => { src.setValue(path); show(); name.inputEl.focus(); }, (message) => note.setText(message));
     new PictureSuggest(this.app, src.inputEl, (path) => { src.setValue(path); show(); });
     for (const input of [src.inputEl, name.inputEl]) {
       input.addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); submit(); } });
