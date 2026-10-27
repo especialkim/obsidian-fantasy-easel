@@ -102,7 +102,7 @@ button.kanban-plugin__new-item-button:hover {
 
 a.kanban-plugin__item-postfix-button.is-enabled.clickable-icon svg {
 	--icon-stroke: 4px;
-	color: red;
+	color: var(--text-error);
 }
 
 /* part: headings — headings inside cards in the theme heading colors */

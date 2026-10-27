@@ -21,6 +21,8 @@ export interface Tuning {
   vars: (v: number) => Record<string, string>;
   /** only while the card layout is on (the card variables mean nothing without it) */
   cardOnly?: boolean;
+  /** only moves stage backgrounds: dimmed in the panel otherwise (other backgrounds, or Still) */
+  stageOnly?: boolean;
   /** saved separately for dark and light mode (stored as `<key>.dark` / `<key>.light`) */
   perMode?: boolean;
 }
@@ -48,7 +50,7 @@ export const TUNINGS: Tuning[] = [
   { key: "headingScale", name: "Heading size", desc: "How much larger headings are than body text (1 = theme).", group: "editor", min: 0, max: 2, step: 0.05, unit: "×", def: { dark: 1, light: 1 }, vars: (v) => Object.fromEntries(HEADINGS.map((h, i) => [`--h${i + 1}-size`, `${round(1 + (h - 1) * v)}em`])) },
   { key: "paragraph", name: "Paragraph spacing", desc: "Space between paragraphs.", group: "editor", min: 0, max: 1.5, step: 0.05, unit: "rem", def: { dark: 1, light: 1 }, vars: (v) => ({ "--p-spacing": `${v}rem` }) },
   { key: "propertiesRadius", name: "Properties corners", desc: "Corner radius of the properties tray.", group: "editor", min: 0, max: 24, step: 1, unit: "px", def: { dark: 8, light: 8 }, vars: (v) => ({ "--metadata-border-radius": `${v}px` }) },
-  { key: "stageSpeed", name: "Stage speed", desc: "Speed of the stage backgrounds (four moving layers).", group: "background", min: 0.25, max: 2, step: 0.05, unit: "×", def: { dark: 1, light: 1 }, vars: (v) => ({ "--fantasy-easel-speed": `${v}` }) },
+  { key: "stageSpeed", name: "Stage speed", desc: "Speed of the stage backgrounds (four moving layers). Only for a stage background while it moves.", group: "background", min: 0.25, max: 2, step: 0.05, unit: "×", def: { dark: 1, light: 1 }, vars: (v) => ({ "--fantasy-easel-speed": `${v}` }), stageOnly: true },
 ];
 
 /** Gallery tiles show both modes at once: per-mode values also go out as

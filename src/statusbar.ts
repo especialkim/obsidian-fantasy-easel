@@ -1,6 +1,5 @@
 import { setIcon, setTooltip, type App, type Plugin } from "obsidian";
 import { backgroundById, colorByCls } from "./catalog";
-import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu, stepBackground } from "./menus";
 import { MOTIONS, type StatusId } from "./settings";
 import type { Store } from "./store";
@@ -24,7 +23,7 @@ export class StatusBar {
   private card?: HTMLElement;
   private still?: HTMLElement;
 
-  constructor(private app: App, private plugin: Plugin, private store: Store, private managePictures: () => void) {}
+  constructor(private app: App, private plugin: Plugin, private store: Store, private managePictures: () => void, private openGallery: () => void) {}
 
   /** layout the buttons were built for (rebuilt when the order or the chosen buttons change) */
   private built = "";
@@ -55,12 +54,12 @@ export class StatusBar {
       },
       prev: () => setIcon(add("fantasy-easel-sb-prev", "Previous background", () => stepBackground(this.store, -1)), "chevron-left"),
       background: () => {
-        const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store, this.managePictures)));
+        const bg = add("fantasy-easel-sb-bg", "Background", (ev) => menuAt(ev, () => backgroundMenu(this.store, this.managePictures, this.openGallery)));
         this.bgKind = bg.createSpan({ cls: "fantasy-easel-sb-kind" });
         this.bgName = bg.createSpan({ cls: "fantasy-easel-sb-text fantasy-easel-sb-bgname" });
       },
       next: () => setIcon(add("fantasy-easel-sb-next", "Next background", () => stepBackground(this.store, 1)), "chevron-right"),
-      gallery: () => setIcon(add("fantasy-easel-sb-gallery", "Background gallery (day / night)", () => new GalleryModal(this.app, this.store, this.managePictures).open()), "layout-grid"),
+      gallery: () => setIcon(add("fantasy-easel-sb-gallery", "Background gallery", this.openGallery), "layout-grid"),
       accent: () => {
         this.accent = add("fantasy-easel-sb-toggle", "Theme accent on / off", () => this.store.setLook({ accent: !this.store.settings.look.accent }));
         setIcon(this.accent, "droplet");

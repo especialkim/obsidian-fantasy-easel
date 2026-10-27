@@ -1,8 +1,7 @@
 import { Menu } from "obsidian";
 import { allBackgrounds, THEME_COLORS } from "./catalog";
+import { backgroundGroups, PICTURES_GROUP } from "./options";
 import type { Store } from "./store";
-
-const KIND_LABEL = { static: "CSS · static", motion: "CSS · motion", image: "Your pictures" } as const;
 
 /** Theme color list. Same menu from the status bar and the settings tab. */
 export function colorMenu(store: Store): Menu {
@@ -18,16 +17,20 @@ export function colorMenu(store: Store): Menu {
   return menu;
 }
 
-/** Background list grouped by kind (CSS static, CSS motion, your pictures). */
-export function backgroundMenu(store: Store, managePictures?: () => void): Menu {
+/** Background list under group titles (still, moving, your pictures); the gallery first, for
+ *  choosing by picture when the names say little. */
+export function backgroundMenu(store: Store, managePictures?: () => void, openGallery?: () => void): Menu {
   const menu = new Menu();
-  const all = allBackgrounds(store.settings.look.images);
-  for (const kind of ["static", "motion", "image"] as const) {
-    const list = all.filter((b) => b.kind === kind);
-    if (kind === "image" && !list.length && !managePictures) continue;
-    if (kind !== "static") menu.addSeparator();
-    menu.addItem((item) => item.setTitle(KIND_LABEL[kind]).setIsLabel(true));
-    for (const b of list) {
+  if (openGallery) {
+    menu.addItem((item) => item.setTitle("Open gallery…").setIcon("layout-grid").onClick(openGallery));
+    menu.addSeparator();
+  }
+  const groups = backgroundGroups(store.settings.look.images);
+  if (managePictures && !groups.some((g) => g.label === PICTURES_GROUP)) groups.push({ label: PICTURES_GROUP, list: [] });
+  groups.forEach((g, i) => {
+    if (i) menu.addSeparator();
+    menu.addItem((item) => item.setTitle(g.label).setIsLabel(true));
+    for (const b of g.list) {
       menu.addItem((item) =>
         item
           .setTitle(b.name)
@@ -35,8 +38,8 @@ export function backgroundMenu(store: Store, managePictures?: () => void): Menu 
           .onClick(() => store.setLook({ background: b.id })),
       );
     }
-    if (kind === "image" && managePictures) menu.addItem((item) => item.setTitle("Add picture…").setIcon("plus").onClick(managePictures));
-  }
+    if (g.label === PICTURES_GROUP && managePictures) menu.addItem((item) => item.setTitle("Add picture…").setIcon("plus").onClick(managePictures));
+  });
   return menu;
 }
 

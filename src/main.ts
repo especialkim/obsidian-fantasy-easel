@@ -1,7 +1,7 @@
 import { Notice, Plugin } from "obsidian";
 import { Applier } from "./apply";
-import { GalleryModal } from "./gallery";
 import { backgroundMenu, colorMenu, stepBackground } from "./menus";
+import { NO_THEME_TEXT } from "./options";
 import { DEFAULT_SETTINGS, normalize, type FantasyEaselSettings } from "./settings";
 import { StageHost } from "./stages";
 import { backgroundById, setPictureResolver } from "./catalog";
@@ -49,7 +49,7 @@ export default class FantasyEaselPlugin extends Plugin {
   }
 
   /** Menu builders, also for CLI checks (a Menu closes at once when the window has no focus). */
-  menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.addPicture()) };
+  menus = { color: () => colorMenu(this.store), background: () => backgroundMenu(this.store, () => this.addPicture(), () => void this.openGallery()) };
 
   async onload() {
     const saved = (await this.loadData()) as Partial<FantasyEaselSettings> | null;
@@ -64,7 +64,7 @@ export default class FantasyEaselPlugin extends Plugin {
     document.body.setCssProps({ "--fantasy-easel-delay": `-${Math.round(Math.random() * 600)}s` });
     this.register(() => document.body.setCssProps({ "--fantasy-easel-delay": "" }));
     this.applier = new Applier(document.body, () => this.store.settings);
-    this.statusBar = new StatusBar(this.app, this, this.store, () => this.addPicture());
+    this.statusBar = new StatusBar(this.app, this, this.store, () => this.addPicture(), () => void this.openGallery());
     this.refresh();
 
     this.register(this.store.subscribe(() => this.refresh()));
@@ -74,13 +74,19 @@ export default class FantasyEaselPlugin extends Plugin {
     this.registerView(STYLE_VIEW, (leaf) => new StyleView(leaf, this));
     this.addSettingTab(new FantasyEaselSettingTab(this.app, this));
     // obsidian://fantasy-easel opens the background gallery (the theme's Style Settings notice links here)
-    this.registerObsidianProtocolHandler("fantasy-easel", () => this.openGallery());
-    this.addCommand({ id: "next-background", name: "Next background", callback: () => stepBackground(this.store, 1) });
-    this.addCommand({ id: "previous-background", name: "Previous background", callback: () => stepBackground(this.store, -1) });
-    this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => this.openGallery() });
+    this.registerObsidianProtocolHandler("fantasy-easel", () => void this.openGallery());
+    // without the Fantasy theme these change nothing you can see: hidden from the palette
+    const whenActive = (run: () => void) => (checking: boolean) => {
+      if (!this.active) return false;
+      if (!checking) run();
+      return true;
+    };
+    this.addCommand({ id: "next-background", name: "Next background", checkCallback: whenActive(() => stepBackground(this.store, 1)) });
+    this.addCommand({ id: "previous-background", name: "Previous background", checkCallback: whenActive(() => stepBackground(this.store, -1)) });
+    this.addCommand({ id: "background-gallery", name: "Background gallery", callback: () => void this.openGallery() });
     // no default hotkey (plugin guidelines)
     this.addCommand({ id: "open-style-panel", name: "Open style panel", callback: () => void this.openStylePanel() });
-    this.addCommand({ id: "add-picture", name: "Add picture", callback: () => this.addPicture() });
+    this.addCommand({ id: "add-picture", name: "Add picture", checkCallback: whenActive(() => this.addPicture()) });
     // a vault picture that is renamed or moved keeps working
     this.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
       const images = this.store.settings.look.images;
@@ -101,15 +107,18 @@ export default class FantasyEaselPlugin extends Plugin {
     this.stage.remove();
   }
 
-  openGallery() {
-    if (!this.active) return void new Notice("Fantasy Easel works with the Fantasy theme. Choose Fantasy in Settings → Appearance → Themes.");
-    new GalleryModal(this.app, this.store, () => this.addPicture()).open();
+  /** The gallery lives in the style panel: open the panel with the gallery unfolded and in view
+   *  (status bar, menu, command, settings, obsidian://fantasy-easel), one click. */
+  async openGallery() {
+    if (!this.active) return void new Notice(NO_THEME_TEXT);
+    (await this.openStylePanel())?.showGallery();
   }
 
   /** The style panel in the right sidebar (reuses an open one). */
-  async openStylePanel() {
+  async openStylePanel(): Promise<StyleView | null> {
     const leaf = await this.app.workspace.ensureSideLeaf(STYLE_VIEW, "right", { active: true, reveal: true });
     await this.app.workspace.revealLeaf(leaf);
+    return leaf.view instanceof StyleView ? leaf.view : null;
   }
 
   addPicture() {

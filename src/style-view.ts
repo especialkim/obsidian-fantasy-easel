@@ -2,8 +2,9 @@ import { ItemView, Setting, SettingGroup, setTooltip, type WorkspaceLeaf } from 
 import { renderGallery } from "./gallery";
 import type FantasyEaselPlugin from "./main";
 import { stepBackground, stepColor } from "./menus";
-import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
+import { ACCENT_DESC, backgroundGroups, colorOptions, FANTASY_URL, NO_THEME_TEXT, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
 import { isLight } from "./apply";
+import { backgroundById } from "./catalog";
 import { DEFAULT_LOOK, DEFAULT_SETTINGS, type Motion, type MotionQuality } from "./settings";
 import { toggleDarkLight } from "./statusbar";
 import { isDefaultValue, storeKey, TUNING_GROUPS, TUNINGS, type Mode, type Tuning, type TuningGroup } from "./tuning";
@@ -23,6 +24,8 @@ export class StyleView extends ItemView {
   private unsubscribe: (() => void) | null = null;
   private galleryCleanup: (() => void) | null = null;
   private galleryOpen = false;
+  /** unfold the gallery (and redraw its button); set by build() */
+  private unfoldGallery: (() => HTMLElement) | null = null;
   /** what the rows were built for: rebuild when it changes */
   private built = "";
   /** true while rows take values from the store: a component's own onChange must not write back */
@@ -86,7 +89,8 @@ export class StyleView extends ItemView {
     root.empty();
     root.addClass("fantasy-easel-panel");
     if (!this.plugin.active) {
-      root.createEl("p", { cls: "setting-item-description", text: "Fantasy Easel works with the Fantasy theme. Choose Fantasy in Settings → Appearance → Themes." });
+      root.createEl("p", { cls: "setting-item-description", text: NO_THEME_TEXT });
+      new Setting(root).addButton((b) => b.setButtonText("Get Fantasy").setCta().onClick(() => window.open(FANTASY_URL)));
       return;
     }
     const store = this.plugin.store;
@@ -105,7 +109,8 @@ export class StyleView extends ItemView {
     /** One line: the name (description as its tooltip), the control, and a reset shown only when changed. */
     const row = (g: SettingGroup, name: string, desc: string, isDefault: (() => boolean) | null, reset: (() => void) | null, add: (s: Setting) => void) => {
       g.addSetting((s) => {
-        s.setName(name).setClass("fantasy-easel-panel-row");
+        // the name in its own span: a long one ends in … (the name box is a flex row for the changed dot)
+        s.setClass("fantasy-easel-panel-row").nameEl.createSpan({ cls: "fantasy-easel-panel-name", text: name });
         if (desc) setTooltip(s.nameEl, desc, { placement: "left" });
         add(s);
         // no default of ours: an empty reset slot keeps the controls in one column
@@ -137,16 +142,31 @@ export class StyleView extends ItemView {
       t.onChange((v) => { if (!this.syncing && v !== (this.mode() === "dark")) toggleDarkLight(this.app); });
       this.syncs.push(() => t.setValue(this.mode() === "dark"));
     }));
-    /** Name, then ‹ dropdown › (step without opening the list), then the reset. */
-    const picker = (g: SettingGroup, name: string, desc: string, options: Record<string, string>, get: () => string, set: (v: string) => void, step: (dir: 1 | -1) => void, def: string) =>
+    /** Name, then ‹ dropdown › (step without opening the list), then the reset. Grouped options show
+     *  group titles in the list and only the name in the closed dropdown (narrow sidebar). */
+    type Groups = { label: string; options: Record<string, string> }[];
+    const picker = (g: SettingGroup, name: string, desc: string, options: Record<string, string> | Groups, get: () => string, set: (v: string) => void, step: (dir: 1 | -1) => void, def: string) =>
       row(g, name, desc, () => get() === def, () => set(def), (s) => {
         s.setClass("fantasy-easel-panel-picker");
         s.addExtraButton((b) => b.setIcon("chevron-left").setTooltip(`Previous ${name.toLowerCase()}`).onClick(() => step(-1)));
         s.addDropdown((d) => {
-          d.addOptions(options).onChange((v) => this.syncing || set(v));
+          const tips: Record<string, string> = {};
+          if (Array.isArray(options)) {
+            for (const grp of options) {
+              const og = d.selectEl.createEl("optgroup", { attr: { label: grp.label } });
+              for (const [v, text] of Object.entries(grp.options)) {
+                og.createEl("option", { value: v, text });
+                tips[v] = `${grp.label} · ${text}`;
+              }
+            }
+          } else {
+            d.addOptions(options);
+            Object.assign(tips, options);
+          }
+          d.onChange((v) => this.syncing || set(v));
           this.syncs.push(() => {
             d.setValue(get());
-            setTooltip(d.selectEl, options[get()] ?? "");
+            setTooltip(d.selectEl, tips[get()] ?? "");
           });
         });
         s.addExtraButton((b) => b.setIcon("chevron-right").setTooltip(`Next ${name.toLowerCase()}`).onClick(() => step(1)));
@@ -172,6 +192,8 @@ export class StyleView extends ItemView {
       }
       store.set({ tuning });
     };
+    /** a stage background is chosen and allowed to move (Still freezes it; Follow system may move) */
+    const stageMoving = () => !!backgroundById(look().background, look().images)?.stage && store.settings.motion !== "off";
     const show = (t: Tuning, v: number) => `${Math.round(v * 100) / 100}${t.unit}`;
     const sliders = (g: SettingGroup, id: TuningGroup) => {
       for (const t of TUNINGS.filter((x) => x.group === id)) {
@@ -181,7 +203,7 @@ export class StyleView extends ItemView {
             const v = value(t);
             // setValue during a drag would fight the pointer: only when it differs
             if (sl.getValue() !== v) sl.setValue(v);
-            const off = !!t.cardOnly && !look().card;
+            const off = (!!t.cardOnly && !look().card) || (!!t.stageOnly && !stageMoving());
             sl.setDisabled(off);
             s.settingEl.toggleClass("is-disabled", off);
           });
@@ -200,7 +222,7 @@ export class StyleView extends ItemView {
         store.set({ look: { ...look(), background: DEFAULT_LOOK.background }, motion: DEFAULT_SETTINGS.motion, motionQuality: null, pauseUnfocused: DEFAULT_SETTINGS.pauseUnfocused });
       },
     });
-    picker(bgG, "Background", "CSS, motion, stage or one of your pictures.", backgroundOptions(look().images), () => look().background, (v) => store.setLook({ background: v }), (dir) => stepBackground(store, dir), DEFAULT_LOOK.background);
+    picker(bgG, "Background", "Still, moving or one of your pictures.", backgroundGroups(look().images).map((grp) => ({ label: grp.label, options: Object.fromEntries(grp.list.map((b) => [b.id, b.name])) })), () => look().background, (v) => store.setLook({ background: v }), (dir) => stepBackground(store, dir), DEFAULT_LOOK.background);
     row(bgG, "Motion", MOTION_DESC, () => store.settings.motion === DEFAULT_SETTINGS.motion, () => store.set({ motion: DEFAULT_SETTINGS.motion }), (s) => s.addDropdown((d) => {
       d.addOptions(MOTION_OPTIONS).onChange((v) => this.syncing || store.set({ motion: v as Motion }));
       this.syncs.push(() => d.setValue(store.settings.motion));
@@ -238,16 +260,27 @@ export class StyleView extends ItemView {
       this.galleryCleanup?.();
       this.galleryCleanup = null;
       gBody.empty();
-      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { scrollRoot: this.contentEl, addPicture: () => this.plugin.addPicture(), still: true, sides: [mode === "dark" ? "night" : "day"] });
+      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { addPicture: () => this.plugin.addPicture(), still: true, sides: [mode === "dark" ? "night" : "day"] });
     };
+    let draw = () => {};
     galleryG.addExtraButton((b) => {
-      const draw = () => b.setIcon(this.galleryOpen ? "chevron-up" : "chevron-down").setTooltip(this.galleryOpen ? "Hide gallery" : `Show gallery (${mode} mode)`);
+      draw = () => b.setIcon(this.galleryOpen ? "chevron-up" : "chevron-down").setTooltip(this.galleryOpen ? "Hide gallery" : `Show gallery (${mode} mode)`);
       b.onClick(() => { setGallery(!this.galleryOpen); draw(); });
       draw();
     });
+    this.unfoldGallery = () => {
+      if (!this.galleryOpen) { setGallery(true); draw(); }
+      return gBody.previousElementSibling instanceof HTMLElement ? gBody.previousElementSibling : gBody;
+    };
     setGallery(this.galleryOpen);
 
     this.sync();
+  }
+
+  /** Gallery unfolded and scrolled to the top of the panel (status bar, command, settings): one click. */
+  showGallery() {
+    const head = this.unfoldGallery?.();
+    if (head) window.requestAnimationFrame(() => head.scrollIntoView({ block: "start", behavior: "smooth" }));
   }
 
   private mode(): Mode {

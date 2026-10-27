@@ -2,14 +2,13 @@ import { PluginSettingTab, setTooltip, type App, type SettingDefinitionItem, typ
 import { DEFAULT_BACKGROUND, newImageId, toCssUrl, type UserImage } from "./catalog";
 import type FantasyEaselPlugin from "./main";
 import { excalidrawAvailable, excalidrawDiff, ExcalidrawSettingsModal, restoreExcalidraw } from "./excalidraw";
-import { ACCENT_DESC, backgroundOptions, colorOptions, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
+import { ACCENT_DESC, backgroundOptions, FANTASY_URL, colorOptions, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
 import { isLight } from "./apply";
 import { PictureSuggest } from "./pictures";
 import { partOn, skinOn, SKINS } from "./skins";
-import type { StatusId } from "./settings";
+import { DEFAULT_SETTINGS, type StatusId } from "./settings";
 
 /** Where to get the theme (not in the community store yet). */
-const FANTASY_URL = "https://github.com/especialkim/obsidian-theme-fantasy";
 
 const STATUS_LABEL: Record<StatusId, string> = {
   color: "Palette",
@@ -101,7 +100,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
       // general rows: no heading (one-section rule)
       { name: "Palette", desc: paletteDesc(), control: { type: "dropdown", key: "look.color", options: colorOptions() } },
       { name: "Theme accent", desc: ACCENT_DESC, control: { type: "toggle", key: "look.accent" } },
-      { name: "Open style panel", desc: "Sidebar tab with the main switches and style tuning (glass, cards, text, motion), each with a reset.", action: () => void this.plugin.openStylePanel() },
+      { name: "Open style panel", desc: "Sidebar tab with the main switches and style tuning (glass, cards, text, motion), each with a reset.", action: () => { this.closeSettings(); void this.plugin.openStylePanel(); } },
       {
         type: "group",
         heading: "Card layout",
@@ -112,7 +111,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
         heading: "Background",
         items: [
           { name: "Background", desc: "CSS, motion, stage or one of your pictures.", control: { type: "dropdown", key: "look.background", options: backgroundOptions(look.images) } },
-          { name: "Gallery", desc: "Every background side by side, day and night.", action: () => this.plugin.openGallery() },
+          { name: "Gallery", desc: "Every background as a picture, in the style panel.", action: () => { this.closeSettings(); void this.plugin.openGallery(); } },
           { name: "Motion", desc: MOTION_DESC, control: { type: "dropdown", key: "motion", options: MOTION_OPTIONS } },
           { name: "Motion quality", desc: QUALITY_DESC, control: { type: "dropdown", key: "motionQuality", options: QUALITY_OPTIONS } },
           { name: "Pause when unfocused", desc: "Stop moving backgrounds while you work in another app (saves GPU).", control: { type: "toggle", key: "pauseUnfocused" } },
@@ -153,7 +152,17 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
       {
         type: "group",
         heading: "Status bar",
-        items: [{ name: "Show buttons", desc: "Quick controls in the status bar. Choose and order them below.", control: { type: "toggle", key: "statusBar" } }],
+        items: [
+          { name: "Show buttons", desc: "Quick controls in the status bar. Choose and order them below.", control: { type: "toggle", key: "statusBar" } },
+          {
+            name: "Default buttons",
+            desc: "All buttons on, in the original order.",
+            render: (setting) => {
+              const isDefault = () => JSON.stringify(store.settings.statusItems) === JSON.stringify(DEFAULT_SETTINGS.statusItems);
+              setting.addButton((b) => b.setButtonText("Reset").setDisabled(isDefault()).onClick(() => store.set({ statusItems: DEFAULT_SETTINGS.statusItems.map((x) => ({ ...x })) })));
+            },
+          },
+        ],
       },
       {
         type: "list",
@@ -240,6 +249,12 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
         if (store.settings.excalidrawBackup) setting.addButton((b) => b.setButtonText("Restore").setTooltip("Put back the Excalidraw settings from before Fantasy Easel changed them").onClick(() => void restoreExcalidraw(this.app, store)));
       },
     };
+  }
+
+  /** The settings window covers the sidebar: close it before showing the style panel, so one click
+   *  is enough. Private API (`app.setting`), guarded: without it the panel opens behind the window. */
+  private closeSettings() {
+    (this.app as unknown as { setting?: { close?: () => void } }).setting?.close?.();
   }
 
   /** Without the Fantasy theme: what this plugin is and where to get the theme. Nothing to set. */

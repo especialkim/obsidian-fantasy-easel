@@ -1,14 +1,33 @@
-import { allBackgrounds, THEME_COLORS, type UserImage } from "./catalog";
+import { allBackgrounds, THEME_COLORS, type Background, type UserImage } from "./catalog";
 
 // Dropdown options (value → label), shared by the settings tab and the style panel.
 
 export const colorOptions = (): Record<string, string> => Object.fromEntries(THEME_COLORS.map((c) => [c.cls, c.name]));
 
-/** The kind goes before the name: an Obsidian dropdown has no group titles. */
-const KIND = { static: "CSS", motion: "Motion", image: "Picture" } as const;
+export const PICTURES_GROUP = "Your pictures";
 
+/** What a viewer sees, not how it is drawn: still, moving (CSS motion and stages), your pictures. */
+const GROUP = { static: "Still", motion: "Moving", image: PICTURES_GROUP } as const;
+
+/** The group goes before the name: an Obsidian dropdown has no group titles (settings tab). */
 export const backgroundOptions = (images: UserImage[]): Record<string, string> =>
-  Object.fromEntries(allBackgrounds(images).map((b) => [b.id, `${b.stage ? "Stage" : KIND[b.kind]} · ${b.name}`]));
+  Object.fromEntries(allBackgrounds(images).map((b) => [b.id, `${b.kind === "image" ? "Picture" : GROUP[b.kind]} · ${b.name}`]));
+
+/** Backgrounds under group titles, in list order (status bar menu, style panel): Still, Moving, Your pictures. */
+export function backgroundGroups(images: UserImage[]): { label: string; list: Background[] }[] {
+  const label = (b: Background) => GROUP[b.kind];
+  const groups: { label: string; list: Background[] }[] = [];
+  for (const b of allBackgrounds(images)) {
+    const last = groups[groups.length - 1];
+    if (last?.label === label(b)) last.list.push(b);
+    else groups.push({ label: label(b), list: [b] });
+  }
+  return groups;
+}
+
+export const FANTASY_URL = "https://github.com/especialkim/obsidian-theme-fantasy";
+
+export const NO_THEME_TEXT = "Fantasy Easel works with the Fantasy theme. Choose Fantasy in Settings → Appearance → Themes.";
 
 export const MOTION_OPTIONS: Record<string, string> = { on: "Moving", auto: "Follow system", off: "Still" };
 

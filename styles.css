@@ -791,11 +791,6 @@ body.fantasy-easel.fantasy-easel-stage-on .app-container > .fantasy-easel-stage 
 	backdrop-filter: none;
 }
 
-/* While the gallery is open the real stage behind it holds still (GPU for the tiles) */
-body:has(.fantasy-easel-gallery-modal) .app-container > .fantasy-easel-stage > div {
-	animation-play-state: paused;
-}
-
 /* Gallery: still pictures, no per-layer blur or animation, no GPU layer hints.
    (0,3,1): beats the layer rules `.fantasy-easel-stage.fe-<family> > .fe-lN` (0,3,0). */
 .fantasy-easel-gallery .fantasy-easel-tile > .fantasy-easel-stage > div {
@@ -1260,7 +1255,7 @@ body.fantasy-easel-skin-kanban-cards button.kanban-plugin__new-item-button:hover
 }
 body.fantasy-easel-skin-kanban-cards a.kanban-plugin__item-postfix-button.is-enabled.clickable-icon svg {
 	--icon-stroke: 4px;
-	color: red;
+	color: var(--text-error);
 }
 /* kanban · headings */
 body.fantasy-easel-skin-kanban-headings .kanban-plugin,
@@ -1356,14 +1351,9 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 	box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-normal) 35%, transparent);
 }
 
-/* Gallery (Modal). Tiles preview the theme glass: the card mimics theme.css card glass
+/* Gallery (style panel). Tiles preview the theme glass: the card mimics theme.css card glass
    (dark: theme color at 0.6 + blur; light: white at 0.67 + blur). These two preview colors stand
    for the theme's own glass in the other mode, which cannot be read while this mode is on. */
-.fantasy-easel-gallery-modal {
-	width: min(1100px, 94vw);
-	max-height: 88vh;
-}
-
 .fantasy-easel-gallery-head,
 .fantasy-easel-gallery-row {
 	display: grid;
@@ -1398,8 +1388,56 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 	margin-bottom: var(--size-4-2);
 }
 
-.fantasy-easel-gallery-add {
-	margin-left: var(--size-4-2);
+/* group title with an optional "+" at its right (your pictures) */
+.fantasy-easel-gallery-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--size-4-2);
+}
+
+.fantasy-easel-gallery-empty {
+	padding-block: var(--size-4-2);
+}
+
+/* Add picture (Modal): the address field takes the full width under its name, preview below */
+.fantasy-easel-add-picture .fantasy-easel-add-picture-src {
+	flex-wrap: wrap;
+	row-gap: var(--size-4-2);
+}
+
+.fantasy-easel-add-picture .fantasy-easel-add-picture-src .setting-item-control {
+	flex: 1 1 100%;
+}
+
+.fantasy-easel-add-picture .fantasy-easel-add-picture-src input[type="text"] {
+	width: 100%;
+}
+
+.fantasy-easel-add-picture-note:empty {
+	display: none;
+}
+
+.fantasy-easel-add-picture-preview {
+	aspect-ratio: 16 / 9;
+	max-height: 12rem;
+	margin-inline: auto;
+	border-radius: var(--radius-m);
+	border: 1px solid var(--background-modifier-border);
+	background: var(--fantasy-easel-preview) center / cover no-repeat;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.fantasy-easel-add-picture-preview > span {
+	display: none;
+	color: var(--text-faint);
+	font-size: var(--font-ui-small);
+}
+
+.fantasy-easel-add-picture-preview.is-empty > span {
+	display: block;
 }
 
 /* Settings: your pictures, one row each (name, address, use) */
@@ -1434,6 +1472,8 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 /* denser than the settings window (Obsidian's group row padding variable): a sidebar shows many rows */
 .fantasy-easel-panel {
 	--setting-items-padding-y: var(--size-4-2);
+	/* no container-type here: Obsidian's unnamed "@container (max-width: 400px)" would then stack
+	   every setting row into a column (1.15) */
 }
 
 .fantasy-easel-panel .fantasy-easel-panel-row {
@@ -1442,8 +1482,16 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 }
 
 .fantasy-easel-panel .fantasy-easel-panel-row .setting-item-info {
-	flex: 1 1 auto;
+	flex: 1 1 6em;
 	min-width: 0;
+}
+
+/* a long name ends in … instead of running under the value */
+.fantasy-easel-panel .fantasy-easel-panel-name {
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .fantasy-easel-panel .fantasy-easel-panel-row .setting-item-name {
@@ -1471,10 +1519,36 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 	background-color: var(--interactive-accent);
 }
 
-/* sliders: the same width in every row, so the groups line up */
-.fantasy-easel-panel .fantasy-easel-panel-row input[type="range"] {
-	width: 9em;
+/* slider and picker rows wrap by themselves in a narrow sidebar: the name stays on top and the
+   control moves to the next line. The name takes nearly all spare space (grow 999) while they
+   share a line; alone on its line the control (grow 1) fills it. No container query: see above. */
+.fantasy-easel-panel .fantasy-easel-panel-row:is(:has(input[type="range"]), .fantasy-easel-panel-picker) {
+	flex-wrap: wrap;
+	row-gap: var(--size-2-2);
 }
+
+/* the same control box in every slider row (value, slider, reset), so the groups line up */
+.fantasy-easel-panel .fantasy-easel-panel-row:has(input[type="range"]) .setting-item-info {
+	flex: 999 1 6em;
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-row:has(input[type="range"]) .setting-item-control {
+	flex: 1 1 11.5em;
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-row .slider-value {
+	flex: none;
+	min-width: 3.6em;
+	text-align: end;
+	font-variant-numeric: tabular-nums;
+}
+
+.fantasy-easel-panel .fantasy-easel-panel-row input[type="range"] {
+	flex: 1 1 auto;
+	width: auto;
+	min-width: 3em;
+}
+
 
 .fantasy-easel-panel .clickable-icon.is-hidden {
 	visibility: hidden;
@@ -1484,19 +1558,21 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 	opacity: 0.5;
 }
 
-/* pickers (palette, background): name, then ‹ dropdown › filling the rest; long names end in … */
+/* pickers (palette, background): name, then ‹ dropdown › filling the rest; long names end in …
+   (the background dropdown shows only the name; its group is in the list and the tooltip) */
 .fantasy-easel-panel .fantasy-easel-panel-picker .setting-item-info {
-	flex: 0 0 auto;
+	flex: 999 1 auto;
+	min-width: 3em;
 }
 
 .fantasy-easel-panel .fantasy-easel-panel-picker .setting-item-control {
-	flex: 1 1 auto;
+	flex: 1 1 15em;
 	justify-content: flex-end;
 }
 
 .fantasy-easel-panel .fantasy-easel-panel-picker select {
-	flex: 0 1 15em;
-	min-width: 0;
+	flex: 1 1 0;
+	min-width: 4em;
 	text-overflow: ellipsis;
 }
 
@@ -1518,6 +1594,19 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 .fantasy-easel-panel-gallery .fantasy-easel-gallery.is-single .fantasy-easel-gallery-row {
 	grid-template-columns: minmax(0, 1fr);
 	gap: var(--size-2-2);
+}
+
+/* two tiles per line are small: a smaller card text, body on one line, nothing outside the card */
+.fantasy-easel-panel-gallery .fantasy-easel-tile-card {
+	font-size: 10px;
+	line-height: 1.3;
+	overflow: hidden;
+}
+
+.fantasy-easel-panel-gallery .fantasy-easel-tile-p {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .fantasy-easel-panel-gallery .fantasy-easel-gallery-name {
