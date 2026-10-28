@@ -46,6 +46,8 @@ export interface FantasyEaselSettings {
   skins: Record<string, boolean>;
   /** Excalidraw settings before Easel changed them (Restore puts them back); null = untouched */
   excalidrawBackup: Record<string, unknown> | null;
+  /** vault folder for pictures added from Finder or the desktop; "" = Obsidian's attachment folder */
+  pictureFolder: string;
 }
 
 export const DEFAULT_LOOK: Look = {
@@ -56,7 +58,7 @@ export const DEFAULT_LOOK: Look = {
   images: [],
 };
 
-export const DEFAULT_SETTINGS: FantasyEaselSettings = { look: DEFAULT_LOOK, motion: "on", motionQuality: null, pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
+export const DEFAULT_SETTINGS: FantasyEaselSettings = { look: DEFAULT_LOOK, motion: "on", motionQuality: null, pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null, pictureFolder: "" };
 
 /**
  * Old 3 fixed URL slots (data.json before 2026-10-21) → pictures. `chosen` is the old
@@ -125,5 +127,9 @@ export function normalize(data: Partial<FantasyEaselSettings> | null | undefined
     tuning,
     skins,
     excalidrawBackup: data?.excalidrawBackup && typeof data.excalidrawBackup === "object" ? { ...data.excalidrawBackup } : null,
+    pictureFolder: typeof data?.pictureFolder === "string" ? normalizeFolder(data.pictureFolder) : "",
   };
 }
+
+/** A vault folder as typed ("/Assets/Backgrounds/" → "Assets/Backgrounds"); "" = none. */
+export const normalizeFolder = (folder: string): string => folder.trim().replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");

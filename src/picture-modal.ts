@@ -1,6 +1,6 @@
 import { ButtonComponent, Modal, setIcon, setTooltip, TextComponent, type App } from "obsidian";
 import { newImageId, toCssUrl } from "./catalog";
-import { acceptPictureDrop, PictureSuggest, setPictures } from "./pictures";
+import { acceptPictureDrop, choosePictureFiles, PictureSuggest, setPictures } from "./pictures";
 import type { Store } from "./store";
 
 const NOT_FOUND = "Not found. Check the path or address.";
@@ -38,10 +38,10 @@ export class PicturesModal extends Modal {
   }
 
   private addRow(el: HTMLElement) {
-    const preview = el.createDiv({ cls: "fantasy-easel-pictures-preview is-empty", attr: { "aria-label": "Drop a picture here" } });
+    const preview = el.createDiv({ cls: "fantasy-easel-pictures-preview is-empty", attr: { "aria-label": "Drop a picture here or click to choose a file", role: "button", tabindex: "0" } });
     const hint = preview.createDiv({ cls: "fantasy-easel-pictures-drop" });
     setIcon(hint, "image-plus");
-    hint.createSpan({ text: "Drop a picture" });
+    hint.createSpan({ text: "Drop or click" });
     const fields = el.createDiv({ cls: "fantasy-easel-pictures-fields" });
     const src = new TextComponent(fields).setPlaceholder("Vault picture, https://… or file://…");
     src.inputEl.addClass("fantasy-easel-pictures-src");
@@ -73,7 +73,14 @@ export class PicturesModal extends Modal {
     };
     src.onChange(show);
     // dropped: fill the address and preview it; the name is next
-    acceptPictureDrop(this.app, preview, (path) => { src.setValue(path); show(); name.inputEl.focus(); }, (message) => note.setText(message));
+    // dropped or chosen: fill the address and preview it; the name is next
+    const folder = () => this.store.settings.pictureFolder;
+    const fill = (srcs: string[]) => { src.setValue(srcs[0]); show(); name.inputEl.focus(); };
+    const fail = (message: string) => note.setText(message);
+    acceptPictureDrop(this.app, preview, folder, fill, fail);
+    const choose = () => choosePictureFiles(this.app, preview.doc, folder, fill, fail);
+    preview.addEventListener("click", choose);
+    preview.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); choose(); } });
     new PictureSuggest(this.app, src.inputEl, (path) => { src.setValue(path); show(); });
     for (const input of [src.inputEl, name.inputEl]) {
       input.addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); submit(); } });

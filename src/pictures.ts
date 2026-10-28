@@ -1,5 +1,6 @@
-import { AbstractInputSuggest, normalizePath, Platform, type App, type TFile } from "obsidian";
-import { DEFAULT_BACKGROUND, toCssUrl, type UserImage } from "./catalog";
+import { AbstractInputSuggest, normalizePath, Platform, setIcon, type App, type TFile, type TFolder } from "obsidian";
+import { DEFAULT_BACKGROUND, newImageId, toCssUrl, type UserImage } from "./catalog";
+import { normalizeFolder } from "./settings";
 import type { Store } from "./store";
 
 // Your pictures from this computer (2026-10-23): a vault path ("Assets/sky.png", or [[sky.png]]),
@@ -63,32 +64,67 @@ export function setPictures(store: Store, images: UserImage[]) {
   store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
 }
 
-/**
- * A picture dropped on a target → its address for Your pictures ("" = not a picture).
- * From Obsidian's file explorer the drag carries obsidian://open?vault=…&file=… (a vault path);
- * a file from Finder or the desktop is copied into the vault's attachment folder (Obsidian's
- * own setting), so it works on every device; an image dragged from a browser gives https://.
- */
-export async function pictureFromDrop(app: App, data: DataTransfer): Promise<string> {
-  const file = Array.from(data.files).find((f) => f.type.startsWith("image/"));
-  if (file) {
-    const path = await app.fileManager.getAvailablePathForAttachment(file.name);
-    return (await app.vault.createBinary(path, await file.arrayBuffer())).path;
-  }
-  const text = (data.getData("text/uri-list") || data.getData("text/plain")).split(/\r?\n/).find((l) => l.trim() && !l.startsWith("#"))?.trim() ?? "";
-  if (text.startsWith("obsidian://")) {
-    const url = new URL(text);
-    if (url.searchParams.get("vault") !== app.vault.getName()) return "";
-    const path = url.searchParams.get("file") ?? "";
-    const hit = app.vault.getFileByPath(path) ?? app.metadataCache.getFirstLinkpathDest(path, "");
-    return hit && IMAGE.test(hit.extension) ? hit.path : "";
-  }
-  return /^https?:\/\//i.test(text) ? text : "";
+/** New pictures go on top (menus, gallery, lists); the first one becomes the background. */
+export function addPictures(store: Store, srcs: string[]) {
+  const added = srcs.map((src) => ({ id: newImageId(), src, name: "" }));
+  if (added.length) store.setLook({ images: [...added, ...store.settings.look.images], background: `img-${added[0].id}` });
 }
 
-/** Let `el` take dropped pictures: `is-drop-target` while a drag is over it, then the address
- *  (or an error message for something that is not a picture). */
-export function acceptPictureDrop(app: App, el: HTMLElement, onPicture: (src: string) => void, onError: (message: string) => void) {
+/** Copy a picture file from outside the vault into it: the Easel picture folder when set (made if
+ *  missing; a free name like "sky 1.png"), else Obsidian's attachment folder. Returns the vault path. */
+export async function savePictureFile(app: App, file: File, folder: string): Promise<string> {
+  const dir = normalizeFolder(folder);
+  let path: string;
+  if (dir) {
+    if (!app.vault.getFolderByPath(dir)) await app.vault.createFolder(dir);
+    const dot = file.name.lastIndexOf(".");
+    const base = dot > 0 ? file.name.slice(0, dot) : file.name;
+    const ext = dot > 0 ? file.name.slice(dot) : "";
+    path = normalizePath(`${dir}/${file.name}`);
+    for (let n = 1; app.vault.getAbstractFileByPath(path); n++) path = normalizePath(`${dir}/${base} ${n}${ext}`);
+  } else {
+    path = await app.fileManager.getAvailablePathForAttachment(file.name);
+  }
+  return (await app.vault.createBinary(path, await file.arrayBuffer())).path;
+}
+
+/** One after another: two files with the same name would otherwise pick the same free path. */
+async function saveAll(app: App, files: File[], folder: string): Promise<string[]> {
+  const out: string[] = [];
+  for (const f of files) out.push(await savePictureFile(app, f, folder));
+  return out;
+}
+
+/**
+ * Pictures dropped on a target → their addresses for Your pictures ([] = none was a picture).
+ * From Obsidian's file explorer the drag carries obsidian://open?vault=…&file=… (a vault path);
+ * files from Finder or the desktop are copied into the vault (savePictureFile), so they work on
+ * every device; an image dragged from a browser gives https://.
+ */
+export async function picturesFromDrop(app: App, data: DataTransfer, folder: string): Promise<string[]> {
+  const files = Array.from(data.files).filter((f) => f.type.startsWith("image/"));
+  // read the text now: a DataTransfer is empty once the drop event is over
+  const lines = (data.getData("text/uri-list") || data.getData("text/plain")).split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+  if (files.length) return saveAll(app, files, folder);
+  const out: string[] = [];
+  for (const line of lines) {
+    if (line.startsWith("obsidian://")) {
+      const url = new URL(line);
+      if (url.searchParams.get("vault") !== app.vault.getName()) continue;
+      const path = url.searchParams.get("file") ?? "";
+      const hit = app.vault.getFileByPath(path) ?? app.metadataCache.getFirstLinkpathDest(path, "");
+      if (hit && IMAGE.test(hit.extension)) out.push(hit.path);
+    } else if (/^https?:\/\//i.test(line)) out.push(line);
+  }
+  return out;
+}
+
+const NOT_A_PICTURE = "Not a picture. Drop an image file or a picture from the vault.";
+const failed = (err: unknown) => `Could not add the picture: ${err instanceof Error ? err.message : String(err)}`;
+
+/** Let `el` take dropped pictures: `is-drop-target` while a drag is over it, then the addresses
+ *  (or an error message when none was a picture). */
+export function acceptPictureDrop(app: App, el: HTMLElement, folder: () => string, onPictures: (srcs: string[]) => void, onError: (message: string) => void) {
   let depth = 0;
   const set = (on: boolean) => el.toggleClass("is-drop-target", on);
   el.addEventListener("dragenter", (ev) => { ev.preventDefault(); depth++; set(true); });
@@ -100,9 +136,59 @@ export function acceptPictureDrop(app: App, el: HTMLElement, onPicture: (src: st
     depth = 0;
     set(false);
     if (!ev.dataTransfer) return;
-    pictureFromDrop(app, ev.dataTransfer).then(
-      (src) => (src ? onPicture(src) : onError("Not a picture. Drop an image file or a picture from the vault.")),
-      (err: unknown) => onError(`Could not add the picture: ${err instanceof Error ? err.message : String(err)}`),
-    );
+    picturesFromDrop(app, ev.dataTransfer, folder()).then((srcs) => (srcs.length ? onPictures(srcs) : onError(NOT_A_PICTURE)), (err: unknown) => onError(failed(err)));
   });
+}
+
+/** Ask for picture files (Finder), copy them into the vault, then hand over their vault paths. */
+export function choosePictureFiles(app: App, doc: Document, folder: () => string, onPictures: (srcs: string[]) => void, onError: (message: string) => void) {
+  const input = doc.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.multiple = true;
+  input.addEventListener("change", () => {
+    const files = Array.from(input.files ?? []).filter((f) => f.type.startsWith("image/"));
+    if (!files.length) return;
+    saveAll(app, files, folder()).then(onPictures, (err: unknown) => onError(failed(err)));
+  });
+  input.click();
+}
+
+/**
+ * The dashed "add pictures" box (settings, panel gallery): drop pictures on it, or click (Enter)
+ * to choose files. Built fresh on each render, so its listeners never pile up.
+ */
+export function pictureDropZone(app: App, parent: HTMLElement, folder: () => string, onPictures: (srcs: string[]) => void, onError: (message: string) => void): HTMLElement {
+  const zone = parent.createDiv({ cls: "fantasy-easel-dropzone", attr: { role: "button", tabindex: "0", "aria-label": "Vault pictures, Finder or desktop files, or images from a browser" } });
+  setIcon(zone.createDiv({ cls: "fantasy-easel-dropzone-icon" }), "image-plus");
+  const text = zone.createDiv({ cls: "fantasy-easel-dropzone-text" });
+  text.createDiv({ cls: "fantasy-easel-dropzone-main", text: "Drop pictures here" });
+  text.createDiv({ cls: "fantasy-easel-dropzone-sub", text: "or click to choose files" });
+  const choose = () => choosePictureFiles(app, zone.doc, folder, onPictures, onError);
+  zone.addEventListener("click", choose);
+  zone.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); choose(); } });
+  acceptPictureDrop(app, zone, folder, onPictures, onError);
+  return zone;
+}
+
+/** Vault folders for the "Picture folder" field. */
+export class FolderSuggest extends AbstractInputSuggest<TFolder> {
+  constructor(app: App, private inputEl: HTMLInputElement, private onPick: (path: string) => void) {
+    super(app, inputEl);
+  }
+
+  getSuggestions(query: string): TFolder[] {
+    const q = query.toLowerCase();
+    return this.app.vault.getAllFolders(false).filter((f) => f.path.toLowerCase().includes(q)).slice(0, 50);
+  }
+
+  renderSuggestion(folder: TFolder, el: HTMLElement) {
+    el.setText(folder.path);
+  }
+
+  selectSuggestion(folder: TFolder) {
+    this.inputEl.value = folder.path;
+    this.onPick(folder.path);
+    this.close();
+  }
 }

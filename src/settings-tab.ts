@@ -4,9 +4,9 @@ import type FantasyEaselPlugin from "./main";
 import { excalidrawAvailable, excalidrawDiff, ExcalidrawSettingsModal, restoreExcalidraw } from "./excalidraw";
 import { ACCENT_DESC, backgroundOptions, FANTASY_URL, colorOptions, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
 import { isLight } from "./apply";
-import { acceptPictureDrop, PictureSuggest, setPictures } from "./pictures";
+import { acceptPictureDrop, addPictures, FolderSuggest, PictureSuggest, pictureDropZone, setPictures } from "./pictures";
 import { partOn, skinOn, SKINS } from "./skins";
-import { DEFAULT_SETTINGS, type StatusId } from "./settings";
+import { DEFAULT_SETTINGS, normalizeFolder, type StatusId } from "./settings";
 
 /** Where to get the theme (not in the community store yet). */
 
@@ -83,6 +83,16 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
     const store = this.plugin.store;
     const { look, statusItems } = store.settings;
     const setImages = (images: UserImage[]) => setPictures(store, images);
+    // the "add pictures" box (drop or click), between the Your pictures heading and its rows
+    const dropZone = (parent: HTMLElement) => pictureDropZone(this.app, parent, () => store.settings.pictureFolder, (srcs) => addPictures(store, srcs), (message) => new Notice(message));
+    // Obsidian's list has no place between its heading and rows: the Picture folder row (right
+    // after the list, rendered every time, even with no pictures) puts the one box there
+    const zoneUnderHeading = (folderRow: HTMLElement) => {
+      const list = folderRow.closest(".setting-group")?.previousElementSibling;
+      const heading = list?.querySelector(":scope > .setting-item-heading");
+      if (!heading || list?.querySelector(":scope > .fantasy-easel-dropzone-slot")) return;
+      heading.after(createDiv({ cls: "fantasy-easel-dropzone-slot" }, (slot) => void dropZone(slot)));
+    };
     const patchImage = (id: string, patch: Partial<UserImage>) => setImages(store.settings.look.images.map((x) => (x.id === id ? { ...x, ...patch } : x)));
     const move = <T,>(list: T[], from: number, to: number) => {
       const out = [...list];
@@ -115,8 +125,8 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
       {
         type: "list",
         heading: "Your pictures",
-        emptyState: "No pictures yet. Add one with +: a vault picture (type to search), https://… or file://… (this computer only).",
-        addItem: { name: "Add picture", action: () => store.setLook({ images: [{ id: newImageId(), src: "" }, ...store.settings.look.images] }) },
+        emptyState: "No pictures yet. Drop them on the box above.",
+        addItem: { name: "Add a picture address", action: () => store.setLook({ images: [{ id: newImageId(), src: "" }, ...store.settings.look.images] }) },
         onDelete: (i) => setImages(store.settings.look.images.filter((_, j) => j !== i)),
         onReorder: (from, to) => setImages(move(store.settings.look.images, from, to)),
         items: look.images.map((img, i) => ({
@@ -130,7 +140,7 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
             const row = setting.settingEl;
             row.querySelector(":scope > .fantasy-easel-picture-thumb")?.remove();
             const url = toCssUrl(img.src);
-            const thumb = createDiv({ cls: "fantasy-easel-picture-thumb", attr: { "aria-label": "Drop a picture on this row" } });
+            const thumb = createDiv({ cls: "fantasy-easel-picture-thumb", attr: { "aria-label": "Drop a picture on this row to replace it" } });
             thumb.toggleClass("is-empty", !url);
             thumb.setCssProps({ "--fantasy-easel-preview": url || "none" });
             if (!url) setIcon(thumb, "image-plus");
@@ -138,7 +148,9 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
             row.dataset.picture = img.id;
             if (!row.dataset.dropReady) {
               row.dataset.dropReady = "1";
-              acceptPictureDrop(this.app, row, (src) => { if (row.dataset.picture) patchImage(row.dataset.picture, { src }); }, (message) => new Notice(message));
+              // a row replaces its picture (the box above adds); the highlight says which
+              row.dataset.dropLabel = "Replace this picture";
+              acceptPictureDrop(this.app, row, () => store.settings.pictureFolder, (srcs) => { if (row.dataset.picture) patchImage(row.dataset.picture, { src: srcs[0] }); }, (message) => new Notice(message));
             }
             const id = `img-${img.id}`;
             // saved on change (blur / Enter), so a redraw never steals focus while typing
@@ -159,6 +171,25 @@ export class FantasyEaselSettingTab extends PluginSettingTab {
             });
           },
         })),
+      },
+      {
+        type: "group",
+        items: [
+          {
+            name: "Picture folder",
+            desc: "Vault folder for pictures added from Finder or the desktop. Empty: Obsidian's attachment folder. Pictures already added stay where they are.",
+            render: (setting) => {
+              // the row may not be on the page yet while it renders
+              window.setTimeout(() => zoneUnderHeading(setting.settingEl), 0);
+              setting.addText((t) => {
+                t.setPlaceholder("Obsidian's attachment folder").setValue(store.settings.pictureFolder);
+                const save = (v: string) => { if (normalizeFolder(v) !== store.settings.pictureFolder) store.set({ pictureFolder: normalizeFolder(v) }); };
+                t.inputEl.addEventListener("change", () => save(t.getValue()));
+                new FolderSuggest(this.app, t.inputEl, save);
+              });
+            },
+          },
+        ],
       },
       {
         type: "group",

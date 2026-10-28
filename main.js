@@ -1340,7 +1340,7 @@ var DEFAULT_LOOK = {
   card: true,
   images: []
 };
-var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "on", motionQuality: null, pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null };
+var DEFAULT_SETTINGS = { look: DEFAULT_LOOK, motion: "on", motionQuality: null, pauseUnfocused: false, statusBar: true, statusItems: STATUS_IDS.map((id) => ({ id, on: true })), tuning: {}, skins: {}, excalidrawBackup: null, pictureFolder: "" };
 function fromOldUrls(urls, chosen) {
   const images = [];
   let background;
@@ -1398,9 +1398,11 @@ function normalize(data) {
     statusItems,
     tuning,
     skins,
-    excalidrawBackup: data?.excalidrawBackup && typeof data.excalidrawBackup === "object" ? { ...data.excalidrawBackup } : null
+    excalidrawBackup: data?.excalidrawBackup && typeof data.excalidrawBackup === "object" ? { ...data.excalidrawBackup } : null,
+    pictureFolder: typeof data?.pictureFolder === "string" ? normalizeFolder(data.pictureFolder) : ""
   };
 }
+var normalizeFolder = (folder) => folder.trim().replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
 
 // src/pictures.ts
 var import_obsidian3 = require("obsidian");
@@ -1446,23 +1448,49 @@ function setPictures(store, images) {
   const keep = !bg.startsWith("img-") || images.some((x) => `img-${x.id}` === bg && toCssUrl(x.src));
   store.setLook(keep ? { images } : { images, background: DEFAULT_BACKGROUND });
 }
-async function pictureFromDrop(app, data) {
-  const file = Array.from(data.files).find((f) => f.type.startsWith("image/"));
-  if (file) {
-    const path = await app.fileManager.getAvailablePathForAttachment(file.name);
-    return (await app.vault.createBinary(path, await file.arrayBuffer())).path;
-  }
-  const text = (data.getData("text/uri-list") || data.getData("text/plain")).split(/\r?\n/).find((l) => l.trim() && !l.startsWith("#"))?.trim() ?? "";
-  if (text.startsWith("obsidian://")) {
-    const url = new URL(text);
-    if (url.searchParams.get("vault") !== app.vault.getName()) return "";
-    const path = url.searchParams.get("file") ?? "";
-    const hit = app.vault.getFileByPath(path) ?? app.metadataCache.getFirstLinkpathDest(path, "");
-    return hit && IMAGE.test(hit.extension) ? hit.path : "";
-  }
-  return /^https?:\/\//i.test(text) ? text : "";
+function addPictures(store, srcs) {
+  const added = srcs.map((src) => ({ id: newImageId(), src, name: "" }));
+  if (added.length) store.setLook({ images: [...added, ...store.settings.look.images], background: `img-${added[0].id}` });
 }
-function acceptPictureDrop(app, el, onPicture, onError) {
+async function savePictureFile(app, file, folder) {
+  const dir = normalizeFolder(folder);
+  let path;
+  if (dir) {
+    if (!app.vault.getFolderByPath(dir)) await app.vault.createFolder(dir);
+    const dot = file.name.lastIndexOf(".");
+    const base = dot > 0 ? file.name.slice(0, dot) : file.name;
+    const ext = dot > 0 ? file.name.slice(dot) : "";
+    path = (0, import_obsidian3.normalizePath)(`${dir}/${file.name}`);
+    for (let n = 1; app.vault.getAbstractFileByPath(path); n++) path = (0, import_obsidian3.normalizePath)(`${dir}/${base} ${n}${ext}`);
+  } else {
+    path = await app.fileManager.getAvailablePathForAttachment(file.name);
+  }
+  return (await app.vault.createBinary(path, await file.arrayBuffer())).path;
+}
+async function saveAll(app, files, folder) {
+  const out = [];
+  for (const f of files) out.push(await savePictureFile(app, f, folder));
+  return out;
+}
+async function picturesFromDrop(app, data, folder) {
+  const files = Array.from(data.files).filter((f) => f.type.startsWith("image/"));
+  const lines = (data.getData("text/uri-list") || data.getData("text/plain")).split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+  if (files.length) return saveAll(app, files, folder);
+  const out = [];
+  for (const line of lines) {
+    if (line.startsWith("obsidian://")) {
+      const url = new URL(line);
+      if (url.searchParams.get("vault") !== app.vault.getName()) continue;
+      const path = url.searchParams.get("file") ?? "";
+      const hit = app.vault.getFileByPath(path) ?? app.metadataCache.getFirstLinkpathDest(path, "");
+      if (hit && IMAGE.test(hit.extension)) out.push(hit.path);
+    } else if (/^https?:\/\//i.test(line)) out.push(line);
+  }
+  return out;
+}
+var NOT_A_PICTURE = "Not a picture. Drop an image file or a picture from the vault.";
+var failed = (err) => `Could not add the picture: ${err instanceof Error ? err.message : String(err)}`;
+function acceptPictureDrop(app, el, folder, onPictures, onError) {
   let depth = 0;
   const set = (on) => el.toggleClass("is-drop-target", on);
   el.addEventListener("dragenter", (ev) => {
@@ -1486,12 +1514,57 @@ function acceptPictureDrop(app, el, onPicture, onError) {
     depth = 0;
     set(false);
     if (!ev.dataTransfer) return;
-    pictureFromDrop(app, ev.dataTransfer).then(
-      (src) => src ? onPicture(src) : onError("Not a picture. Drop an image file or a picture from the vault."),
-      (err) => onError(`Could not add the picture: ${err instanceof Error ? err.message : String(err)}`)
-    );
+    picturesFromDrop(app, ev.dataTransfer, folder()).then((srcs) => srcs.length ? onPictures(srcs) : onError(NOT_A_PICTURE), (err) => onError(failed(err)));
   });
 }
+function choosePictureFiles(app, doc, folder, onPictures, onError) {
+  const input = doc.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.multiple = true;
+  input.addEventListener("change", () => {
+    const files = Array.from(input.files ?? []).filter((f) => f.type.startsWith("image/"));
+    if (!files.length) return;
+    saveAll(app, files, folder()).then(onPictures, (err) => onError(failed(err)));
+  });
+  input.click();
+}
+function pictureDropZone(app, parent, folder, onPictures, onError) {
+  const zone = parent.createDiv({ cls: "fantasy-easel-dropzone", attr: { role: "button", tabindex: "0", "aria-label": "Vault pictures, Finder or desktop files, or images from a browser" } });
+  (0, import_obsidian3.setIcon)(zone.createDiv({ cls: "fantasy-easel-dropzone-icon" }), "image-plus");
+  const text = zone.createDiv({ cls: "fantasy-easel-dropzone-text" });
+  text.createDiv({ cls: "fantasy-easel-dropzone-main", text: "Drop pictures here" });
+  text.createDiv({ cls: "fantasy-easel-dropzone-sub", text: "or click to choose files" });
+  const choose = () => choosePictureFiles(app, zone.doc, folder, onPictures, onError);
+  zone.addEventListener("click", choose);
+  zone.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter" || ev.key === " ") {
+      ev.preventDefault();
+      choose();
+    }
+  });
+  acceptPictureDrop(app, zone, folder, onPictures, onError);
+  return zone;
+}
+var FolderSuggest = class extends import_obsidian3.AbstractInputSuggest {
+  constructor(app, inputEl, onPick) {
+    super(app, inputEl);
+    this.inputEl = inputEl;
+    this.onPick = onPick;
+  }
+  getSuggestions(query) {
+    const q = query.toLowerCase();
+    return this.app.vault.getAllFolders(false).filter((f) => f.path.toLowerCase().includes(q)).slice(0, 50);
+  }
+  renderSuggestion(folder, el) {
+    el.setText(folder.path);
+  }
+  selectSuggestion(folder) {
+    this.inputEl.value = folder.path;
+    this.onPick(folder.path);
+    this.close();
+  }
+};
 
 // src/settings-tab.ts
 var import_obsidian5 = require("obsidian");
@@ -1642,6 +1715,13 @@ var FantasyEaselSettingTab = class extends import_obsidian5.PluginSettingTab {
     const store = this.plugin.store;
     const { look, statusItems } = store.settings;
     const setImages = (images) => setPictures(store, images);
+    const dropZone = (parent) => pictureDropZone(this.app, parent, () => store.settings.pictureFolder, (srcs) => addPictures(store, srcs), (message) => new import_obsidian5.Notice(message));
+    const zoneUnderHeading = (folderRow) => {
+      const list = folderRow.closest(".setting-group")?.previousElementSibling;
+      const heading = list?.querySelector(":scope > .setting-item-heading");
+      if (!heading || list?.querySelector(":scope > .fantasy-easel-dropzone-slot")) return;
+      heading.after(createDiv({ cls: "fantasy-easel-dropzone-slot" }, (slot) => void dropZone(slot)));
+    };
     const patchImage = (id, patch) => setImages(store.settings.look.images.map((x) => x.id === id ? { ...x, ...patch } : x));
     const move = (list, from, to) => {
       const out = [...list];
@@ -1679,8 +1759,8 @@ var FantasyEaselSettingTab = class extends import_obsidian5.PluginSettingTab {
       {
         type: "list",
         heading: "Your pictures",
-        emptyState: "No pictures yet. Add one with +: a vault picture (type to search), https://\u2026 or file://\u2026 (this computer only).",
-        addItem: { name: "Add picture", action: () => store.setLook({ images: [{ id: newImageId(), src: "" }, ...store.settings.look.images] }) },
+        emptyState: "No pictures yet. Drop them on the box above.",
+        addItem: { name: "Add a picture address", action: () => store.setLook({ images: [{ id: newImageId(), src: "" }, ...store.settings.look.images] }) },
         onDelete: (i) => setImages(store.settings.look.images.filter((_, j) => j !== i)),
         onReorder: (from, to) => setImages(move(store.settings.look.images, from, to)),
         items: look.images.map((img, i) => ({
@@ -1691,7 +1771,7 @@ var FantasyEaselSettingTab = class extends import_obsidian5.PluginSettingTab {
             const row = setting.settingEl;
             row.querySelector(":scope > .fantasy-easel-picture-thumb")?.remove();
             const url = toCssUrl(img.src);
-            const thumb = createDiv({ cls: "fantasy-easel-picture-thumb", attr: { "aria-label": "Drop a picture on this row" } });
+            const thumb = createDiv({ cls: "fantasy-easel-picture-thumb", attr: { "aria-label": "Drop a picture on this row to replace it" } });
             thumb.toggleClass("is-empty", !url);
             thumb.setCssProps({ "--fantasy-easel-preview": url || "none" });
             if (!url) (0, import_obsidian5.setIcon)(thumb, "image-plus");
@@ -1699,8 +1779,9 @@ var FantasyEaselSettingTab = class extends import_obsidian5.PluginSettingTab {
             row.dataset.picture = img.id;
             if (!row.dataset.dropReady) {
               row.dataset.dropReady = "1";
-              acceptPictureDrop(this.app, row, (src) => {
-                if (row.dataset.picture) patchImage(row.dataset.picture, { src });
+              row.dataset.dropLabel = "Replace this picture";
+              acceptPictureDrop(this.app, row, () => store.settings.pictureFolder, (srcs) => {
+                if (row.dataset.picture) patchImage(row.dataset.picture, { src: srcs[0] });
               }, (message) => new import_obsidian5.Notice(message));
             }
             const id = `img-${img.id}`;
@@ -1721,6 +1802,26 @@ var FantasyEaselSettingTab = class extends import_obsidian5.PluginSettingTab {
             });
           }
         }))
+      },
+      {
+        type: "group",
+        items: [
+          {
+            name: "Picture folder",
+            desc: "Vault folder for pictures added from Finder or the desktop. Empty: Obsidian's attachment folder. Pictures already added stay where they are.",
+            render: (setting) => {
+              window.setTimeout(() => zoneUnderHeading(setting.settingEl), 0);
+              setting.addText((t) => {
+                t.setPlaceholder("Obsidian's attachment folder").setValue(store.settings.pictureFolder);
+                const save = (v) => {
+                  if (normalizeFolder(v) !== store.settings.pictureFolder) store.set({ pictureFolder: normalizeFolder(v) });
+                };
+                t.inputEl.addEventListener("change", () => save(t.getValue()));
+                new FolderSuggest(this.app, t.inputEl, save);
+              });
+            }
+          }
+        ]
       },
       {
         type: "group",
@@ -1863,10 +1964,10 @@ var PicturesModal = class extends import_obsidian6.Modal {
     this.contentEl.empty();
   }
   addRow(el) {
-    const preview = el.createDiv({ cls: "fantasy-easel-pictures-preview is-empty", attr: { "aria-label": "Drop a picture here" } });
+    const preview = el.createDiv({ cls: "fantasy-easel-pictures-preview is-empty", attr: { "aria-label": "Drop a picture here or click to choose a file", role: "button", tabindex: "0" } });
     const hint = preview.createDiv({ cls: "fantasy-easel-pictures-drop" });
     (0, import_obsidian6.setIcon)(hint, "image-plus");
-    hint.createSpan({ text: "Drop a picture" });
+    hint.createSpan({ text: "Drop or click" });
     const fields = el.createDiv({ cls: "fantasy-easel-pictures-fields" });
     const src = new import_obsidian6.TextComponent(fields).setPlaceholder("Vault picture, https://\u2026 or file://\u2026");
     src.inputEl.addClass("fantasy-easel-pictures-src");
@@ -1895,11 +1996,22 @@ var PicturesModal = class extends import_obsidian6.Modal {
       src.inputEl.focus();
     };
     src.onChange(show2);
-    acceptPictureDrop(this.app, preview, (path) => {
-      src.setValue(path);
+    const folder = () => this.store.settings.pictureFolder;
+    const fill = (srcs) => {
+      src.setValue(srcs[0]);
       show2();
       name.inputEl.focus();
-    }, (message) => note.setText(message));
+    };
+    const fail = (message) => note.setText(message);
+    acceptPictureDrop(this.app, preview, folder, fill, fail);
+    const choose = () => choosePictureFiles(this.app, preview.doc, folder, fill, fail);
+    preview.addEventListener("click", choose);
+    preview.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        choose();
+      }
+    });
     new PictureSuggest(this.app, src.inputEl, (path) => {
       src.setValue(path);
       show2();
@@ -2193,7 +2305,8 @@ function renderGallery(root, store, opts) {
       }
     });
   }
-  if (!mine.length) section.createDiv({ cls: "fantasy-easel-gallery-empty setting-item-description", text: "No pictures yet. Add one with +." });
+  if (opts.dropZone) opts.dropZone(section);
+  else if (!mine.length) section.createDiv({ cls: "fantasy-easel-gallery-empty setting-item-description", text: "No pictures yet. Add one with +." });
   for (const b of mine) {
     const row = section.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": b.id } });
     const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
@@ -2437,7 +2550,7 @@ var StyleView = class extends import_obsidian9.ItemView {
       this.galleryCleanup?.();
       this.galleryCleanup = null;
       gBody.empty();
-      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { addPicture: () => this.plugin.managePictures(), still: true, sides: [mode === "dark" ? "night" : "day"] });
+      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { addPicture: () => this.plugin.managePictures(), dropZone: (parent) => void pictureDropZone(this.app, parent, () => store.settings.pictureFolder, (srcs) => addPictures(store, srcs), (message) => new import_obsidian9.Notice(message)), still: true, sides: [mode === "dark" ? "night" : "day"] });
     };
     let draw = () => {
     };

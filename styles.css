@@ -1419,6 +1419,7 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 }
 
 .fantasy-easel-pictures-preview {
+	cursor: pointer;
 	aspect-ratio: 16 / 9;
 	border-radius: var(--radius-m);
 	box-shadow: 0 0 0 1px var(--fe-pics-line);
@@ -1599,6 +1600,89 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 
 .fantasy-easel-pictures-card.is-current .fantasy-easel-pictures-name {
 	color: var(--text-normal);
+}
+
+/* Add pictures box (settings, panel gallery): dashed, drop pictures or click to choose files */
+.fantasy-easel-dropzone {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-3);
+	width: 100%;
+	padding: var(--size-4-4);
+	border-radius: var(--radius-m);
+	outline: 1px dashed color-mix(in srgb, var(--text-normal) 30%, transparent);
+	outline-offset: -1px;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: background-color 120ms ease, color 120ms ease;
+}
+
+.fantasy-easel-dropzone:hover,
+.fantasy-easel-dropzone:focus-visible {
+	background-color: color-mix(in srgb, var(--text-normal) 5%, transparent);
+	color: var(--text-normal);
+}
+
+.fantasy-easel-dropzone-icon {
+	flex: none;
+	display: flex;
+	--icon-size: 22px;
+}
+
+.fantasy-easel-dropzone-text {
+	min-width: 0;
+	pointer-events: none;
+}
+
+.fantasy-easel-dropzone-icon {
+	pointer-events: none;
+}
+
+.fantasy-easel-dropzone-main {
+	font-size: var(--font-ui-medium);
+}
+
+.fantasy-easel-dropzone-sub {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-faint);
+}
+
+.fantasy-easel-dropzone.is-drop-target {
+	outline: 2px dashed var(--interactive-accent);
+	outline-offset: -2px;
+	background-color: color-mix(in srgb, var(--interactive-accent) 12%, transparent);
+	color: var(--interactive-accent);
+}
+
+/* settings: the box between the Your pictures heading and its rows (or alone when there are none) */
+.fantasy-easel-dropzone-slot {
+	margin-bottom: var(--size-4-3);
+}
+
+/* the panel gallery: the box sits above the pictures, compact */
+.fantasy-easel-panel-gallery .fantasy-easel-dropzone {
+	padding: var(--size-4-3);
+	margin-bottom: var(--size-4-2);
+	grid-column: 1 / -1;
+}
+
+/* a settings row under a dragged picture: replacing, not adding */
+.fantasy-easel-picture.is-drop-target {
+	position: relative;
+}
+
+.fantasy-easel-picture.is-drop-target::after {
+	content: attr(data-drop-label);
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--radius-m);
+	background-color: color-mix(in srgb, var(--interactive-accent) 18%, var(--background-primary));
+	color: var(--interactive-accent);
+	font-weight: var(--font-semibold);
+	pointer-events: none;
 }
 
 /* Settings: your pictures, one row each (thumbnail, name, address, use); a row takes a dropped picture */

@@ -1,9 +1,10 @@
-import { ItemView, Setting, SettingGroup, setTooltip, type WorkspaceLeaf } from "obsidian";
+import { ItemView, Notice, Setting, SettingGroup, setTooltip, type WorkspaceLeaf } from "obsidian";
 import { renderGallery } from "./gallery";
 import type FantasyEaselPlugin from "./main";
 import { stepBackground, stepColor } from "./menus";
 import { ACCENT_DESC, backgroundGroups, colorOptions, FANTASY_URL, NO_THEME_TEXT, MOTION_DESC, MOTION_OPTIONS, paletteDesc, QUALITY_DESC, QUALITY_OPTIONS } from "./options";
 import { isLight } from "./apply";
+import { addPictures, pictureDropZone } from "./pictures";
 import { backgroundById } from "./catalog";
 import { DEFAULT_LOOK, DEFAULT_SETTINGS, type Motion, type MotionQuality } from "./settings";
 import { toggleDarkLight } from "./statusbar";
@@ -260,7 +261,7 @@ export class StyleView extends ItemView {
       this.galleryCleanup?.();
       this.galleryCleanup = null;
       gBody.empty();
-      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { addPicture: () => this.plugin.managePictures(), still: true, sides: [mode === "dark" ? "night" : "day"] });
+      if (open) this.galleryCleanup = renderGallery(gBody.createDiv(), store, { addPicture: () => this.plugin.managePictures(), dropZone: (parent) => void pictureDropZone(this.app, parent, () => store.settings.pictureFolder, (srcs) => addPictures(store, srcs), (message) => new Notice(message)), still: true, sides: [mode === "dark" ? "night" : "day"] });
     };
     let draw = () => {};
     galleryG.addExtraButton((b) => {

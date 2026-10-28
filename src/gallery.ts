@@ -13,7 +13,7 @@ import type { Store } from "./store";
  * 2026-10-27: tiles built and dropped while scrolling flickered, and it hid the background it set).
  * Returns the cleanup (unsubscribes).
  */
-export function renderGallery(root: HTMLElement, store: Store, opts: { addPicture?: () => void; still?: boolean; sides?: ("day" | "night")[] }): () => void {
+export function renderGallery(root: HTMLElement, store: Store, opts: { addPicture?: () => void; dropZone?: (parent: HTMLElement) => void; still?: boolean; sides?: ("day" | "night")[] }): () => void {
   root.addClass("fantasy-easel-gallery");
   const { motion } = store.settings;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -101,7 +101,9 @@ export function renderGallery(root: HTMLElement, store: Store, opts: { addPictur
     add.addEventListener("click", () => opts.addPicture?.());
     add.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); opts.addPicture?.(); } });
   }
-  if (!mine.length) section.createDiv({ cls: "fantasy-easel-gallery-empty setting-item-description", text: "No pictures yet. Add one with +." });
+  // the same drop box as in settings, above the pictures
+  if (opts.dropZone) opts.dropZone(section);
+  else if (!mine.length) section.createDiv({ cls: "fantasy-easel-gallery-empty setting-item-description", text: "No pictures yet. Add one with +." });
   for (const b of mine) {
     const row = section.createDiv({ cls: "fantasy-easel-gallery-row", attr: { "data-id": b.id } });
     const label = row.createDiv({ cls: "fantasy-easel-gallery-name" });
