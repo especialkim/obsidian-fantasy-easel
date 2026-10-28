@@ -2496,7 +2496,7 @@ var StyleView = class extends import_obsidian9.ItemView {
     const show2 = (t, v) => `${Math.round(v * 100) / 100}${t.unit}`;
     const sliders = (g, id) => {
       for (const t of TUNINGS.filter((x) => x.group === id)) {
-        row(g, t.name, t.desc, () => !(key(t) in store.settings.tuning), () => setTuning([key(t)], null), (s) => s.addSlider((sl) => {
+        row(g, t.name, t.desc, () => !(key(t) in store.settings.tuning), () => setTuning([key(t)], null), (s) => s.setClass("fantasy-easel-panel-slider").addSlider((sl) => {
           sl.setLimits(t.min, t.max, t.step).setInstant(true).setDisplayFormat((v) => show2(t, v)).onChange((v) => this.syncing || setTuning([key(t)], isDefaultValue(t, mode, v) ? null : v));
           this.syncs.push(() => {
             const v = value(t);
