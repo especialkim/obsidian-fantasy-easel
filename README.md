@@ -4,25 +4,46 @@
 
 **No setup needed.** Fantasy already looks complete on its own. Easel is optional: turn it on when you want to change the look, and everything stays in one sidebar tab.
 
-![Fantasy Easel: stage wallpaper and the style panel](assets/easel-hero.jpg)
+![Typing a note in source and reading view while the wallpaper behind the glass changes](assets/easel-hero.webp)
 
-## Features
+## Wallpapers that move
+
+Three kinds of wallpaper, grouped the same way everywhere:
+
+- **Still:** soft gradients. Some follow your palette, some keep their own colors.
+- **Moving:** slow media-art gradients and 19 four-layer "stage" scenes that drift and turn.
+- **Your pictures:** see below.
+
+Motion is *Moving*, *Follow system* (still when *Reduce motion* is on) or *Still*. *Motion quality* Light draws moving wallpapers with less GPU work (the default on Windows). *Still* and *Pause when unfocused* save the most battery.
+
+## One panel for every style
+
+Command *Open style panel* opens a sidebar tab with the main switches (dark mode, palette, accent, cards, wallpaper, motion) and sliders for glass opacity, blur and brightness (kept per dark and light mode), card gap, corners and padding, note width, heading size and paragraph spacing. Every value has a reset.
+
+The **gallery** sits at the bottom of the panel: every wallpaper under a glass card that follows your settings. Click one to use it.
+
+| Style panel in light mode | Gallery in the panel |
+| --- | --- |
+| ![Style panel in light mode](assets/easel-panel-light.jpg) | ![Wallpaper gallery in the style panel](assets/easel-panel-gallery.jpg) |
+
+## Your pictures
+
+Drop a picture on the add box (in the panel, in Settings or in the *Your pictures* window), click it to choose files, or type a vault path, `https://…` or `file://…`. A new picture goes to the top and becomes the wallpaper.
+
+- Files from Finder or Explorer are copied into the vault, to **Picture folder** (Settings) or your attachment folder, so they work on every device that has the vault.
+- *Manage pictures…* (wallpaper menu in the status bar, or the command) opens a window to add, use and remove pictures. Removing one only takes it off the list; the file stays.
+
+![The Your pictures window](assets/easel-pictures.jpg)
+
+## Also
 
 - **Six palettes:** Graphite, Sky, Ocean, Emerald, Mystic and Orchid tint the glass, the wallpaper and the accent.
-- **Wallpapers, still and moving:** CSS gradients, slow media-art motion, 19 four-layer "stage" scenes, and your own pictures (a vault image, a web address, or a file on this computer).
-- **Style panel** (command *Open style panel*): the main switches plus sliders for glass opacity, blur and brightness (kept per dark and light mode), card gap, corners and padding, note width, heading size and paragraph spacing. Every value has a reset.
-- **Gallery:** every wallpaper under a glass card that follows your settings.
 - **Plugin styles:** Dataview, Kanban and Excalidraw fitted to the glass, each part on or off.
-- **Motion:** Moving, Follow system (still when *Reduce motion* is on), or Still. *Motion quality* Light draws moving wallpapers with less GPU work (the default on Windows).
 - **Status bar:** palette, previous and next wallpaper, gallery, accent, cards, motion and dark or light, in the order you choose.
-
-## Screenshots
 
 ![The six palettes](assets/easel-palettes.jpg)
 
-| Style panel in light mode | Kanban, Dataview and Excalidraw |
-| --- | --- |
-| ![Style panel in light mode](assets/easel-panel-light.jpg) | ![Plugin styles](assets/easel-plugin-styles.jpg) |
+![Kanban, Dataview and Excalidraw](assets/easel-plugin-styles.jpg)
 
 ## Install
 
@@ -37,6 +58,7 @@ Desktop only, Obsidian 1.13 or later. With any other theme the plugin stays idle
 
 - **Network use:** a picture you add as a web address (`https://…`) is loaded from that site. Nothing else goes over the network; the built-in wallpapers are CSS only.
 - **Files outside the vault:** a picture you add as `file://…` or an absolute path is read from that place on your computer, only to show it as the wallpaper. It works only on that computer; vault pictures work wherever the vault is.
+- **Files written to the vault:** a picture you drop from Finder or Explorer (or choose with the file picker) is copied into the vault, to *Picture folder* or your attachment folder. Easel writes nothing else to your vault.
 
 ## Develop
 
