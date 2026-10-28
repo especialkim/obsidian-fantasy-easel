@@ -41,9 +41,9 @@ Drop a picture on the add box (in the panel, in Settings or in the *Your picture
 - **Plugin styles:** Dataview, Kanban and Excalidraw fitted to the glass, each part on or off.
 - **Status bar:** palette, previous and next wallpaper, gallery, accent, cards, motion and dark or light, in the order you choose.
 
-![The six palettes](assets/easel-palettes.jpg)
+![The same note in all six palettes, from Graphite to Orchid](assets/easel-palettes.jpg)
 
-![Kanban, Dataview and Excalidraw](assets/easel-plugin-styles.jpg)
+![Kanban, Dataview and Excalidraw on the glass](assets/easel-plugin-styles.jpg)
 
 ## Install
 
