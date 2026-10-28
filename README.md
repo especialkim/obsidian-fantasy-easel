@@ -65,6 +65,7 @@ Desktop only, Obsidian 1.13 or later. With any other theme the plugin stays idle
 - **Network use:** a picture you add as a web address (`https://…`) is loaded from that site. Nothing else goes over the network; the built-in wallpapers are CSS only.
 - **Files outside the vault:** a picture you add as `file://…` or an absolute path is read from that place on your computer, only to show it as the wallpaper. It works only on that computer; vault pictures work wherever the vault is.
 - **Files written to the vault:** a picture you drop from Finder or Explorer (or choose with the file picker) is copied into the vault, to *Picture folder* or your attachment folder. Easel writes nothing else to your vault.
+- **Vault file list:** to suggest pictures as you type a path, and to follow a picture when you rename it, Easel lists the files in your vault and keeps the image ones. It reads file names only, never note contents.
 
 ## Develop
 

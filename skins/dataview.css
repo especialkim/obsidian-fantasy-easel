@@ -98,7 +98,7 @@ ul.dataview.list-view-ul,
 }
 
 .block-language-dataviewjs.node-insert-event h4 {
-	padding: 25px 0px 10px 0px !important;
+	padding: 25px 0px 10px 0px;
 	color: var(--h2-color);
 	font-size: var(--h4-size);
 }

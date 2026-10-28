@@ -198,7 +198,7 @@ export class StyleView extends ItemView {
     const show = (t: Tuning, v: number) => `${Math.round(v * 100) / 100}${t.unit}`;
     const sliders = (g: SettingGroup, id: TuningGroup) => {
       for (const t of TUNINGS.filter((x) => x.group === id)) {
-        row(g, t.name, t.desc, () => !(key(t) in store.settings.tuning), () => setTuning([key(t)], null), (s) => s.addSlider((sl) => {
+        row(g, t.name, t.desc, () => !(key(t) in store.settings.tuning), () => setTuning([key(t)], null), (s) => s.setClass("fantasy-easel-panel-slider").addSlider((sl) => {
           sl.setLimits(t.min, t.max, t.step).setInstant(true).setDisplayFormat((v) => show(t, v)).onChange((v) => this.syncing || setTuning([key(t)], isDefaultValue(t, mode, v) ? null : v));
           this.syncs.push(() => {
             const v = value(t);

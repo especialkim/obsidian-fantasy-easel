@@ -1162,7 +1162,7 @@ body.fantasy-easel-skin-dataview-text .block-language-dataviewjs.node-insert-eve
 	font-size: 0.92rem;
 }
 body.fantasy-easel-skin-dataview-text .block-language-dataviewjs.node-insert-event h4 {
-	padding: 25px 0px 10px 0px !important;
+	padding: 25px 0px 10px 0px;
 	color: var(--h2-color);
 	font-size: var(--h4-size);
 }
@@ -1791,17 +1791,17 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 /* slider and picker rows wrap by themselves in a narrow sidebar: the name stays on top and the
    control moves to the next line. The name takes nearly all spare space (grow 999) while they
    share a line; alone on its line the control (grow 1) fills it. No container query: see above. */
-.fantasy-easel-panel .fantasy-easel-panel-row:is(:has(input[type="range"]), .fantasy-easel-panel-picker) {
+.fantasy-easel-panel .fantasy-easel-panel-row:is(.fantasy-easel-panel-slider, .fantasy-easel-panel-picker) {
 	flex-wrap: wrap;
 	row-gap: var(--size-2-2);
 }
 
 /* the same control box in every slider row (value, slider, reset), so the groups line up */
-.fantasy-easel-panel .fantasy-easel-panel-row:has(input[type="range"]) .setting-item-info {
+.fantasy-easel-panel .fantasy-easel-panel-row.fantasy-easel-panel-slider .setting-item-info {
 	flex: 999 1 6em;
 }
 
-.fantasy-easel-panel .fantasy-easel-panel-row:has(input[type="range"]) .setting-item-control {
+.fantasy-easel-panel .fantasy-easel-panel-row.fantasy-easel-panel-slider .setting-item-control {
 	flex: 1 1 11.5em;
 }
 
@@ -1853,7 +1853,7 @@ body.fantasy-easel-skin-kanban-search .kanban-plugin__board mark[data-markjs="tr
 .fantasy-easel-panel-gallery .fantasy-easel-gallery.is-single .fantasy-easel-gallery-group {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	column-gap: var(--size-4-3);
+	gap: 0 var(--size-4-3);
 }
 
 .fantasy-easel-panel-gallery .fantasy-easel-gallery.is-single :is(.fantasy-easel-gallery-title, .fantasy-easel-gallery-desc) {
