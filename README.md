@@ -6,10 +6,6 @@
 
 ![Typing a note in source and reading view while the wallpaper behind the glass changes](assets/easel-hero.webp)
 
-**A one-minute tour:** moving wallpapers, the style panel and your own pictures.
-
-https://github.com/user-attachments/assets/a54df028-7295-4e57-8a49-508afce3441a
-
 ## Wallpapers that move
 
 Three kinds of wallpaper, grouped the same way everywhere:
@@ -48,6 +44,12 @@ Drop a picture on the add box (in the panel, in Settings or in the *Your picture
 ![The same note in all six palettes, from Graphite to Orchid](assets/easel-palettes.jpg)
 
 ![Kanban, Dataview and Excalidraw on the glass](assets/easel-plugin-styles.jpg)
+
+## Tour
+
+**A one-minute tour:** moving wallpapers, the style panel and your own pictures.
+
+https://github.com/user-attachments/assets/a54df028-7295-4e57-8a49-508afce3441a
 
 ## Install
 
